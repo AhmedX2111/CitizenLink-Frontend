@@ -30,8 +30,9 @@ yarn-error.log
 .history/*
 
 # Miscellaneous
-/.angular/cache
-.sass-cache/
+/.angular          # <-- Covers full Angular cache directory
+.cache
+/sass-cache/
 /connect.lock
 /coverage
 /libpeerconnection.log
@@ -39,6 +40,7 @@ testem.log
 /typings
 __screenshots__/
 
-# System files
+# System & Environment
 .DS_Store
 Thumbs.db
+*.env              # <-- Prevents committing environment variables
