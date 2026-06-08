@@ -1,0 +1,23 @@
+// src/app/auth/models/auth.models.ts
+
+export interface LoginRequest {
+  username: string;
+  password: string;
+}
+
+export interface AuthResponse {
+  token: string | null;
+  id: string;
+  username: string;
+  displayName: string;
+  email: string;
+  role: 'ADMIN' | 'SUPERVISOR' | 'HANDLER' | 'AGENT';
+}
+
+export interface AuthState {
+  isAuthenticated: boolean;
+  user: AuthResponse | null;
+  token: string | null;
+  loading: boolean;
+  error: string | null;
+}
