@@ -7,36 +7,34 @@ import { LoginRequest, AuthResponse } from './models/auth.models';
 import { environment } from '../../environments/environment';
 
 @Injectable({
-  providedIn: 'root'
+  providedIn: 'root',
 })
 export class AuthService {
   private readonly API_URL = `${environment.apiUrl}/api/v1/auth`;
   private readonly TOKEN_KEY = 'auth_token';
   private readonly USER_KEY = 'auth_user';
   private readonly REMEMBER_ME_KEY = 'remember_me';
-  
+
   private authState = new BehaviorSubject<AuthResponse | null>(null);
   authState$ = this.authState.asObservable();
 
   constructor(
     private http: HttpClient,
-    private router: Router
+    private router: Router,
   ) {
     this.loadStoredAuth();
   }
 
   login(credentials: LoginRequest, rememberMe: boolean): Observable<AuthResponse> {
-    
-    return this.http.post<AuthResponse>(`${this.API_URL}/login`, credentials)
-      .pipe(
-        tap(response => {
-          this.saveAuthData(response, rememberMe);
-          this.authState.next(response);
-        }),
-        catchError(error => {
-          return throwError(() => error);
-        })
-      );
+    return this.http.post<AuthResponse>(`${this.API_URL}/login`, credentials).pipe(
+      tap((response) => {
+        this.saveAuthData(response, rememberMe);
+        this.authState.next(response);
+      }),
+      catchError((error) => {
+        return throwError(() => error);
+      }),
+    );
   }
 
   logout(): void {
@@ -56,12 +54,12 @@ export class AuthService {
   isAuthenticated(): boolean {
     const token = this.getToken();
     if (!token) return false;
-    
+
     try {
       const payload = JSON.parse(atob(token.split('.')[1]));
       const expiryDate = new Date(payload.exp * 1000);
       const isValid = expiryDate > new Date();
-      
+
       if (!isValid) {
         this.logout();
       }
@@ -88,9 +86,21 @@ export class AuthService {
     return user?.role === role;
   }
 
+  getRoleFromToken(): string | null {
+    const token = this.getToken();
+    if (!token) return null;
+
+    try {
+      const payload = JSON.parse(atob(token.split('.')[1]));
+      return payload.role ?? null; // matches the "role" claim set in JwtService.generateToken()
+    } catch {
+      return null;
+    }
+  }
+
   private saveAuthData(response: AuthResponse, rememberMe: boolean): void {
     const storage = rememberMe ? localStorage : sessionStorage;
-    
+
     if (response.token) {
       storage.setItem(this.TOKEN_KEY, response.token);
       storage.setItem(this.USER_KEY, JSON.stringify(response));
@@ -110,7 +120,7 @@ export class AuthService {
   private loadStoredAuth(): void {
     const token = this.getToken();
     const user = this.getUserData();
-    
+
     if (token && user && this.isAuthenticated()) {
       this.authState.next(user);
     }

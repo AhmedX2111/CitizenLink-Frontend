@@ -22,7 +22,7 @@ export class LoginComponent implements OnInit, OnDestroy {
   protected readonly isLoading = signal(false);
   protected readonly showPassword = signal(false);
   protected readonly errorMessage = signal<string | null>(null);
-  protected returnUrl: string = '/dashboard';
+  protected returnUrl: string | null = null;
   
   private subscriptions: Subscription = new Subscription();
 
@@ -42,12 +42,12 @@ export class LoginComponent implements OnInit, OnDestroy {
   ngOnInit(): void {
     // Redirect if already logged in
     if (this.authService.isAuthenticated()) {
-      this.router.navigate(['/dashboard']);
+      this.router.navigate([this.getRoleRoute()]);
       return;
     }
 
     // Get return URL from route parameters
-    this.returnUrl = this.route.snapshot.queryParams['returnUrl'] || '/dashboard';
+    this.returnUrl = this.route.snapshot.queryParams['returnUrl'] || null;
   }
 
   ngOnDestroy(): void {
@@ -69,7 +69,8 @@ export class LoginComponent implements OnInit, OnDestroy {
       .subscribe({
         next: (response) => {
           this.isLoading.set(false);
-          this.router.navigate([this.returnUrl]);
+          const destination = this.returnUrl ?? this.getRoleRoute();
+          this.router.navigate([destination]);
         },
         error: (error) => {
           this.isLoading.set(false);
@@ -116,6 +117,17 @@ export class LoginComponent implements OnInit, OnDestroy {
       }
     });
   }
+
+  private getRoleRoute(): string {
+  const role = this.authService.getRoleFromToken();
+  switch (role) {
+    case 'ADMIN':
+    case 'SUPERVISOR': return '/dashboard';
+    case 'HANDLER':    return '/cases';
+    case 'AGENT':      return '/cases';
+    default:           return '/login';
+  }
+}
 
   // Getters for form controls
   get username() { return this.loginForm.get('username'); }

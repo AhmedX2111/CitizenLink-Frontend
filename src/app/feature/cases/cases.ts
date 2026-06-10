@@ -1,0 +1,314 @@
+import {
+  Component, OnInit, signal, computed, inject, DestroyRef
+} from '@angular/core';
+import { CommonModule } from '@angular/common';
+import {
+  ReactiveFormsModule, FormBuilder, FormGroup, Validators
+} from '@angular/forms';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
+import { debounceTime, distinctUntilChanged } from 'rxjs/operators';
+import { CaseService } from '../../../core/services/case.service';
+import { AuthService } from '../../auth/auth.service';
+import { AuthResponse } from '../../auth/models/auth.models';
+import {
+  CaseResponse, CaseSearchRequest, CaseStatus,
+  CaseType, Priority, PagedResponse
+} from '../../../core/models/case.models';
+import { Department } from '../../../core/models/department.model';
+import { Category } from '../../../core/models/category.model';
+
+type ActiveTab = 'list' | 'create';
+
+@Component({
+  selector: 'app-cases',
+  standalone: true,
+  imports: [CommonModule, ReactiveFormsModule],
+  templateUrl: './cases.html',
+  styleUrl: './cases.css'
+})
+export class CasesComponent implements OnInit {
+
+  private fb          = inject(FormBuilder);
+  private caseService = inject(CaseService);
+  private destroyRef  = inject(DestroyRef);
+  authService  = inject(AuthService);
+  currentUser  = signal<AuthResponse | null>(null);
+
+  // ── UI state ──────────────────────────────────────────────────
+  activeTab     = signal<ActiveTab>('list');
+  isSubmitting  = signal(false);
+  isLoading     = signal(false);
+  submitSuccess = signal(false);
+  submitError   = signal<string | null>(null);
+  serverErrors  = signal<Record<string, string>>({});
+
+  // ── Case list state ───────────────────────────────────────────
+  cases         = signal<CaseResponse[]>([]);
+  totalElements = signal(0);
+  totalPages    = signal(0);
+  currentPage   = signal(0);
+  pageSize      = 5;
+
+  // ── Departments and Categories state ──────────────────────────
+  departments = signal<Department[]>([]);
+  categories = signal<Category[]>([]);
+  filteredCategories = signal<Category[]>([]);
+
+  // ── Enums exposed to template ─────────────────────────────────
+  readonly statuses:   CaseStatus[] = ['NEW','ASSIGNED','IN_PROGRESS','AWAITING_INFO','SUSPENDED','RESOLVED','CLOSED','CANCELLED'];
+  readonly types:      CaseType[]   = ['COMPLAINT', 'REQUEST'];
+  readonly priorities: Priority[]   = ['LOW', 'MEDIUM', 'HIGH', 'URGENT'];
+  readonly channels                 = ['PHONE', 'WEB', 'WALK_IN', 'EMAIL'] as const;
+
+  // ── Search form ───────────────────────────────────────────────
+  searchForm = this.fb.group({
+    keyword:  [''],
+    status:   ['' as CaseStatus | ''],
+    type:     ['' as CaseType | ''],
+    priority: ['' as Priority | ''],
+  });
+
+  // ── Create form ───────────────────────────────────────────────
+  createForm: FormGroup = this.fb.group({
+    subject:          ['', [Validators.required, Validators.maxLength(255)]],
+    description:      ['', Validators.required],
+    type:             ['', Validators.required],
+    priority:         ['', Validators.required],
+    channel:          ['', Validators.required],
+    citizenId:        ['', Validators.required],
+    categoryId:       ['', Validators.required],
+    departmentId:     ['', Validators.required],
+    assignedToUserId: [''],
+    dueAt:            [''],
+  });
+
+  // ── Computed stats ────────────────────────────────────────────
+  openCount     = computed(() => this.cases().filter(c => !['RESOLVED','CLOSED','CANCELLED'].includes(c.status)).length);
+  urgentCount   = computed(() => this.cases().filter(c => c.priority === 'URGENT').length);
+  resolvedCount = computed(() => this.cases().filter(c => c.status === 'RESOLVED').length);
+
+  ngOnInit(): void {
+    // Subscribe to BehaviorSubject from teammate's AuthService
+    this.authService.authState$.pipe(
+      takeUntilDestroyed(this.destroyRef)
+    ).subscribe(user => this.currentUser.set(user));
+
+    this.loadCases();
+    this.loadDepartments();
+    this.loadCategories();
+
+    // Auto-search on filter change with debounce
+    this.searchForm.valueChanges.pipe(
+      debounceTime(400),
+      distinctUntilChanged(),
+      takeUntilDestroyed(this.destroyRef)
+    ).subscribe(() => {
+      this.currentPage.set(0);
+      this.loadCases();
+    });
+
+    // Watch for department changes to filter categories (only if category has departmentId)
+    this.createForm.get('departmentId')?.valueChanges.pipe(
+      takeUntilDestroyed(this.destroyRef)
+    ).subscribe(departmentId => {
+      // Since Category entity doesn't have departmentId, show all categories
+      // If you add departmentId to Category later, uncomment the filtering logic
+      this.filteredCategories.set(this.categories());
+      
+      // Reset category when department changes
+      this.createForm.get('categoryId')?.setValue('');
+    });
+  }
+
+  // ── Load Departments and Categories ───────────────────────────
+  loadDepartments(): void {
+    this.caseService.getDepartments().pipe(
+      takeUntilDestroyed(this.destroyRef)
+    ).subscribe({
+      next: (departments) => {
+        console.log('Departments loaded:', departments);
+        this.departments.set(departments);
+      },
+      error: (error) => {
+        console.error('Error loading departments:', error);
+      }
+    });
+  }
+
+  loadCategories(): void {
+    this.caseService.getCategories().pipe(
+      takeUntilDestroyed(this.destroyRef)
+    ).subscribe({
+      next: (categories) => {
+        console.log('Categories loaded:', categories);
+        this.categories.set(categories);
+        this.filteredCategories.set(categories);
+      },
+      error: (error) => {
+        console.error('Error loading categories:', error);
+      }
+    });
+  }
+
+  // ── Navigation ────────────────────────────────────────────────
+  showTab(tab: ActiveTab): void {
+    this.activeTab.set(tab);
+    if (tab === 'list') {
+      this.submitSuccess.set(false);
+      this.submitError.set(null);
+      this.serverErrors.set({});
+    }
+  }
+
+  // ── List / Search ─────────────────────────────────────────────
+  loadCases(): void {
+    this.isLoading.set(true);
+    const v = this.searchForm.value;
+
+    const filter: CaseSearchRequest = {
+      page: this.currentPage(),
+      size: this.pageSize,
+      ...(v.keyword?.trim() && { keyword: v.keyword.trim() }),
+      ...(v.status           && { status:  v.status as CaseStatus }),
+      ...(v.type             && { type:    v.type   as CaseType }),
+      ...(v.priority         && { priority: v.priority as Priority }),
+    };
+
+    this.caseService.searchCases(filter).pipe(
+      takeUntilDestroyed(this.destroyRef)
+    ).subscribe({
+      next: (res: PagedResponse<CaseResponse>) => {
+        this.cases.set(res.content);
+        this.totalElements.set(res.totalElements);
+        this.totalPages.set(res.totalPages);
+        this.isLoading.set(false);
+      },
+      error: () => this.isLoading.set(false)
+    });
+  }
+
+  goToPage(page: number): void {
+    if (page < 0 || page >= this.totalPages()) return;
+    this.currentPage.set(page);
+    this.loadCases();
+  }
+
+  get pages(): number[] {
+    return Array.from({ length: this.totalPages() }, (_, i) => i);
+  }
+
+  clearFilters(): void {
+    this.searchForm.reset({ keyword: '', status: '', type: '', priority: '' });
+    this.currentPage.set(0);
+  }
+
+  // ── Create Case ───────────────────────────────────────────────
+  onSubmit(): void {
+    if (this.createForm.invalid) {
+      this.createForm.markAllAsTouched();
+      return;
+    }
+
+    this.isSubmitting.set(true);
+    this.submitError.set(null);
+    this.serverErrors.set({});
+
+    const v = this.createForm.value;
+    const payload = {
+      subject:          v.subject,
+      description:      v.description,
+      type:             v.type,
+      priority:         v.priority,
+      channel:          v.channel,
+      citizenId:        v.citizenId,
+      categoryId:       v.categoryId,
+      departmentId:     v.departmentId,
+      ...(v.assignedToUserId && { assignedToUserId: v.assignedToUserId }),
+      ...(v.dueAt            && { dueAt: new Date(v.dueAt).toISOString() }),
+    };
+
+    this.caseService.createCase(payload).pipe(
+      takeUntilDestroyed(this.destroyRef)
+    ).subscribe({
+      next: () => {
+        this.isSubmitting.set(false);
+        this.submitSuccess.set(true);
+        this.createForm.reset();
+        this.loadCases();
+        // Auto-switch to list after short delay
+        setTimeout(() => this.showTab('list'), 1500);
+      },
+      error: (err) => {
+        this.isSubmitting.set(false);
+        if (err.status === 400 && err.error?.fieldErrors) {
+          this.serverErrors.set(err.error.fieldErrors);
+        } else if (err.status === 404) {
+          this.submitError.set(err.error?.message ?? 'A referenced record was not found.');
+        } else {
+          this.submitError.set('An unexpected error occurred. Please try again.');
+        }
+      }
+    });
+  }
+
+  resetForm(): void {
+    this.createForm.reset();
+    this.submitSuccess.set(false);
+    this.submitError.set(null);
+    this.serverErrors.set({});
+  }
+
+  // ── Template helpers ──────────────────────────────────────────
+  hasError(field: string): boolean {
+    const c = this.createForm.get(field);
+    return !!(c && c.invalid && c.touched);
+  }
+
+  fieldError(field: string): string {
+    const ctrl = this.createForm.get(field);
+    if (!ctrl?.errors) return '';
+    if (ctrl.errors['required'])   return 'This field is required';
+    if (ctrl.errors['maxlength'])  return `Maximum ${ctrl.errors['maxlength'].requiredLength} characters`;
+    return '';
+  }
+
+  serverError(field: string): string {
+    return this.serverErrors()[field] ?? '';
+  }
+
+  statusBadgeClass(status: CaseStatus): string {
+    const map: Record<CaseStatus, string> = {
+      NEW:           'bg-blue-50 text-blue-700',
+      ASSIGNED:      'bg-yellow-50 text-yellow-800',
+      IN_PROGRESS:   'bg-indigo-50 text-indigo-700',
+      AWAITING_INFO: 'bg-orange-50 text-orange-700',
+      SUSPENDED:     'bg-gray-100 text-gray-600',
+      RESOLVED:      'bg-emerald-50 text-emerald-700',
+      CLOSED:        'bg-slate-100 text-slate-600',
+      CANCELLED:     'bg-red-50 text-red-700',
+    };
+    return map[status] ?? 'bg-gray-100 text-gray-600';
+  }
+
+  priorityBadgeClass(priority: Priority): string {
+    const map: Record<Priority, string> = {
+      LOW:    'bg-emerald-50 text-emerald-700',
+      MEDIUM: 'bg-yellow-50 text-yellow-800',
+      HIGH:   'bg-orange-50 text-orange-700',
+      URGENT: 'bg-red-50 text-red-700',
+    };
+    return map[priority] ?? 'bg-gray-100 text-gray-600';
+  }
+
+  typeBadgeClass(type: CaseType): string {
+    return type === 'COMPLAINT'
+      ? 'bg-purple-50 text-purple-700'
+      : 'bg-teal-50 text-teal-700';
+  }
+
+  formatDate(iso: string): string {
+    return new Date(iso).toLocaleDateString('en-GB', {
+      day: '2-digit', month: 'short', year: 'numeric'
+    });
+  }
+}
