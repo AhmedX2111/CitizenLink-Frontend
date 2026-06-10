@@ -29,6 +29,12 @@ yarn-error.log
 !.vscode/mcp.json
 .history/*
 
+# Add these lines to your .gitignore
+.angular/
+.angular/cache/
+.angular/cache/**/*
+*.tsbuildinfo
+
 # Miscellaneous
 /.angular          # <-- Covers full Angular cache directory
 .cache
