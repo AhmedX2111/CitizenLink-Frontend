@@ -1,3 +1,7 @@
 /* You can add global styles to this file, and also import other style files */
 
 @import 'tailwindcss';
+
+input:focus, select:focus, textarea:focus {
+    --tw-ring-color: rgba(30, 58, 95, 0.2);
+  }

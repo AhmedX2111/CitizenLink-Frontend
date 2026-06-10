@@ -1,5 +1,3 @@
-// tailwind.config.js
-
 /** @type {import('tailwindcss').Config} */
 module.exports = {
   content: [
@@ -8,10 +6,10 @@ module.exports = {
   theme: {
     extend: {
       colors: {
-        gov: {
-          navy: '#1a2a4f',
-          gold: '#c5a028',
-        }
+        'gov-navy': '#1e3a5f',  
+        'gov-gold': '#c9a84c',   
+        // 'gov-navy': '#1a2a4f',
+        // 'gov-gold': '#c5a028',
       },
       animation: {
         'fadeIn': 'fadeIn 0.5s ease-out',

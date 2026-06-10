@@ -1,40 +1,28 @@
 import {
   withHttpTransferCache
-} from "./chunk-VJ6LOG5Y.js";
+} from "./chunk-HVEAXT4O.js";
 import {
   CommonModule,
   PLATFORM_BROWSER_ID
-} from "./chunk-X5HE3FNT.js";
+} from "./chunk-62FOFBEB.js";
 import {
   DomAdapter,
   getDOM,
   parseCookieValue,
   setRootDomAdapter
-} from "./chunk-R5G4LZFP.js";
+} from "./chunk-NODQK6UZ.js";
 import {
   APP_BOOTSTRAP_LISTENER,
-  APP_ID,
   ApplicationModule,
   ApplicationRef,
-  CACHE_ACTIVE,
-  CSP_NONCE,
   Console,
-  DOCUMENT,
-  ENVIRONMENT_INITIALIZER,
-  ErrorHandler,
-  INJECTOR_SCOPE,
   IS_ENABLED_BLOCKING_INITIAL_NAVIGATION,
   Inject,
   Injectable,
-  InjectionToken,
   NgModule,
-  NgZone,
   Optional,
-  PLATFORM_ID,
-  PLATFORM_INITIALIZER,
   RendererFactory2,
   RendererStyleFlags2,
-  RuntimeError,
   SHARED_STYLES_HOST,
   SecurityContext,
   Service,
@@ -44,10 +32,7 @@ import {
   TestabilityRegistry,
   TracingService,
   USE_PENDING_TASKS,
-  Version,
   ViewEncapsulation,
-  XSS_SECURITY_URL,
-  _global,
   _sanitizeHtml,
   _sanitizeUrl,
   allLeavingAnimations,
@@ -58,11 +43,7 @@ import {
   bypassSanitizationTrustStyle,
   bypassSanitizationTrustUrl,
   createPlatformFactory,
-  formatRuntimeError,
-  forwardRef,
-  inject,
   internalCreateApplication,
-  makeEnvironmentProviders,
   platformCore,
   provideStabilityDebugging,
   setClassMetadata,
@@ -72,12 +53,33 @@ import {
   withEventReplay,
   withI18nSupport,
   withIncrementalHydration,
+  ɵɵdefineNgModule,
+  ɵɵdefineService
+} from "./chunk-MEVJWT5V.js";
+import {
+  APP_ID,
+  CACHE_ACTIVE,
+  CSP_NONCE,
+  DOCUMENT,
+  ENVIRONMENT_INITIALIZER,
+  ErrorHandler,
+  INJECTOR_SCOPE,
+  InjectionToken,
+  NgZone,
+  PLATFORM_ID,
+  PLATFORM_INITIALIZER,
+  RuntimeError,
+  Version,
+  XSS_SECURITY_URL,
+  _global,
+  formatRuntimeError,
+  forwardRef,
+  inject,
+  makeEnvironmentProviders,
   ɵɵdefineInjectable,
   ɵɵdefineInjector,
-  ɵɵdefineNgModule,
-  ɵɵdefineService,
   ɵɵinject
-} from "./chunk-RHYQDY2P.js";
+} from "./chunk-KYBQYUPO.js";
 import {
   __spreadValues
 } from "./chunk-U7EDC2PH.js";
@@ -1559,4 +1561,4 @@ export {
   DomSanitizerImpl,
   VERSION
 };
-//# sourceMappingURL=chunk-YDDES7RL.js.map
+//# sourceMappingURL=chunk-LTDZB6TK.js.map

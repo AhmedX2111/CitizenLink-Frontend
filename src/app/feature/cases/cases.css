@@ -1,0 +1,5 @@
+/* gov-navy and gov-gold aren't in Tailwind by default — define them */
+:host {
+  --gov-navy: #1e3a5f;
+  --gov-gold: #c9a84c;
+}
