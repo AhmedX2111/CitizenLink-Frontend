@@ -1,5 +1,3 @@
-// src/app/auth/models/auth.models.ts
-
 export interface LoginRequest {
   username: string;
   password: string;

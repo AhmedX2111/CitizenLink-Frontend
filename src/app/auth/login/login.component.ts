@@ -15,7 +15,7 @@ import { environment } from '../../../environments/environment';
   templateUrl: './login.component.html',
   styleUrls: ['./login.component.css']
 })
-export class LoginComponent implements OnInit, OnDestroy {
+export class Login implements OnInit, OnDestroy {
   loginForm: FormGroup;
   
   // Using signals for reactive state
