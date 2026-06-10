@@ -5,7 +5,12 @@ export const routes: Routes = [
   {
     path: 'login',
     loadComponent: () =>
-      import('./auth/login/login.component').then(m => m.LoginComponent)
+      import('./auth/login/login.component').then(m => m.Login)
+  },
+  {
+    path: 'logout',
+    loadComponent: () =>
+      import('./auth/logout/logout.component').then(m => m.Logout)
   },
   {
     path: 'cases',
