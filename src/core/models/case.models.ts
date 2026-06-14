@@ -9,17 +9,29 @@ export type Channel      = 'PHONE' | 'WEB' | 'WALK_IN' | 'EMAIL';
 
 // ── Request DTOs ──────────────────────────────────────────────
 
+// export interface CreateCaseRequest {
+//   subject:           string;
+//   description:       string;
+//   type:              CaseType;
+//   priority:          Priority;
+//   channel:           Channel;
+//   citizenId:         string;   // raw UUID — internal use only
+//   categoryId:        string;
+//   departmentId:      string;
+//   assignedToUserId?: string;
+//   dueAt?:            string;   // ISO-8601 OffsetDateTime
+// }
 export interface CreateCaseRequest {
-  subject:           string;
-  description:       string;
-  type:              CaseType;
-  priority:          Priority;
-  channel:           Channel;
-  citizenId:         string;   // raw UUID — internal use only
-  categoryId:        string;
-  departmentId:      string;
+  subject: string;
+  description: string;
+  type: CaseType;
+  priority: Priority;
+  channel: Channel;
+  citizenNationalId: string;  
+  categoryId: string;
+  departmentId: string;
   assignedToUserId?: string;
-  dueAt?:            string;   // ISO-8601 OffsetDateTime
+  dueAt?: string;
 }
 
 export interface CaseSearchRequest {

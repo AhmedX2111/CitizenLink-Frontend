@@ -75,7 +75,7 @@ export class CasesComponent implements OnInit {
     type:             ['', Validators.required],
     priority:         ['', Validators.required],
     channel:          ['', Validators.required],
-    citizenId:        ['', Validators.required],
+    citizenNationalId: ['', [Validators.required, Validators.pattern(/^\d+$/)]], // Changed to National ID
     categoryId:       ['', Validators.required],
     departmentId:     ['', Validators.required],
     assignedToUserId: [''],
@@ -112,9 +112,7 @@ export class CasesComponent implements OnInit {
       takeUntilDestroyed(this.destroyRef)
     ).subscribe(departmentId => {
       // Since Category entity doesn't have departmentId, show all categories
-      // If you add departmentId to Category later, uncomment the filtering logic
       this.filteredCategories.set(this.categories());
-      
       // Reset category when department changes
       this.createForm.get('categoryId')?.setValue('');
     });
@@ -220,7 +218,7 @@ export class CasesComponent implements OnInit {
       type:             v.type,
       priority:         v.priority,
       channel:          v.channel,
-      citizenId:        v.citizenId,
+      citizenNationalId: v.citizenNationalId, // Changed to National ID
       categoryId:       v.categoryId,
       departmentId:     v.departmentId,
       ...(v.assignedToUserId && { assignedToUserId: v.assignedToUserId }),
@@ -243,7 +241,7 @@ export class CasesComponent implements OnInit {
         if (err.status === 400 && err.error?.fieldErrors) {
           this.serverErrors.set(err.error.fieldErrors);
         } else if (err.status === 404) {
-          this.submitError.set(err.error?.message ?? 'A referenced record was not found.');
+          this.submitError.set(err.error?.message ?? 'Citizen not found with this National ID.');
         } else {
           this.submitError.set('An unexpected error occurred. Please try again.');
         }
@@ -267,8 +265,9 @@ export class CasesComponent implements OnInit {
   fieldError(field: string): string {
     const ctrl = this.createForm.get(field);
     if (!ctrl?.errors) return '';
-    if (ctrl.errors['required'])   return 'This field is required';
-    if (ctrl.errors['maxlength'])  return `Maximum ${ctrl.errors['maxlength'].requiredLength} characters`;
+    if (ctrl.errors['required']) return 'This field is required';
+    if (ctrl.errors['maxlength']) return `Maximum ${ctrl.errors['maxlength'].requiredLength} characters`;
+    if (ctrl.errors['pattern']) return 'National ID must contain only numbers';
     return '';
   }
 
