@@ -25,6 +25,13 @@ export const routes: Routes = [
       import('./feature/cases/cases').then(m => m.CasesComponent),
     canActivate: [AuthGuard]
   },
+  // US-07: Call Center - Citizen Search
+  {
+    path: 'app/call-center',
+    loadComponent: () =>
+      import('./call-center/call-center/call-center').then(m => m.CallCenter),
+    canActivate: [AuthGuard]
+  },
   { path: '', redirectTo: 'login', pathMatch: 'full' },
   { path: '**', redirectTo: 'login' }
 ];
