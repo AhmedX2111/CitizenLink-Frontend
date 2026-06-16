@@ -52,8 +52,6 @@ export const routes: Routes = [
       import('./call-center/citizen-profile/citizen-profile').then(m => m.CitizenProfile),
     canActivate: [AuthGuard]
   },
-  { path: '', redirectTo: 'login', pathMatch: 'full' },
-  { path: '**', redirectTo: 'login' }
   // Any other routes - redirect to landing page
   { path: '**', redirectTo: '' }
 ];
