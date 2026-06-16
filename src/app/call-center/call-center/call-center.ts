@@ -3,7 +3,7 @@ import { Component, computed, inject, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { RouterModule, Router } from '@angular/router';
 import { PagedResponse } from '../../../core/models/case.models';
-import { Citizen } from '../../../core/models/citizen.models';
+import { Citizen, PageResponse } from '../../../core/models/citizen.models';
 import { CitizenService } from '../../../core/services/citizen.service';
 
 @Component({
@@ -21,8 +21,8 @@ export class CallCenter {
   protected isLoading = signal(false);
   protected citizens = signal<Citizen[]>([]);
   protected pagination = signal<{
-    page: number;
-    size: number;
+    currentPage: number;
+    pageSize: number;
     totalElements: number;
     totalPages: number;
   } | null>(null);
@@ -50,11 +50,11 @@ export class CallCenter {
     this.hasSearched.set(true);
 
     this.citizenService.searchCitizens(term, 0, 20).subscribe({
-      next: (response: PagedResponse<Citizen>) => {
+      next: (response: PageResponse<Citizen>) => {
         this.citizens.set(response.content);
         this.pagination.set({
-          page: response.page,
-          size: response.size,
+          currentPage: response.number,
+          pageSize: response.size,
           totalElements: response.totalElements,
           totalPages: response.totalPages
         });
@@ -97,7 +97,7 @@ export class CallCenter {
    * Load next page
    */
   nextPage(): void {
-    const currentPage = this.pagination()?.page ?? 0;
+    const currentPage = this.pagination()?.currentPage ?? 0;
     const totalPages = this.pagination()?.totalPages ?? 0;
     
     if (currentPage + 1 < totalPages) {
@@ -109,7 +109,7 @@ export class CallCenter {
    * Load previous page
    */
   previousPage(): void {
-    const currentPage = this.pagination()?.page ?? 0;
+    const currentPage = this.pagination()?.currentPage ?? 0;
     
     if (currentPage > 0) {
       this.loadPage(currentPage - 1);
@@ -121,11 +121,11 @@ export class CallCenter {
     this.isLoading.set(true);
     
     this.citizenService.searchCitizens(term, page, 20).subscribe({
-      next: (response: PagedResponse<Citizen>) => {
+      next: (response: PageResponse<Citizen>) => {
         this.citizens.set(response.content);
         this.pagination.set({
-          page: response.page,
-          size: response.size,
+          currentPage: response.number,
+          pageSize: response.size,
           totalElements: response.totalElements,
           totalPages: response.totalPages
         });

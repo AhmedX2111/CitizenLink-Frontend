@@ -3,7 +3,7 @@ import { HttpClient, HttpParams } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import { environment } from '../../environments/environment';
 import { PagedResponse } from '../models/case.models';
-import { Citizen } from '../models/citizen.models';
+import { Citizen, CreateCitizenRequest, PageResponse } from '../models/citizen.models';
 
 @Injectable({
   providedIn: 'root'
@@ -15,11 +15,8 @@ export class CitizenService {
 
   /**
    * US-07: Search for citizens
-   * @param searchTerm - Name (partial), national ID, or phone number
-   * @param page - Page number (0-based)
-   * @param size - Page size
    */
-  searchCitizens(searchTerm: string, page: number = 0, size: number = 20): Observable<PagedResponse<Citizen>> {
+  searchCitizens(searchTerm: string, page: number = 0, size: number = 20): Observable<PageResponse<Citizen>> {
     let params = new HttpParams()
       .set('page', page.toString())
       .set('size', size.toString());
@@ -28,7 +25,14 @@ export class CitizenService {
       params = params.set('searchTerm', searchTerm.trim());
     }
     
-    return this.http.get<PagedResponse<Citizen>>(`${this.API_URL}/search`, { params });
+    return this.http.get<PageResponse<Citizen>>(`${this.API_URL}/search`, { params });
+  }
+
+  /**
+   * US-09: Create a new citizen
+   */
+  createCitizen(request: CreateCitizenRequest): Observable<Citizen> {
+    return this.http.post<Citizen>(this.API_URL, request);
   }
 
   /**
