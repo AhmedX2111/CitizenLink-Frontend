@@ -7,6 +7,7 @@ import {
 } from '@angular/forms';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { debounceTime, distinctUntilChanged } from 'rxjs/operators';
+import { TranslocoModule, TranslocoService } from '@jsverse/transloco';
 import { CaseService } from '../../../core/services/case.service';
 import { AuthService } from '../../auth/auth.service';
 import { AuthResponse } from '../../auth/models/auth.models';
@@ -22,7 +23,7 @@ type ActiveTab = 'list' | 'create';
 @Component({
   selector: 'app-cases',
   standalone: true,
-  imports: [CommonModule, ReactiveFormsModule],
+  imports: [CommonModule, ReactiveFormsModule, TranslocoModule],
   templateUrl: './cases.html',
   styleUrl: './cases.css'
 })
@@ -31,6 +32,7 @@ export class CasesComponent implements OnInit {
   private fb          = inject(FormBuilder);
   private caseService = inject(CaseService);
   private destroyRef  = inject(DestroyRef);
+  private transloco   = inject(TranslocoService);
   authService  = inject(AuthService);
   currentUser  = signal<AuthResponse | null>(null);
 
@@ -54,6 +56,9 @@ export class CasesComponent implements OnInit {
   categories = signal<Category[]>([]);
   filteredCategories = signal<Category[]>([]);
 
+  // ── RTL detection ──────────────────────────────────────────────
+  isRTL = computed(() => this.transloco.getActiveLang() === 'ar');
+
   // ── Enums exposed to template ─────────────────────────────────
   readonly statuses:   CaseStatus[] = ['NEW','ASSIGNED','IN_PROGRESS','AWAITING_INFO','SUSPENDED','RESOLVED','CLOSED','CANCELLED'];
   readonly types:      CaseType[]   = ['COMPLAINT', 'REQUEST'];
@@ -75,7 +80,7 @@ export class CasesComponent implements OnInit {
     type:             ['', Validators.required],
     priority:         ['', Validators.required],
     channel:          ['', Validators.required],
-    citizenNationalId: ['', [Validators.required, Validators.pattern(/^\d+$/)]], // Changed to National ID
+    citizenNationalId: ['', [Validators.required, Validators.pattern(/^\d+$/)]],
     categoryId:       ['', Validators.required],
     departmentId:     ['', Validators.required],
     assignedToUserId: [''],
@@ -88,6 +93,9 @@ export class CasesComponent implements OnInit {
   resolvedCount = computed(() => this.cases().filter(c => c.status === 'RESOLVED').length);
 
   ngOnInit(): void {
+    // Apply initial RTL direction based on current language
+    this.applyDirection(this.transloco.getActiveLang());
+
     // Subscribe to BehaviorSubject from teammate's AuthService
     this.authService.authState$.pipe(
       takeUntilDestroyed(this.destroyRef)
@@ -107,15 +115,35 @@ export class CasesComponent implements OnInit {
       this.loadCases();
     });
 
-    // Watch for department changes to filter categories (only if category has departmentId)
+    // Watch for department changes to filter categories
     this.createForm.get('departmentId')?.valueChanges.pipe(
       takeUntilDestroyed(this.destroyRef)
     ).subscribe(departmentId => {
-      // Since Category entity doesn't have departmentId, show all categories
       this.filteredCategories.set(this.categories());
-      // Reset category when department changes
       this.createForm.get('categoryId')?.setValue('');
     });
+  }
+
+  // ── Language Toggle ────────────────────────────────────────────
+  toggleLanguage(): void {
+    const currentLang = this.transloco.getActiveLang();
+    const newLang = currentLang === 'en' ? 'ar' : 'en';
+    this.transloco.setActiveLang(newLang);
+    localStorage.setItem('preferredLanguage', newLang);
+    
+    // Apply RTL/LTR direction to the document
+    this.applyDirection(newLang);
+  }
+
+  private applyDirection(lang: string): void {
+    const htmlElement = document.documentElement;
+    if (lang === 'ar') {
+      htmlElement.setAttribute('dir', 'rtl');
+      htmlElement.setAttribute('lang', 'ar');
+    } else {
+      htmlElement.setAttribute('dir', 'ltr');
+      htmlElement.setAttribute('lang', 'en');
+    }
   }
 
   // ── Load Departments and Categories ───────────────────────────
@@ -218,7 +246,7 @@ export class CasesComponent implements OnInit {
       type:             v.type,
       priority:         v.priority,
       channel:          v.channel,
-      citizenNationalId: v.citizenNationalId, // Changed to National ID
+      citizenNationalId: v.citizenNationalId,
       categoryId:       v.categoryId,
       departmentId:     v.departmentId,
       ...(v.assignedToUserId && { assignedToUserId: v.assignedToUserId }),
@@ -233,7 +261,6 @@ export class CasesComponent implements OnInit {
         this.submitSuccess.set(true);
         this.createForm.reset();
         this.loadCases();
-        // Auto-switch to list after short delay
         setTimeout(() => this.showTab('list'), 1500);
       },
       error: (err) => {

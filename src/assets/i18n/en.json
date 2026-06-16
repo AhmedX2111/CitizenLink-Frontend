@@ -1,0 +1,203 @@
+{
+  "common": {
+    "appName": "CitizenLink",
+    "tagline": "Government Services Portal",
+    "loading": "Loading...",
+    "save": "Save",
+    "cancel": "Cancel",
+    "close": "Close",
+    "back": "Back",
+    "search": "Search",
+    "reset": "Reset",
+    "submit": "Submit",
+    "confirm": "Confirm",
+    "delete": "Delete",
+    "edit": "Edit",
+    "view": "View",
+    "create": "Create",
+    "yes": "Yes",
+    "no": "No",
+    "required": "This field is required",
+    "contactSupport": "Contact Support",
+    "privacyPolicy": "Privacy Policy",
+    "termsOfService": "Terms of Service",
+    "contact": "Contact",
+    "allRightsReserved": "© 2026 CitizenLink. All rights reserved.",
+    "securePortal": "Secure Government Portal | All rights reserved © 2025"
+  },
+  "nav": {
+    "switchToArabic": "العربية",
+    "switchToEnglish": "English",
+    "staffLogin": "Staff Login",
+    "portal": "Government Portal"
+  },
+  "landing": {
+    "badge": "Government Digital Transformation",
+    "heroTitle": "CitizenLink",
+    "heroSubtitle": "Empowering Citizens, Simplifying Services",
+    "heroDescription": "A comprehensive case management system connecting citizens with government services. Track requests, monitor progress, and get real-time updates.",
+    "getStarted": "Get Started",
+    "learnMore": "Learn More",
+    "stats": {
+      "casesResolved": "Cases Resolved",
+      "satisfactionRate": "Satisfaction Rate",
+      "supportAvailable": "Support Available",
+      "governmentServices": "Government Services"
+    },
+    "features": {
+      "badge": "Platform Capabilities",
+      "sectionTitle": "Everything you need to manage citizen services",
+      "sectionDescription": "Powerful features designed to streamline case management and improve citizen satisfaction.",
+      "sla": {
+        "title": "SLA Tracking",
+        "description": "Automated tracking of service level agreements with real-time alerts"
+      },
+      "channels": {
+        "title": "Multi-Channel Intake",
+        "description": "Receive cases via Phone, Web, Walk-in, and Email"
+      },
+      "workflow": {
+        "title": "Smart Workflow",
+        "description": "Automated case routing and status management"
+      },
+      "reports": {
+        "title": "Analytics & Reports",
+        "description": "Real-time dashboards and performance metrics"
+      }
+    },
+    "cta": {
+      "title": "Ready to get started?",
+      "description": "Join thousands of government employees using CitizenLink to serve citizens better."
+    }
+  },
+  "login": {
+    "welcomeBack": "Welcome Back",
+    "signInPrompt": "Please sign in to access government services",
+    "username": "Username",
+    "usernamePlaceholder": "Enter your username",
+    "usernameRequired": "Username is required",
+    "password": "Password",
+    "passwordPlaceholder": "Enter your password",
+    "passwordRequired": "Password is required",
+    "passwordMinLength": "Password must be at least 6 characters",
+    "rememberMe": "Remember me",
+    "forgotPassword": "Forgot password?",
+    "signIn": "Sign In",
+    "authenticating": "Authenticating...",
+    "needHelp": "Need help?",
+    "errors": {
+      "connectionFailed": "Cannot connect to server. Please make sure the backend is running on port 8080.",
+      "invalidCredentials": "Invalid username or password. Please try again.",
+      "badRequest": "Please check your credentials and try again.",
+      "accountInactive": "Your account is inactive. Please contact support.",
+      "endpointNotFound": "API endpoint not found. Please check if the backend is correctly configured.",
+      "serverError": "Server error. Please try again later or contact support.",
+      "unknown": "An unexpected error occurred"
+    }
+  },
+  "cases": {
+    "title": "Cases",
+    "subtitle": "Manage and track citizen service requests",
+    "newCase": "New Case",
+    "caseList": "Case List",
+    "searchPlaceholder": "Search case number or subject…",
+    "allStatuses": "All statuses",
+    "allTypes": "All types",
+    "allPriorities": "All priorities",
+    "clearFilters": "Clear",
+    "noResults": "No cases found",
+    "noResultsHint": "Try adjusting your filters or create a new case",
+    "loading": "Loading cases…",
+    "pagination": {
+      "showing": "Showing",
+      "to": "to",
+      "of": "of",
+      "cases": "cases"
+    },
+    "table": {
+      "caseNumber": "Case #",
+      "subject": "Subject",
+      "type": "Type",
+      "priority": "Priority",
+      "status": "Status",
+      "department": "Department",
+      "assignedTo": "Assigned to",
+      "created": "Created"
+    },
+    "stats": {
+      "total": "Total Cases",
+      "myCases": "My cases",
+      "open": "Open",
+      "urgent": "Urgent",
+      "resolved": "Resolved"
+    },
+    "statuses": {
+      "NEW": "New",
+      "ASSIGNED": "Assigned",
+      "IN_PROGRESS": "In Progress",
+      "AWAITING_INFO": "Awaiting Info",
+      "SUSPENDED": "Suspended",
+      "RESOLVED": "Resolved",
+      "CLOSED": "Closed",
+      "CANCELLED": "Cancelled"
+    },
+    "types": {
+      "COMPLAINT": "Complaint",
+      "REQUEST": "Request"
+    },
+    "priorities": {
+      "LOW": "Low",
+      "MEDIUM": "Medium",
+      "HIGH": "High",
+      "URGENT": "Urgent"
+    },
+    "channels": {
+      "PHONE": "Phone",
+      "WEB": "Web",
+      "WALK_IN": "Walk-in",
+      "EMAIL": "Email"
+    },
+    "create": {
+      "title": "New Case",
+      "backToList": "Back to list",
+      "success": "Case created successfully. Redirecting to list…",
+      "sections": {
+        "citizen": "Citizen Information",
+        "details": "Case Details",
+        "assignment": "Assignment"
+      },
+      "fields": {
+        "citizenId": "National ID",
+        "citizenIdPlaceholder": "Enter citizen National ID (e.g., 12345678901234)",
+        "channel": "Channel",
+        "channelPlaceholder": "Select channel…",
+        "subject": "Subject",
+        "subjectPlaceholder": "Brief description of the issue or request",
+        "description": "Description",
+        "descriptionPlaceholder": "Full details — what happened, when, and any relevant context…",
+        "type": "Type",
+        "typePlaceholder": "Select…",
+        "priority": "Priority",
+        "priorityPlaceholder": "Select…",
+        "dueDate": "Due date",
+        "department": "Department",
+        "departmentPlaceholder": "Select department…",
+        "category": "Category",
+        "categoryPlaceholder": "Select category…",
+        "assignTo": "Assign to",
+        "assignToPlaceholder": "User UUID — leave blank to skip",
+        "optional": "optional"
+      },
+      "actions": {
+        "reset": "Reset",
+        "cancel": "Cancel",
+        "creating": "Creating…",
+        "createCase": "Create Case"
+      },
+      "errors": {
+        "notFound": "A referenced record was not found.",
+        "unexpected": "An unexpected error occurred. Please try again."
+      }
+    }
+  }
+}

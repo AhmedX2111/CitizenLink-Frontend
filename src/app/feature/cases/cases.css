@@ -1,5 +1,368 @@
-/* gov-navy and gov-gold aren't in Tailwind by default — define them */
-:host {
-  --gov-navy: #1e3a5f;
-  --gov-gold: #c9a84c;
+/* src/app/feature/cases/cases.css */
+
+/* ============================================
+   RTL SUPPORT - Full mirroring for Arabic
+   ============================================ */
+
+/* ---------- General RTL ---------- */
+[dir="rtl"] {
+  text-align: right;
+}
+
+[dir="rtl"] .flex {
+  flex-direction: row-reverse;
+}
+
+[dir="rtl"] .flex-row {
+  flex-direction: row-reverse;
+}
+
+[dir="rtl"] .flex-col {
+  flex-direction: column-reverse;
+}
+
+/* ---------- Spacing ---------- */
+[dir="rtl"] .space-x-2 > :not([hidden]) ~ :not([hidden]) {
+  --tw-space-x-reverse: 1;
+}
+
+[dir="rtl"] .space-x-0\.5 > :not([hidden]) ~ :not([hidden]) {
+  --tw-space-x-reverse: 1;
+}
+
+[dir="rtl"] .space-x-1 > :not([hidden]) ~ :not([hidden]) {
+  --tw-space-x-reverse: 1;
+}
+
+[dir="rtl"] .space-x-1\.5 > :not([hidden]) ~ :not([hidden]) {
+  --tw-space-x-reverse: 1;
+}
+
+[dir="rtl"] .space-y-0\.5 > :not([hidden]) ~ :not([hidden]) {
+  --tw-space-y-reverse: 0;
+}
+
+/* ---------- Margin & Padding ---------- */
+[dir="rtl"] .ml-1 {
+  margin-left: 0;
+  margin-right: 0.25rem;
+}
+
+[dir="rtl"] .ml-2 {
+  margin-left: 0;
+  margin-right: 0.5rem;
+}
+
+[dir="rtl"] .ml-3 {
+  margin-left: 0;
+  margin-right: 0.75rem;
+}
+
+[dir="rtl"] .ml-4 {
+  margin-left: 0;
+  margin-right: 1rem;
+}
+
+[dir="rtl"] .mr-1 {
+  margin-right: 0;
+  margin-left: 0.25rem;
+}
+
+[dir="rtl"] .mr-2 {
+  margin-right: 0;
+  margin-left: 0.5rem;
+}
+
+[dir="rtl"] .mr-3 {
+  margin-right: 0;
+  margin-left: 0.75rem;
+}
+
+[dir="rtl"] .pl-1 {
+  padding-left: 0;
+  padding-right: 0.25rem;
+}
+
+[dir="rtl"] .pl-2 {
+  padding-left: 0;
+  padding-right: 0.5rem;
+}
+
+[dir="rtl"] .pl-3 {
+  padding-left: 0;
+  padding-right: 0.75rem;
+}
+
+[dir="rtl"] .pl-4 {
+  padding-left: 0;
+  padding-right: 1rem;
+}
+
+[dir="rtl"] .pl-8 {
+  padding-left: 0.75rem;
+  padding-right: 2rem;
+}
+
+[dir="rtl"] .pl-10 {
+  padding-left: 0;
+  padding-right: 2.5rem;
+}
+
+[dir="rtl"] .pl-\[10px\] {
+  padding-left: 0;
+  padding-right: 10px;
+}
+
+[dir="rtl"] .pr-1 {
+  padding-right: 0;
+  padding-left: 0.25rem;
+}
+
+[dir="rtl"] .pr-2 {
+  padding-right: 0;
+  padding-left: 0.5rem;
+}
+
+[dir="rtl"] .pr-3 {
+  padding-right: 0;
+  padding-left: 0.75rem;
+}
+
+[dir="rtl"] .pr-4 {
+  padding-right: 0;
+  padding-left: 1rem;
+}
+
+[dir="rtl"] .pr-8 {
+  padding-right: 0.75rem;
+  padding-left: 2rem;
+}
+
+/* ---------- Borders ---------- */
+[dir="rtl"] .border-l-2 {
+  border-left: none;
+  border-right: 2px solid;
+}
+
+[dir="rtl"] .border-r-2 {
+  border-right: none;
+  border-left: 2px solid;
+}
+
+[dir="rtl"] .border-l {
+  border-left: none;
+  border-right: 1px solid;
+}
+
+[dir="rtl"] .border-r {
+  border-right: none;
+  border-left: 1px solid;
+}
+
+[dir="rtl"] .rounded-l-lg {
+  border-top-left-radius: 0;
+  border-bottom-left-radius: 0;
+  border-top-right-radius: 0.5rem;
+  border-bottom-right-radius: 0.5rem;
+}
+
+[dir="rtl"] .rounded-r-lg {
+  border-top-right-radius: 0;
+  border-bottom-right-radius: 0;
+  border-top-left-radius: 0.5rem;
+  border-bottom-left-radius: 0.5rem;
+}
+
+[dir="rtl"] .rounded-l-md {
+  border-top-left-radius: 0;
+  border-bottom-left-radius: 0;
+  border-top-right-radius: 0.375rem;
+  border-bottom-right-radius: 0.375rem;
+}
+
+[dir="rtl"] .rounded-r-md {
+  border-top-right-radius: 0;
+  border-bottom-right-radius: 0;
+  border-top-left-radius: 0.375rem;
+  border-bottom-left-radius: 0.375rem;
+}
+
+/* ---------- Text Alignment ---------- */
+[dir="rtl"] .text-left {
+  text-align: right;
+}
+
+[dir="rtl"] .text-right {
+  text-align: left;
+}
+
+[dir="rtl"] th,
+[dir="rtl"] td {
+  text-align: right;
+}
+
+[dir="rtl"] th.text-left,
+[dir="rtl"] td.text-left {
+  text-align: right;
+}
+
+[dir="rtl"] th.text-right,
+[dir="rtl"] td.text-right {
+  text-align: left;
+}
+
+/* ---------- Position ---------- */
+[dir="rtl"] .left-0 {
+  left: auto;
+  right: 0;
+}
+
+[dir="rtl"] .left-2\.5 {
+  left: auto;
+  right: 0.625rem;
+}
+
+[dir="rtl"] .right-0 {
+  right: auto;
+  left: 0;
+}
+
+[dir="rtl"] .right-2 {
+  right: auto;
+  left: 0.5rem;
+}
+
+[dir="rtl"] .right-2\.5 {
+  right: auto;
+  left: 0.625rem;
+}
+
+/* ---------- Flex Items ---------- */
+[dir="rtl"] .items-start {
+  align-items: flex-end;
+}
+
+[dir="rtl"] .items-end {
+  align-items: flex-start;
+}
+
+[dir="rtl"] .justify-start {
+  justify-content: flex-end;
+}
+
+[dir="rtl"] .justify-end {
+  justify-content: flex-start;
+}
+
+[dir="rtl"] .self-start {
+  align-self: flex-end;
+}
+
+[dir="rtl"] .self-end {
+  align-self: flex-start;
+}
+
+/* ---------- Forms ---------- */
+[dir="rtl"] input[type="text"],
+[dir="rtl"] input[type="password"],
+[dir="rtl"] input[type="email"],
+[dir="rtl"] input[type="number"],
+[dir="rtl"] input[type="date"],
+[dir="rtl"] select,
+[dir="rtl"] textarea {
+  text-align: right;
+}
+
+[dir="rtl"] ::placeholder {
+  text-align: right;
+}
+
+[dir="rtl"] select {
+  background-position: left 0.75rem center;
+  padding-right: 0.75rem;
+  padding-left: 2rem;
+}
+
+/* ---------- SVG & Icons ---------- */
+[dir="rtl"] svg {
+  transform: scaleX(1);
+}
+
+/* Only mirror directional icons */
+[dir="rtl"] svg.arrow-icon,
+[dir="rtl"] svg[data-direction="rtl"],
+[dir="rtl"] .mirror-rtl {
+  transform: scaleX(-1);
+}
+
+/* ---------- Sidebar ---------- */
+[dir="rtl"] .sidebar .border-l-2 {
+  border-left: none;
+  border-right: 2px solid;
+}
+
+/* ---------- Dropdowns ---------- */
+[dir="rtl"] select option {
+  text-align: right;
+}
+
+/* ---------- Search Input ---------- */
+[dir="rtl"] .relative input[type="text"] {
+  padding-right: 2rem;
+  padding-left: 0.75rem;
+}
+
+[dir="rtl"] .absolute.left-2\.5 {
+  left: auto;
+  right: 0.625rem;
+}
+
+/* ---------- Pagination ---------- */
+[dir="rtl"] .flex.gap-1 {
+  flex-direction: row-reverse;
+}
+
+/* ---------- Badges ---------- */
+[dir="rtl"] .inline-flex .ml-2 {
+  margin-left: 0;
+  margin-right: 0.5rem;
+}
+
+/* ---------- Table ---------- */
+[dir="rtl"] table {
+  text-align: right;
+}
+
+[dir="rtl"] .whitespace-nowrap {
+  text-align: right;
+}
+
+/* ---------- Grid ---------- */
+[dir="rtl"] .grid {
+  direction: rtl;
+}
+
+/* ---------- Card Stats ---------- */
+[dir="rtl"] .bg-white .text-2xl {
+  text-align: right;
+}
+
+/* ---------- Button Groups ---------- */
+[dir="rtl"] .flex.items-center.gap-2 .flex-1 {
+  order: -1;
+}
+
+/* ---------- Responsive ---------- */
+@media (max-width: 768px) {
+  [dir="rtl"] .md\\:flex-row {
+    flex-direction: row-reverse;
+  }
+  
+  [dir="rtl"] .md\\:text-left {
+    text-align: right;
+  }
+  
+  [dir="rtl"] .md\\:text-right {
+    text-align: left;
+  }
 }

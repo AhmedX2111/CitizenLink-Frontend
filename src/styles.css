@@ -1,7 +1,43 @@
-/* You can add global styles to this file, and also import other style files */
+@import url('https://fonts.googleapis.com/css2?family=Cairo:wght@400;500;600;700&display=swap');
 
 @import 'tailwindcss';
 
+@theme {
+  --color-gov-navy:      #1e3a5f;
+  --color-gov-navy-dark: #152b47;
+  --color-gov-gold:      #c9a84c;
+}
+
 input:focus, select:focus, textarea:focus {
-    --tw-ring-color: rgba(30, 58, 95, 0.2);
-  }
+  --tw-ring-color: rgba(30, 58, 95, 0.2);
+}
+
+[dir="rtl"] {
+  text-align: right;
+}
+
+[dir="rtl"] .flex-row {
+  flex-direction: row-reverse;
+}
+
+[dir="rtl"] .space-x-2 > :not([hidden]) ~ :not([hidden]) {
+  --tw-space-x-reverse: 1;
+}
+
+[dir="rtl"] .ml-2 {
+  margin-left: 0;
+  margin-right: 0.5rem;
+}
+
+[dir="rtl"] .mr-2 {
+  margin-right: 0;
+  margin-left: 0.5rem;
+}
+
+[dir="rtl"] .text-left {
+  text-align: right;
+}
+
+[dir="rtl"] .text-right {
+  text-align: left;
+}
