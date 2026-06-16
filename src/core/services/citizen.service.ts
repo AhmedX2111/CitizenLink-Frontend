@@ -3,7 +3,7 @@ import { HttpClient, HttpParams } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import { environment } from '../../environments/environment';
 import { PagedResponse } from '../models/case.models';
-import { Citizen, CreateCitizenRequest, PageResponse } from '../models/citizen.models';
+import { Citizen, CitizenProfile, CreateCitizenRequest, PageResponse } from '../models/citizen.models';
 
 @Injectable({
   providedIn: 'root'
@@ -36,7 +36,15 @@ export class CitizenService {
   }
 
   /**
-   * Get citizen by ID (for Citizen 360)
+   * US-08: Get citizen profile with case history
+   * GET /api/v1/citizens/{id}/profile
+   */
+  getCitizenProfile(id: string): Observable<CitizenProfile> {
+    return this.http.get<CitizenProfile>(`${this.API_URL}/profile/${id}`);
+  }
+
+  /**
+   * Get citizen by ID (for Citizen profile)
    */
   getCitizenById(id: string): Observable<Citizen> {
     return this.http.get<Citizen>(`${this.API_URL}/${id}`);
