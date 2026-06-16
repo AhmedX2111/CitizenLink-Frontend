@@ -9,18 +9,31 @@ export interface Citizen {
     caseCount: number;
 }
 
-export interface PagedResponse<T> {
+export interface PageResponse<T> {
     content: T[];
-    page: number;
-    size: number;
-    totalElements: number;
+    pageable: {
+        pageNumber: number;
+        pageSize: number;
+    };
     totalPages: number;
+    totalElements: number;
+    size: number;
+    number: number;
     first: boolean;
     last: boolean;
+    empty: boolean;
 }
 
 export interface CitizenSearchRequest {
     searchTerm: string;
     page: number;
     size: number;
+}
+
+export interface CreateCitizenRequest {
+    fullName: string;
+    nationalId: string;
+    phone: string;
+    email?: string;
+    preferredLanguage: string;
 }

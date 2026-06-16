@@ -2,8 +2,21 @@
   <!-- Header -->
   <div class="bg-white shadow">
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
-      <h1 class="text-2xl font-bold text-gray-900">Call Center</h1>
-      <p class="text-gray-600 mt-1">Search for citizens to view profile or create a case</p>
+      <div class="flex justify-between items-center">
+        <div>
+          <h1 class="text-2xl font-bold text-gray-900">Call Center</h1>
+          <p class="text-gray-600 mt-1">Search for citizens to view profile or create a case</p>
+        </div>
+        <button
+          (click)="createNewCitizen()"
+          class="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition flex items-center gap-2"
+        >
+          <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path>
+          </svg>
+          New Citizen
+        </button>
+      </div>
     </div>
   </div>
 
@@ -48,16 +61,6 @@
             Clear
           </button>
         </div>
-      </div>
-
-      <!-- Create New Citizen Button -->
-      <div class="mt-4 text-right">
-        <button
-          (click)="createNewCitizen()"
-          class="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition"
-        >
-          + Create New Citizen
-        </button>
       </div>
     </div>
 
@@ -140,20 +143,20 @@
         @if (pagination() && pagination()!.totalPages > 1) {
           <div class="px-6 py-4 bg-gray-50 border-t border-gray-200 flex items-center justify-between">
             <div class="text-sm text-gray-700">
-              Showing page {{ (pagination()!.page + 1) }} of {{ pagination()!.totalPages }} 
+              Showing page {{ (pagination()!.currentPage + 1) }} of {{ pagination()!.totalPages }} 
               ({{ pagination()!.totalElements }} total citizens)
             </div>
             <div class="flex gap-2">
               <button
                 (click)="previousPage()"
-                [disabled]="pagination()!.page === 0"
+                [disabled]="pagination()!.currentPage === 0"
                 class="px-3 py-1 border border-gray-300 rounded text-sm disabled:opacity-50 disabled:cursor-not-allowed hover:bg-gray-50"
               >
                 Previous
               </button>
               <button
                 (click)="nextPage()"
-                [disabled]="pagination()!.page + 1 >= pagination()!.totalPages"
+                [disabled]="pagination()!.currentPage + 1 >= pagination()!.totalPages"
                 class="px-3 py-1 border border-gray-300 rounded text-sm disabled:opacity-50 disabled:cursor-not-allowed hover:bg-gray-50"
               >
                 Next
