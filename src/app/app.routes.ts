@@ -39,13 +39,13 @@ export const routes: Routes = [
       import('./call-center/new-citizen/new-citizen/new-citizen').then(m => m.NewCitizen),
     canActivate: [AuthGuard]
   },
-  // US-08: Citizen 360 Profile
-  // {
-  //   path: 'app/call-center/citizen/:id',
-  //   loadComponent: () =>
-  //     import('./app/citizen-profile/citizen-profile.component').then(m => m.CitizenProfile),
-  //   canActivate: [AuthGuard]
-  // },
+  // US-08: Citizen Profile
+  {
+    path: 'app/call-center/citizen/:id',
+    loadComponent: () =>
+      import('./call-center/citizen-profile/citizen-profile').then(m => m.CitizenProfile),
+    canActivate: [AuthGuard]
+  },
   { path: '', redirectTo: 'login', pathMatch: 'full' },
   { path: '**', redirectTo: 'login' }
 ];

@@ -1,3 +1,5 @@
+// src/app/core/models/citizen.models.ts
+
 export interface Citizen {
     id: string;
     fullName: string;
@@ -7,6 +9,39 @@ export interface Citizen {
     preferredLanguage: string;
     createdAt: string;
     caseCount: number;
+}
+
+export interface CitizenProfile {
+    id: string;
+    fullName: string;
+    nationalId: string;
+    phone: string;
+    email: string;
+    preferredLanguage: string;
+    createdAt: string;
+    createdByUserName: string;
+    totalCases: number;
+    openCases: number;
+    resolvedCases: number;
+    recentCases: CaseSummary[];
+}
+
+export interface CaseSummary {
+    id: string;
+    caseNumber: string;
+    subject: string;
+    status: string;
+    priority: string;
+    createdAt: string;
+    assignedToName: string;
+}
+
+export interface CreateCitizenRequest {
+    fullName: string;
+    nationalId: string;
+    phone: string;
+    email?: string;
+    preferredLanguage: string;
 }
 
 export interface PageResponse<T> {
@@ -22,18 +57,4 @@ export interface PageResponse<T> {
     first: boolean;
     last: boolean;
     empty: boolean;
-}
-
-export interface CitizenSearchRequest {
-    searchTerm: string;
-    page: number;
-    size: number;
-}
-
-export interface CreateCitizenRequest {
-    fullName: string;
-    nationalId: string;
-    phone: string;
-    email?: string;
-    preferredLanguage: string;
 }

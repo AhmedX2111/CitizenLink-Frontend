@@ -70,7 +70,7 @@ export class CallCenter {
   }
 
   /**
-   * Navigate to citizen profile (Citizen 360)
+   * Navigate to citizen profile (Citizen profile)
    */
   viewCitizenProfile(citizenId: string): void {
     this.router.navigate(['/app/call-center/citizen', citizenId]);
