@@ -2,6 +2,12 @@ import { Routes } from '@angular/router';
 import { AuthGuard } from './auth/auth.guard';
 
 export const routes: Routes = [
+  // Landing page - PUBLIC (no auth guard)
+  {
+    path: '',
+    loadComponent: () =>
+      import('./feature/landing/landing').then(m => m.LandingComponent)
+  },
   {
     path: 'login',
     loadComponent: () =>
@@ -48,4 +54,6 @@ export const routes: Routes = [
   },
   { path: '', redirectTo: 'login', pathMatch: 'full' },
   { path: '**', redirectTo: 'login' }
+  // Any other routes - redirect to landing page
+  { path: '**', redirectTo: '' }
 ];

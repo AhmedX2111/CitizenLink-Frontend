@@ -1,0 +1,161 @@
+<ng-container *transloco="let t">
+<div class="min-h-screen bg-gradient-to-br from-slate-50 to-slate-100">
+
+  <!-- Navigation Bar -->
+  <nav class="bg-white/95 backdrop-blur-sm border-b border-slate-200 sticky top-0 z-50">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div class="flex justify-between items-center h-16">
+        <div class="flex items-center gap-3">
+          <div class="w-10 h-10 rounded-full bg-amber-500 flex items-center justify-center">
+            <svg class="w-5 h-5 text-slate-900" fill="currentColor" viewBox="0 0 20 20">
+              <path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"/>
+            </svg>
+          </div>
+          <div>
+            <p class="text-slate-900 text-lg font-semibold leading-tight">{{ t('common.appName') }}</p>
+            <p class="text-slate-400 text-xs">{{ t('nav.portal') }}</p>
+          </div>
+        </div>
+        <div class="flex items-center gap-3">
+          <button (click)="toggleLanguage()"
+                  class="flex items-center gap-2 px-3 py-2 rounded-lg border border-slate-200 bg-white text-slate-600 hover:bg-slate-50 transition-colors text-sm font-medium">
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 5h12M9 3v2m1.048 9.5A18.022 18.022 0 016.412 9m6.088 9h7M11 21l5-10 5 10M12.751 5C11.783 10.77 8.07 15.61 3 18.129"/>
+            </svg>
+            {{ currentLang() === 'en' ? t('nav.switchToArabic') : t('nav.switchToEnglish') }}
+          </button>
+          <button routerLink="/login"
+                  class="bg-emerald-600 hover:bg-emerald-700 text-white px-5 py-2 rounded-lg flex items-center gap-2 transition-colors shadow-sm text-sm font-medium">
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 16l-4-4m0 0l-4-4m-4 4h14m-5 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h7a3 3 0 013 3v1"/>
+            </svg>
+            {{ t('nav.staffLogin') }}
+          </button>
+        </div>
+      </div>
+    </div>
+  </nav>
+
+  <!-- Hero Section -->
+  <section class="relative overflow-hidden">
+    <div class="absolute inset-0 bg-gradient-to-br from-amber-50 via-white to-slate-50"></div>
+    <div class="absolute top-0 right-0 w-96 h-96 bg-amber-100 rounded-full blur-3xl opacity-30"></div>
+    <div class="absolute bottom-0 left-0 w-96 h-96 bg-blue-100 rounded-full blur-3xl opacity-20"></div>
+    <div class="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-20 md:py-28">
+      <div class="text-center max-w-3xl mx-auto">
+        <div class="inline-flex items-center gap-2 bg-amber-50 border border-amber-200 rounded-full px-4 py-1.5 mb-6">
+          <span class="w-2 h-2 rounded-full bg-amber-500 animate-pulse"></span>
+          <span class="text-amber-700 text-xs font-medium">{{ t('landing.badge') }}</span>
+        </div>
+        <h1 class="text-4xl md:text-6xl font-bold text-slate-900 mb-6 tracking-tight">
+          {{ t('landing.heroTitle') }}
+          <span class="text-amber-500 block text-2xl md:text-3xl mt-2">
+            {{ t('landing.heroSubtitle') }}
+          </span>
+        </h1>
+        <p class="text-lg md:text-xl text-slate-600 mb-8 max-w-2xl mx-auto leading-relaxed">
+          {{ t('landing.heroDescription') }}
+        </p>
+        <div class="flex flex-col sm:flex-row gap-4 justify-center items-center">
+          <button routerLink="/login"
+                  class="bg-amber-500 hover:bg-amber-600 text-slate-900 px-8 py-3 rounded-lg flex items-center gap-2 transition-all shadow-md hover:shadow-lg text-base font-semibold">
+            {{ t('landing.getStarted') }}
+            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6"/>
+            </svg>
+          </button>
+          <button class="border-2 border-slate-300 hover:border-amber-400 text-slate-700 hover:text-amber-600 px-8 py-3 rounded-lg transition-all text-base font-medium">
+            {{ t('landing.learnMore') }}
+          </button>
+        </div>
+        <div class="grid grid-cols-2 md:grid-cols-4 gap-6 mt-16 pt-8 border-t border-slate-200">
+          <div>
+            <p class="text-2xl font-bold text-slate-900">100K+</p>
+            <p class="text-xs text-slate-500">{{ t('landing.stats.casesResolved') }}</p>
+          </div>
+          <div>
+            <p class="text-2xl font-bold text-slate-900">98%</p>
+            <p class="text-xs text-slate-500">{{ t('landing.stats.satisfactionRate') }}</p>
+          </div>
+          <div>
+            <p class="text-2xl font-bold text-slate-900">24/7</p>
+            <p class="text-xs text-slate-500">{{ t('landing.stats.supportAvailable') }}</p>
+          </div>
+          <div>
+            <p class="text-2xl font-bold text-slate-900">50+</p>
+            <p class="text-xs text-slate-500">{{ t('landing.stats.governmentServices') }}</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Features Section -->
+  <section class="py-20 bg-white">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div class="text-center max-w-2xl mx-auto mb-12">
+        <div class="inline-flex items-center gap-2 bg-slate-100 rounded-full px-4 py-1.5 mb-4">
+          <svg class="w-4 h-4 text-amber-500" fill="currentColor" viewBox="0 0 20 20">
+            <path d="M13 6a3 3 0 11-6 0 3 3 0 016 0zM18 8a2 2 0 11-4 0 2 2 0 014 0zM14 15a4 4 0 00-8 0v3h8v-3zM6 8a2 2 0 11-4 0 2 2 0 014 0zM16 18v-3a5.972 5.972 0 00-.75-2.906A3.005 3.005 0 0119 15v3h-3zM4.75 12.094A5.973 5.973 0 004 15v3H1v-3a3 3 0 013.75-2.906z"/>
+          </svg>
+          <span class="text-slate-600 text-xs font-medium">{{ t('landing.features.badge') }}</span>
+        </div>
+        <h2 class="text-3xl md:text-4xl font-bold text-slate-900 mb-4">
+          {{ t('landing.features.sectionTitle') }}
+        </h2>
+        <p class="text-slate-500 text-base">{{ t('landing.features.sectionDescription') }}</p>
+      </div>
+      <div class="grid md:grid-cols-2 lg:grid-cols-4 gap-6">
+        @for (feature of features(); track feature.key) {
+          <div class="bg-white rounded-2xl border border-slate-200 p-6 hover:shadow-lg transition-all duration-300 group">
+            <div class="w-12 h-12 bg-amber-50 rounded-xl flex items-center justify-center mb-4 group-hover:bg-amber-100 transition-colors">
+              <svg class="w-6 h-6 text-amber-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" [attr.d]="feature.icon"/>
+              </svg>
+            </div>
+            <h3 class="text-lg font-semibold text-slate-900 mb-2">{{ t(feature.titleKey) }}</h3>
+            <p class="text-slate-500 text-sm leading-relaxed">{{ t(feature.descKey) }}</p>
+          </div>
+        }
+      </div>
+    </div>
+  </section>
+
+  <!-- CTA Section -->
+  <section class="py-20 bg-gradient-to-r from-slate-900 to-slate-800">
+    <div class="max-w-4xl mx-auto text-center px-4 sm:px-6 lg:px-8">
+      <h2 class="text-3xl md:text-4xl font-bold text-white mb-4">{{ t('landing.cta.title') }}</h2>
+      <p class="text-slate-300 text-base mb-8 max-w-2xl mx-auto">{{ t('landing.cta.description') }}</p>
+      <button routerLink="/login"
+              class="bg-amber-500 hover:bg-amber-600 text-slate-900 px-8 py-3 rounded-lg flex items-center gap-2 transition-all shadow-lg hover:shadow-xl text-base font-semibold mx-auto">
+        {{ t('nav.staffLogin') }}
+        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 16l-4-4m0 0l4-4m-4 4h14m-5 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h7a3 3 0 013 3v1"/>
+        </svg>
+      </button>
+    </div>
+  </section>
+
+  <!-- Footer -->
+  <footer class="bg-white border-t border-slate-200 py-8">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div class="flex flex-col md:flex-row justify-between items-center gap-4">
+        <div class="flex items-center gap-3">
+          <div class="w-8 h-8 rounded-full bg-amber-500 flex items-center justify-center">
+            <svg class="w-4 h-4 text-slate-900" fill="currentColor" viewBox="0 0 20 20">
+              <path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"/>
+            </svg>
+          </div>
+          <p class="text-slate-500 text-xs">{{ t('common.allRightsReserved') }}</p>
+        </div>
+        <div class="flex gap-6">
+          <a href="#" class="text-slate-400 hover:text-slate-600 text-xs transition-colors">{{ t('common.privacyPolicy') }}</a>
+          <a href="#" class="text-slate-400 hover:text-slate-600 text-xs transition-colors">{{ t('common.termsOfService') }}</a>
+          <a href="#" class="text-slate-400 hover:text-slate-600 text-xs transition-colors">{{ t('common.contact') }}</a>
+        </div>
+      </div>
+    </div>
+  </footer>
+
+</div>
+</ng-container>

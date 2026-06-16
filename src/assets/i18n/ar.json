@@ -1,0 +1,203 @@
+{
+  "common": {
+    "appName": "رابط المواطن",
+    "tagline": "بوابة الخدمات الحكومية",
+    "loading": "جاري التحميل...",
+    "save": "حفظ",
+    "cancel": "إلغاء",
+    "close": "إغلاق",
+    "back": "رجوع",
+    "search": "بحث",
+    "reset": "إعادة تعيين",
+    "submit": "إرسال",
+    "confirm": "تأكيد",
+    "delete": "حذف",
+    "edit": "تعديل",
+    "view": "عرض",
+    "create": "إنشاء",
+    "yes": "نعم",
+    "no": "لا",
+    "required": "هذا الحقل مطلوب",
+    "contactSupport": "تواصل مع الدعم",
+    "privacyPolicy": "سياسة الخصوصية",
+    "termsOfService": "شروط الخدمة",
+    "contact": "اتصل بنا",
+    "allRightsReserved": "© 2026 رابط المواطن. جميع الحقوق محفوظة.",
+    "securePortal": "بوابة حكومية آمنة | جميع الحقوق محفوظة © 2025"
+  },
+  "nav": {
+    "switchToArabic": "العربية",
+    "switchToEnglish": "English",
+    "staffLogin": "تسجيل الدخول",
+    "portal": "البوابة الحكومية"
+  },
+  "landing": {
+    "badge": "التحول الرقمي الحكومي",
+    "heroTitle": "رابط المواطن",
+    "heroSubtitle": "تمكين المواطنين، تبسيط الخدمات",
+    "heroDescription": "نظام متكامل لإدارة الحالات يربط المواطنين بالخدمات الحكومية. تتبع الطلبات، راقب التقدم، واحصل على تحديثات فورية.",
+    "getStarted": "ابدأ الآن",
+    "learnMore": "اعرف أكثر",
+    "stats": {
+      "casesResolved": "حالات تم حلها",
+      "satisfactionRate": "معدل الرضا",
+      "supportAvailable": "الدعم متاح",
+      "governmentServices": "خدمة حكومية"
+    },
+    "features": {
+      "badge": "إمكانيات المنصة",
+      "sectionTitle": "كل ما تحتاجه لإدارة خدمات المواطنين",
+      "sectionDescription": "ميزات قوية مصممة لتبسيط إدارة الحالات وتحسين رضا المواطنين.",
+      "sla": {
+        "title": "تتبع مستوى الخدمة",
+        "description": "تتبع آلي لاتفاقيات مستوى الخدمة مع تنبيهات فورية"
+      },
+      "channels": {
+        "title": "استقبال متعدد القنوات",
+        "description": "استقبال الحالات عبر الهاتف والويب والحضور الشخصي والبريد الإلكتروني"
+      },
+      "workflow": {
+        "title": "سير العمل الذكي",
+        "description": "توجيه الحالات الآلي وإدارة الحالات"
+      },
+      "reports": {
+        "title": "التحليلات والتقارير",
+        "description": "لوحات معلومات فورية ومقاييس الأداء"
+      }
+    },
+    "cta": {
+      "title": "هل أنت مستعد للبدء؟",
+      "description": "انضم إلى آلاف الموظفين الحكوميين الذين يستخدمون رابط المواطن لخدمة المواطنين بشكل أفضل."
+    }
+  },
+  "login": {
+    "welcomeBack": "مرحباً بعودتك",
+    "signInPrompt": "يرجى تسجيل الدخول للوصول إلى الخدمات الحكومية",
+    "username": "اسم المستخدم",
+    "usernamePlaceholder": "أدخل اسم المستخدم",
+    "usernameRequired": "اسم المستخدم مطلوب",
+    "password": "كلمة المرور",
+    "passwordPlaceholder": "أدخل كلمة المرور",
+    "passwordRequired": "كلمة المرور مطلوبة",
+    "passwordMinLength": "يجب أن تكون كلمة المرور 6 أحرف على الأقل",
+    "rememberMe": "تذكرني",
+    "forgotPassword": "نسيت كلمة المرور؟",
+    "signIn": "تسجيل الدخول",
+    "authenticating": "جاري التحقق...",
+    "needHelp": "تحتاج مساعدة؟",
+    "errors": {
+      "connectionFailed": "لا يمكن الاتصال بالخادم. يرجى التأكد من تشغيل الخادم على المنفذ 8080.",
+      "invalidCredentials": "اسم المستخدم أو كلمة المرور غير صحيحة. يرجى المحاولة مرة أخرى.",
+      "badRequest": "يرجى التحقق من بيانات الاعتماد والمحاولة مرة أخرى.",
+      "accountInactive": "حسابك غير نشط. يرجى التواصل مع الدعم.",
+      "endpointNotFound": "نقطة النهاية غير موجودة. يرجى التحقق من إعدادات الخادم.",
+      "serverError": "خطأ في الخادم. يرجى المحاولة لاحقاً أو التواصل مع الدعم.",
+      "unknown": "حدث خطأ غير متوقع"
+    }
+  },
+  "cases": {
+    "title": "الحالات",
+    "subtitle": "إدارة وتتبع طلبات خدمات المواطنين",
+    "newCase": "حالة جديدة",
+    "caseList": "قائمة الحالات",
+    "searchPlaceholder": "البحث برقم الحالة أو الموضوع...",
+    "allStatuses": "جميع الحالات",
+    "allTypes": "جميع الأنواع",
+    "allPriorities": "جميع الأولويات",
+    "clearFilters": "مسح",
+    "noResults": "لا توجد حالات",
+    "noResultsHint": "حاول تعديل الفلاتر أو إنشاء حالة جديدة",
+    "loading": "جاري تحميل الحالات...",
+    "pagination": {
+      "showing": "عرض",
+      "to": "إلى",
+      "of": "من",
+      "cases": "حالات"
+    },
+    "table": {
+      "caseNumber": "رقم الحالة",
+      "subject": "الموضوع",
+      "type": "النوع",
+      "priority": "الأولوية",
+      "status": "الحالة",
+      "department": "القسم",
+      "assignedTo": "مسند إلى",
+      "created": "تاريخ الإنشاء"
+    },
+    "stats": {
+      "total": "إجمالي الحالات",
+      "myCases": "حالاتي",
+      "open": "مفتوحة",
+      "urgent": "عاجلة",
+      "resolved": "محلولة"
+    },
+    "statuses": {
+      "NEW": "جديد",
+      "ASSIGNED": "مسند",
+      "IN_PROGRESS": "قيد التنفيذ",
+      "AWAITING_INFO": "في انتظار المعلومات",
+      "SUSPENDED": "معلق",
+      "RESOLVED": "تم الحل",
+      "CLOSED": "مغلق",
+      "CANCELLED": "ملغي"
+    },
+    "types": {
+      "COMPLAINT": "شكوى",
+      "REQUEST": "طلب"
+    },
+    "priorities": {
+      "LOW": "منخفضة",
+      "MEDIUM": "متوسطة",
+      "HIGH": "عالية",
+      "URGENT": "عاجلة"
+    },
+    "channels": {
+      "PHONE": "هاتف",
+      "WEB": "ويب",
+      "WALK_IN": "حضور شخصي",
+      "EMAIL": "بريد إلكتروني"
+    },
+    "create": {
+      "title": "حالة جديدة",
+      "backToList": "العودة للقائمة",
+      "success": "تم إنشاء الحالة بنجاح. جاري التحويل...",
+      "sections": {
+        "citizen": "بيانات المواطن",
+        "details": "تفاصيل الحالة",
+        "assignment": "الإسناد"
+      },
+      "fields": {
+        "citizenId": "الرقم الوطني",
+        "citizenIdPlaceholder": "أدخل الرقم الوطني للمواطن (مثال: 12345678901234)",
+        "channel": "القناة",
+        "channelPlaceholder": "اختر القناة...",
+        "subject": "الموضوع",
+        "subjectPlaceholder": "وصف مختصر للمشكلة أو الطلب",
+        "description": "الوصف",
+        "descriptionPlaceholder": "التفاصيل الكاملة — ما الذي حدث ومتى وأي سياق ذي صلة...",
+        "type": "النوع",
+        "typePlaceholder": "اختر...",
+        "priority": "الأولوية",
+        "priorityPlaceholder": "اختر...",
+        "dueDate": "تاريخ الاستحقاق",
+        "department": "القسم",
+        "departmentPlaceholder": "اختر القسم...",
+        "category": "الفئة",
+        "categoryPlaceholder": "اختر الفئة...",
+        "assignTo": "إسناد إلى",
+        "assignToPlaceholder": "معرف المستخدم — اتركه فارغاً للتخطي",
+        "optional": "اختياري"
+      },
+      "actions": {
+        "reset": "إعادة تعيين",
+        "cancel": "إلغاء",
+        "creating": "جاري الإنشاء...",
+        "createCase": "إنشاء حالة"
+      },
+      "errors": {
+        "notFound": "لم يتم العثور على سجل مرجعي.",
+        "unexpected": "حدث خطأ غير متوقع. يرجى المحاولة مرة أخرى."
+      }
+    }
+  }
+}
