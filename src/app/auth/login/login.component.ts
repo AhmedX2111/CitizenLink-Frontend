@@ -1,52 +1,47 @@
-// src/app/auth/login/login.component.ts
-
-import { Component, OnInit, OnDestroy, signal } from '@angular/core';
+import { Component, OnInit, OnDestroy, signal, inject } from '@angular/core';
 import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { Router, ActivatedRoute, RouterModule } from '@angular/router';
 import { CommonModule } from '@angular/common';
+import { TranslocoModule, TranslocoService } from '@jsverse/transloco';
 import { AuthService } from '../auth.service';
-import { Subscription, timeout, catchError } from 'rxjs';
-import { environment } from '../../../environments/environment';
+import { Subscription } from 'rxjs';
 
 @Component({
   selector: 'app-login',
   standalone: true,
-  imports: [CommonModule, ReactiveFormsModule, RouterModule],
+  imports: [CommonModule, ReactiveFormsModule, RouterModule, TranslocoModule],
   templateUrl: './login.component.html',
   styleUrls: ['./login.component.css']
 })
 export class Login implements OnInit, OnDestroy {
+
+  private transloco = inject(TranslocoService);
+
   loginForm: FormGroup;
-  
-  // Using signals for reactive state
-  protected readonly isLoading = signal(false);
-  protected readonly showPassword = signal(false);
-  protected readonly errorMessage = signal<string | null>(null);
+  protected readonly isLoading     = signal(false);
+  protected readonly showPassword   = signal(false);
+  protected readonly errorMessage   = signal<string | null>(null);
   protected returnUrl: string | null = null;
-  
-  private subscriptions: Subscription = new Subscription();
+  private subscriptions             = new Subscription();
 
   constructor(
-    private fb: FormBuilder,
+    private fb:          FormBuilder,
     private authService: AuthService,
-    private router: Router,
-    private route: ActivatedRoute
+    private router:      Router,
+    private route:       ActivatedRoute
   ) {
     this.loginForm = this.fb.group({
-      username: ['', [Validators.required]],
-      password: ['', [Validators.required, Validators.minLength(6)]],
+      username:   ['', Validators.required],
+      password:   ['', [Validators.required, Validators.minLength(6)]],
       rememberMe: [false]
     });
   }
 
   ngOnInit(): void {
-    // Redirect if already logged in
     if (this.authService.isAuthenticated()) {
       this.router.navigate([this.getRoleRoute()]);
       return;
     }
-
-    // Get return URL from route parameters
     this.returnUrl = this.route.snapshot.queryParams['returnUrl'] || null;
   }
 
@@ -59,78 +54,65 @@ export class Login implements OnInit, OnDestroy {
       this.markFormGroupTouched(this.loginForm);
       return;
     }
-
     this.isLoading.set(true);
     this.errorMessage.set(null);
-    
     const { username, password, rememberMe } = this.loginForm.value;
-    
-    const loginSub = this.authService.login({ username, password }, rememberMe)
-      .subscribe({
-        next: (response) => {
+    this.subscriptions.add(
+      this.authService.login({ username, password }, rememberMe).subscribe({
+        next: () => {
           this.isLoading.set(false);
-          const destination = this.returnUrl ?? this.getRoleRoute();
-          this.router.navigate([destination]);
+          this.router.navigate([this.returnUrl ?? this.getRoleRoute()]);
         },
         error: (error) => {
           this.isLoading.set(false);
           this.handleLoginError(error);
         }
-      });
-    
-    this.subscriptions.add(loginSub);
+      })
+    );
   }
 
   togglePasswordVisibility(): void {
-    this.showPassword.update(value => !value);
+    this.showPassword.update(v => !v);
   }
 
   private handleLoginError(error: any): void {
-    console.error('Full error object:', error);
-    
-    if (error.status === 0) {
-      this.errorMessage.set('Cannot connect to server. Please make sure the backend is running on port 8080.');
-    } else if (error.status === 401) {
-      this.errorMessage.set('Invalid username or password. Please try again.');
-    } else if (error.status === 400) {
-      this.errorMessage.set('Please check your credentials and try again.');
-    } else if (error.status === 403) {
-      this.errorMessage.set('Your account is inactive. Please contact support.');
-    } else if (error.status === 404) {
-      this.errorMessage.set('API endpoint not found. Please check if the backend is correctly configured.');
-    } else if (error.status === 500) {
-      this.errorMessage.set('Server error. Please try again later or contact support.');
-    } else {
-      this.errorMessage.set(`Error: ${error.status} - ${error.statusText || 'An unexpected error occurred'}`);
-    }
-    
-    // Clear password field on error
+    const t = (key: string) => this.transloco.translate(key);
+    const keyMap: Record<number, string> = {
+      0:   'login.errors.connectionFailed',
+      401: 'login.errors.invalidCredentials',
+      400: 'login.errors.badRequest',
+      403: 'login.errors.accountInactive',
+      404: 'login.errors.endpointNotFound',
+      500: 'login.errors.serverError'
+    };
+    this.errorMessage.set(
+      keyMap[error.status]
+        ? t(keyMap[error.status])
+        : `${t('login.errors.unknown')}: ${error.status}`
+    );
     this.loginForm.patchValue({ password: '' });
     this.loginForm.get('password')?.markAsUntouched();
   }
 
-  private markFormGroupTouched(formGroup: FormGroup): void {
-    Object.values(formGroup.controls).forEach(control => {
-      control.markAsTouched();
-      if (control instanceof FormGroup) {
-        this.markFormGroupTouched(control);
-      }
+  private getRoleRoute(): string {
+    const role = this.authService.getRoleFromToken();
+    switch (role) {
+      case 'ADMIN':
+      case 'SUPERVISOR': return '/dashboard';
+      case 'HANDLER':
+      case 'AGENT':      return '/cases';
+      default:           return '/login';
+    }
+  }
+
+  private markFormGroupTouched(fg: FormGroup): void {
+    Object.values(fg.controls).forEach(c => {
+      c.markAsTouched();
+      if (c instanceof FormGroup) this.markFormGroupTouched(c);
     });
   }
 
-  private getRoleRoute(): string {
-  const role = this.authService.getRoleFromToken();
-  switch (role) {
-    case 'ADMIN':
-    case 'SUPERVISOR': return '/dashboard';
-    case 'HANDLER':    return '/cases';
-    case 'AGENT':      return '/cases';
-    default:           return '/login';
-  }
-}
-
-  // Getters for form controls
-  get username() { return this.loginForm.get('username'); }
-  get password() { return this.loginForm.get('password'); }
+  get username()   { return this.loginForm.get('username'); }
+  get password()   { return this.loginForm.get('password'); }
   get rememberMe() { return this.loginForm.get('rememberMe'); }
 }
