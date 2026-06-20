@@ -29,7 +29,10 @@
     "switchToArabic": "العربية",
     "switchToEnglish": "English",
     "staffLogin": "Staff Login",
-    "portal": "Government Portal"
+    "portal": "Government Portal",
+    "main": "Main",
+    "dashboard": "Dashboard",
+    "cases": "Cases"
   },
   "landing": {
     "badge": "Government Digital Transformation",
@@ -198,6 +201,28 @@
         "notFound": "A referenced record was not found.",
         "unexpected": "An unexpected error occurred. Please try again."
       }
+    }
+  },
+  "dashboard": {
+    "title": "Dashboard",
+    "subtitle": "Real-time overview of case activity",
+    "loading": "Loading dashboard…",
+    "errors": {
+      "loadFailed": "Failed to load dashboard data. Please try again."
+    },
+    "kpis": {
+      "openCases": "Open Cases",
+      "resolvedThisMonth": "Resolved This Month",
+      "overdueCases": "Overdue Cases",
+      "newToday": "New Today"
+    },
+    "chart": {
+      "title": "Cases by Status"
+    },
+    "myOpenCases": {
+      "title": "My Open Cases",
+      "dueDate": "Due Date",
+      "empty": "You have no open cases assigned."
     }
   }
 }
