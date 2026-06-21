@@ -37,6 +37,15 @@ export class CaseService {
     return this.http.get<PagedResponse<CaseResponse>>(this.baseUrl, { params });
   }
 
+  /**
+   * Fetches full case details by ID for the details modal.
+   * Backend enforces Phase 1 visibility — returns 404 if not visible
+   * to the current user (case belongs to someone else, or doesn't exist).
+   */
+  getCaseById(id: string): Observable<CaseResponse> {
+    return this.http.get<CaseResponse>(`${this.baseUrl}/${id}`);
+  }
+
   getDepartments(): Observable<Department[]> {
     return this.http.get<Department[]>(this.departmentsUrl);
   }
