@@ -3,10 +3,11 @@ import { Component, inject, signal } from '@angular/core';
 import { ReactiveFormsModule, FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { RouterModule, Router } from '@angular/router';
 import { CitizenService } from '../../../../core/services/citizen.service';
+import { TranslocoModule, TranslocoService } from '@jsverse/transloco';
 
 @Component({
   selector: 'app-new-citizen',
-  imports: [CommonModule, ReactiveFormsModule, RouterModule],
+  imports: [CommonModule, ReactiveFormsModule, RouterModule, TranslocoModule],
   templateUrl: './new-citizen.html',
   styleUrl: './new-citizen.css',
 })
@@ -15,6 +16,7 @@ export class NewCitizen {
   private fb = inject(FormBuilder);
   private citizenService = inject(CitizenService);
   private router = inject(Router);
+  private transloco = inject(TranslocoService);
 
   protected citizenForm: FormGroup;
   protected isLoading = signal(false);
@@ -43,7 +45,6 @@ export class NewCitizen {
 
     const formValue = this.citizenForm.value;
     
-    // Send null instead of empty string for email
     const request = {
         fullName: formValue.fullName,
         nationalId: formValue.nationalId,
@@ -55,7 +56,9 @@ export class NewCitizen {
     this.citizenService.createCitizen(request).subscribe({
         next: (response) => {
             this.isLoading.set(false);
-            this.successMessage.set(`Citizen "${response.fullName}" created successfully!`);
+            this.successMessage.set(
+                this.transloco.translate('newCitizen.successMessage', { fullName: response.fullName })
+            );
             
             setTimeout(() => {
                 this.router.navigate(['/app/call-center/citizen', response.id]);
@@ -70,15 +73,15 @@ export class NewCitizen {
                 const firstError = Object.values(fieldErrors)[0];
                 this.errorMessage.set(firstError as string);
             } else if (error.status === 409) {
-                this.errorMessage.set(error.error?.message || 'Citizen with this information already exists');
+                this.errorMessage.set(error.error?.message || this.transloco.translate('newCitizen.errors.duplicate'));
             } else if (error.error?.message) {
                 this.errorMessage.set(error.error.message);
             } else {
-                this.errorMessage.set('An error occurred while creating the citizen. Please try again.');
+                this.errorMessage.set(this.transloco.translate('newCitizen.errors.unexpected'));
             }
         }
     });
-}
+  }
 
   cancel(): void {
     this.router.navigate(['/app/call-center']);
@@ -95,7 +98,6 @@ export class NewCitizen {
 
   protected onlyNumbers(event: KeyboardEvent): boolean {
     const charCode = event.which ? event.which : event.keyCode;
-    // Allow only numbers (0-9)
     if (charCode < 48 || charCode > 57) {
       event.preventDefault();
       return false;
@@ -103,7 +105,6 @@ export class NewCitizen {
     return true;
   }
 
-  // Getters for form controls
   get fullName() { return this.citizenForm.get('fullName'); }
   get nationalId() { return this.citizenForm.get('nationalId'); }
   get phone() { return this.citizenForm.get('phone'); }

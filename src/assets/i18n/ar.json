@@ -9,6 +9,7 @@
     "back": "رجوع",
     "search": "بحث",
     "reset": "إعادة تعيين",
+    "clear": "مسح",
     "submit": "إرسال",
     "confirm": "تأكيد",
     "delete": "حذف",
@@ -32,7 +33,104 @@
     "portal": "البوابة الحكومية",
     "main": "الرئيسية",
     "dashboard": "لوحة المعلومات",
-    "cases": "الحالات"
+    "cases": "الحالات",
+    "callCenter": "مركز الاتصال",
+    "management": "الإدارة",
+    "citizens": "المواطنين",
+    "departments": "الإدارات"
+  },
+  "callCenter": {
+    "title": "مركز الاتصال",
+    "subtitle": "ابحث عن المواطنين لعرض الملف الشخصي أو إنشاء حالة",
+    "newCitizen": "مواطن جديد",
+    "searchLabel": "البحث بالاسم أو الرقم الوطني أو رقم الهاتف",
+    "searchPlaceholder": "مثال: أحمد، 1234567890، 0123456789",
+    "searching": "جاري البحث...",
+    "noResults": "لم يتم العثور على مواطنين",
+    "noResultsHint": "جرب مصطلح بحث مختلف أو أنشئ سجل مواطن جديد.",
+    "createNewCitizen": "إنشاء مواطن جديد",
+    "cases": "حالات",
+    "viewProfile": "عرض الملف الشخصي",
+    "errors": {
+      "searchTermRequired": "يرجى إدخال مصطلح بحث (الاسم، الرقم الوطني، أو رقم الهاتف)",
+      "searchFailed": "حدث خطأ أثناء البحث. يرجى المحاولة مرة أخرى."
+    },
+    "table": {
+      "fullName": "الاسم الكامل",
+      "nationalId": "الرقم الوطني",
+      "phone": "الهاتف",
+      "email": "البريد الإلكتروني",
+      "cases": "الحالات",
+      "actions": "الإجراءات"
+    },
+    "pagination": {
+      "showing": "عرض الصفحة",
+      "of": "من",
+      "citizens": "إجمالي المواطنين",
+      "previous": "السابق",
+      "next": "التالي"
+    }
+  },
+  "citizenProfile": {
+    "title": "ملف المواطن",
+    "subtitle": "الملف الشخصي الكامل للمواطن وتاريخ الحالات",
+    "newCase": "حالة جديدة",
+    "noCases": "لا توجد حالات لهذا المواطن",
+    "unassigned": "غير مسند",
+    "sections": {
+      "information": "معلومات المواطن"
+    },
+    "fields": {
+      "fullName": "الاسم الكامل",
+      "nationalId": "الرقم الوطني",
+      "phone": "الهاتف",
+      "email": "البريد الإلكتروني",
+      "preferredLanguage": "اللغة المفضلة",
+      "createdBy": "تم الإنشاء بواسطة"
+    },
+    "stats": {
+      "totalCases": "إجمالي الحالات",
+      "openCases": "الحالات المفتوحة",
+      "resolvedCases": "الحالات المحلولة"
+    },
+    "recentCases": "الحالات الأخيرة",
+    "caseTable": {
+      "caseNumber": "رقم الحالة",
+      "subject": "الموضوع",
+      "status": "الحالة",
+      "priority": "الأولوية",
+      "assignedTo": "مسند إلى",
+      "created": "تاريخ الإنشاء"
+    },
+    "errors": {
+      "idNotFound": "معرف المواطن غير موجود",
+      "loadFailed": "فشل تحميل ملف المواطن. يرجى المحاولة مرة أخرى."
+    }
+  },
+  "newCitizen": {
+    "title": "تسجيل مواطن جديد",
+    "subtitle": "إنشاء سجل مواطن جديد في النظام",
+    "fullName": "الاسم الكامل",
+    "fullNamePlaceholder": "أدخل الاسم الكامل للمواطن",
+    "nationalId": "الرقم الوطني",
+    "nationalIdPlaceholder": "الرقم الوطني 10 أرقام",
+    "phone": "رقم الهاتف",
+    "phonePlaceholder": "رقم الهاتف 11 رقم",
+    "email": "البريد الإلكتروني",
+    "emailPlaceholder": "citizen@example.com",
+    "preferredLanguage": "اللغة المفضلة",
+    "english": "English",
+    "arabic": "العربية",
+    "create": "إنشاء مواطن",
+    "creating": "جاري الإنشاء...",
+    "cancel": "إلغاء",
+    "required": "مطلوب",
+    "optional": "اختياري",
+    "successMessage": "تم إنشاء المواطن \"{{fullName}}\" بنجاح!",
+    "errors": {
+      "duplicate": "مواطن بهذه المعلومات موجود بالفعل",
+      "unexpected": "حدث خطأ أثناء إنشاء المواطن. يرجى المحاولة مرة أخرى."
+    }
   },
   "landing": {
     "badge": "التحول الرقمي الحكومي",
