@@ -1,521 +1,420 @@
-<div class="min-h-screen bg-gradient-to-br from-slate-50 to-slate-100 flex">
+<app-topbar [pageTitle]="pageTitle"></app-topbar>
 
-  <!-- Sidebar -->
-  <aside class="w-56 bg-slate-900 flex flex-col flex-shrink-0">
-    <div class="px-4 py-5 border-b border-slate-700">
-      <div class="flex items-center gap-3">
-        <div class="w-9 h-9 rounded-full bg-amber-500 flex items-center justify-center flex-shrink-0">
-          <svg class="w-5 h-5 text-slate-900" fill="currentColor" viewBox="0 0 20 20">
-            <path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"/>
-          </svg>
-        </div>
-        <div>
-          <p class="text-white text-sm font-semibold leading-tight">{{ 'common.appName' | transloco }}</p>
-          <p class="text-slate-400 text-[10px]">{{ 'common.tagline' | transloco }}</p>
-        </div>
+<main class="flex-1 overflow-y-auto p-6">
+  <div class="max-w-7xl mx-auto">
+    <!-- Page header -->
+    <div class="flex items-start justify-between mb-5">
+      <div>
+        <h1 class="text-lg font-semibold text-slate-900">{{ 'cases.title' | transloco }}</h1>
+        <p class="text-slate-500 text-xs mt-0.5">{{ 'cases.subtitle' | transloco }}</p>
+        <div class="mt-1.5 h-0.5 w-8 bg-amber-500 rounded-full"></div>
       </div>
-    </div>
-
-    <nav class="flex-1 px-2 py-3 space-y-0.5">
-      <p class="text-slate-500 text-[10px] uppercase tracking-widest px-2 py-2">Main</p>
-      <a class="flex items-center gap-2.5 px-3 py-2 rounded-lg text-slate-300 hover:bg-white/10 hover:text-white text-xs transition-colors cursor-pointer">
-        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zm10 0a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zm10 0a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z"/>
-        </svg>
-        Dashboard
-      </a>
-      <a class="flex items-center gap-2.5 px-3 py-2 rounded-lg bg-slate-800 text-white text-xs border-l-2 border-amber-500 pl-[10px] cursor-pointer">
-        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 7v10a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-6l-2-2H5a2 2 0 00-2 2z"/>
-        </svg>
-        {{ 'cases.title' | transloco }}
-      </a>
-      <a class="flex items-center gap-2.5 px-3 py-2 rounded-lg text-slate-300 hover:bg-white/10 hover:text-white text-xs transition-colors cursor-pointer">
-        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0z"/>
-        </svg>
-        Citizens
-      </a>
-      <p class="text-slate-500 text-[10px] uppercase tracking-widest px-2 py-2 mt-2">Management</p>
-      <a class="flex items-center gap-2.5 px-3 py-2 rounded-lg text-slate-300 hover:bg-white/10 hover:text-white text-xs transition-colors cursor-pointer">
-        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"/>
-        </svg>
-        Departments
-      </a>
-    </nav>
-
-    <!-- User chip -->
-    <div class="px-3 py-3 border-t border-slate-700">
-      <div class="flex items-center gap-2">
-        <div class="w-8 h-8 rounded-full bg-amber-500 flex items-center justify-center text-slate-900 text-xs font-semibold flex-shrink-0">
-          {{ currentUser()?.displayName?.slice(0,2)?.toUpperCase() ?? 'U' }}
-        </div>
-        <div class="flex-1 min-w-0">
-          <p class="text-white text-xs font-medium truncate">{{ currentUser()?.displayName }}</p>
-          <p class="text-slate-400 text-[10px]">{{ currentUser()?.role }}</p>
-        </div>
-        <button (click)="authService.logout()" class="text-slate-400 hover:text-white transition-colors" title="Sign out">
-          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"/>
-          </svg>
-        </button>
-      </div>
-    </div>
-  </aside>
-
-  <!-- Main Content -->
-  <div class="flex-1 flex flex-col min-w-0 overflow-hidden">
-
-    <!-- Topbar -->
-    <header class="bg-white border-b border-slate-200 px-6 py-3 flex items-center justify-between flex-shrink-0">
-      <div class="flex items-center gap-2 text-xs text-slate-400">
+      <button (click)="showTab('create')" class="bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-medium px-4 py-2 rounded-lg flex items-center gap-1.5 transition-colors shadow-sm">
         <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 7v10a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-6l-2-2H5a2 2 0 00-2 2z"/>
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/>
         </svg>
-        {{ 'common.portal' | transloco }} / <span class="text-slate-900 font-medium ml-1">{{ 'cases.title' | transloco }}</span>
+        {{ 'cases.newCase' | transloco }}
+      </button>
+    </div>
+
+    <!-- Stats -->
+    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 mb-5">
+      <div class="bg-white rounded-xl border border-slate-200 px-4 py-3">
+        <p class="text-xs text-slate-500 mb-1">{{ 'cases.stats.total' | transloco }}</p>
+        <p class="text-2xl font-medium text-slate-900">{{ totalElements() }}</p>
       </div>
-      <div class="flex items-center gap-2">
-        <!-- Language Toggle Button -->
-        <button (click)="toggleLanguage()" 
-                class="flex items-center gap-1.5 px-3 py-1.5 rounded-lg border border-slate-200 bg-white text-slate-600 hover:bg-slate-50 hover:text-slate-900 transition-all text-xs font-medium">
+      <div class="bg-white rounded-xl border border-slate-200 px-4 py-3">
+        <p class="text-xs text-slate-500 mb-1">{{ 'cases.stats.open' | transloco }}</p>
+        <p class="text-2xl font-medium text-amber-600">{{ openCount() }}</p>
+      </div>
+      <div class="bg-white rounded-xl border border-slate-200 px-4 py-3">
+        <p class="text-xs text-slate-500 mb-1">{{ 'cases.stats.urgent' | transloco }}</p>
+        <p class="text-2xl font-medium text-red-600">{{ urgentCount() }}</p>
+      </div>
+      <div class="bg-white rounded-xl border border-slate-200 px-4 py-3">
+        <p class="text-xs text-slate-500 mb-1">{{ 'cases.stats.resolved' | transloco }}</p>
+        <p class="text-2xl font-medium text-emerald-600">{{ resolvedCount() }}</p>
+      </div>
+    </div>
+
+    <!-- Panel -->
+    <div class="bg-white rounded-2xl border border-slate-200 overflow-hidden">
+
+      <!-- Tabs -->
+      <div class="flex border-b border-slate-200 bg-slate-50/60 px-4">
+        <button (click)="showTab('list')" [class]="activeTab() === 'list' ? 'flex items-center gap-1.5 px-4 py-3 text-xs font-medium text-slate-900 border-b-2 border-amber-500 -mb-px transition-colors' : 'flex items-center gap-1.5 px-4 py-3 text-xs text-slate-500 hover:text-slate-900 border-b-2 border-transparent -mb-px transition-colors'">
           <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 5h12M9 3v2m1.048 9.5A18.022 18.022 0 016.412 9m6.088 9h7M11 21l5-10 5 10M12.751 5C11.783 10.77 8.07 15.61 3 18.129"/>
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 10h16M4 14h16M4 18h16"/>
           </svg>
-          {{ 'nav.switchToArabic' | transloco }}
+          {{ 'cases.caseList' | transloco }}
+          <span [class]="activeTab() === 'list' ? 'bg-slate-900 text-white text-[10px] px-1.5 py-0.5 rounded-full' : 'bg-slate-200 text-slate-600 text-[10px] px-1.5 py-0.5 rounded-full'">
+            {{ totalElements() }}
+          </span>
         </button>
-        <!-- Notification Bell -->
-        <button class="w-8 h-8 rounded-lg border border-slate-200 flex items-center justify-center text-slate-400 hover:bg-slate-50 transition-colors">
-          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9"/>
+        <button (click)="showTab('create')" [class]="activeTab() === 'create' ? 'flex items-center gap-1.5 px-4 py-3 text-xs font-medium text-slate-900 border-b-2 border-amber-500 -mb-px transition-colors' : 'flex items-center gap-1.5 px-4 py-3 text-xs text-slate-500 hover:text-slate-900 border-b-2 border-transparent -mb-px transition-colors'">
+          <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/>
           </svg>
+          {{ 'cases.newCase' | transloco }}
         </button>
       </div>
-    </header>
 
-    <main class="flex-1 overflow-y-auto p-6">
-      <div class="max-w-7xl mx-auto">
-        <!-- Page header -->
-        <div class="flex items-start justify-between mb-5">
-          <div>
-            <h1 class="text-lg font-semibold text-slate-900">{{ 'cases.title' | transloco }}</h1>
-            <p class="text-slate-500 text-xs mt-0.5">{{ 'cases.subtitle' | transloco }}</p>
-            <div class="mt-1.5 h-0.5 w-8 bg-amber-500 rounded-full"></div>
-          </div>
-          <button (click)="showTab('create')" class="bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-medium px-4 py-2 rounded-lg flex items-center gap-1.5 transition-colors shadow-sm">
-            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/>
-            </svg>
-            {{ 'cases.newCase' | transloco }}
-          </button>
-        </div>
-
-        <!-- Stats -->
-        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 mb-5">
-          <div class="bg-white rounded-xl border border-slate-200 px-4 py-3">
-            <p class="text-xs text-slate-500 mb-1">{{ 'cases.stats.total' | transloco }}</p>
-            <p class="text-2xl font-medium text-slate-900">{{ totalElements() }}</p>
-          </div>
-          <div class="bg-white rounded-xl border border-slate-200 px-4 py-3">
-            <p class="text-xs text-slate-500 mb-1">{{ 'cases.stats.open' | transloco }}</p>
-            <p class="text-2xl font-medium text-amber-600">{{ openCount() }}</p>
-          </div>
-          <div class="bg-white rounded-xl border border-slate-200 px-4 py-3">
-            <p class="text-xs text-slate-500 mb-1">{{ 'cases.stats.urgent' | transloco }}</p>
-            <p class="text-2xl font-medium text-red-600">{{ urgentCount() }}</p>
-          </div>
-          <div class="bg-white rounded-xl border border-slate-200 px-4 py-3">
-            <p class="text-xs text-slate-500 mb-1">{{ 'cases.stats.resolved' | transloco }}</p>
-            <p class="text-2xl font-medium text-emerald-600">{{ resolvedCount() }}</p>
-          </div>
-        </div>
-
-        <!-- Panel -->
-        <div class="bg-white rounded-2xl border border-slate-200 overflow-hidden">
-
-          <!-- Tabs -->
-          <div class="flex border-b border-slate-200 bg-slate-50/60 px-4">
-            <button (click)="showTab('list')" [class]="activeTab() === 'list' ? 'flex items-center gap-1.5 px-4 py-3 text-xs font-medium text-slate-900 border-b-2 border-amber-500 -mb-px transition-colors' : 'flex items-center gap-1.5 px-4 py-3 text-xs text-slate-500 hover:text-slate-900 border-b-2 border-transparent -mb-px transition-colors'">
-              <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 10h16M4 14h16M4 18h16"/>
+      <!-- LIST TAB -->
+      @if (activeTab() === 'list') {
+        <div>
+          <!-- Search & filters -->
+          <div [formGroup]="searchForm" class="flex flex-wrap items-center gap-2 px-4 py-3 border-b border-slate-100">
+            <div class="relative flex-1 min-w-44">
+              <svg class="absolute left-2.5 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/>
               </svg>
-              {{ 'cases.caseList' | transloco }}
-              <span [class]="activeTab() === 'list' ? 'bg-slate-900 text-white text-[10px] px-1.5 py-0.5 rounded-full' : 'bg-slate-200 text-slate-600 text-[10px] px-1.5 py-0.5 rounded-full'">
-                {{ totalElements() }}
-              </span>
-            </button>
-            <button (click)="showTab('create')" [class]="activeTab() === 'create' ? 'flex items-center gap-1.5 px-4 py-3 text-xs font-medium text-slate-900 border-b-2 border-amber-500 -mb-px transition-colors' : 'flex items-center gap-1.5 px-4 py-3 text-xs text-slate-500 hover:text-slate-900 border-b-2 border-transparent -mb-px transition-colors'">
-              <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/>
-              </svg>
-              {{ 'cases.newCase' | transloco }}
+              <input formControlName="keyword" type="text" placeholder="{{ 'cases.searchPlaceholder' | transloco }}" class="w-full pl-8 pr-3 py-1.5 text-xs border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-slate-900/20 focus:border-slate-900/40 transition-all">
+            </div>
+            <select formControlName="status" class="text-xs border border-slate-200 rounded-lg px-2 py-1.5 focus:outline-none focus:ring-2 focus:ring-slate-900/20 text-slate-600 bg-white">
+              <option value="">{{ 'cases.allStatuses' | transloco }}</option>
+              @for (s of statuses; track s) {
+                <option [value]="s">{{ 'cases.statuses.' + s | transloco }}</option>
+              }
+            </select>
+            <select formControlName="type" class="text-xs border border-slate-200 rounded-lg px-2 py-1.5 focus:outline-none focus:ring-2 focus:ring-slate-900/20 text-slate-600 bg-white">
+              <option value="">{{ 'cases.allTypes' | transloco }}</option>
+              @for (t of types; track t) {
+                <option [value]="t">{{ 'cases.types.' + t | transloco }}</option>
+              }
+            </select>
+            <select formControlName="priority" class="text-xs border border-slate-200 rounded-lg px-2 py-1.5 focus:outline-none focus:ring-2 focus:ring-slate-900/20 text-slate-600 bg-white">
+              <option value="">{{ 'cases.allPriorities' | transloco }}</option>
+              @for (p of priorities; track p) {
+                <option [value]="p">{{ 'cases.priorities.' + p | transloco }}</option>
+              }
+            </select>
+            <button (click)="clearFilters()" type="button" class="text-xs text-slate-500 hover:text-slate-900 px-2 py-1.5 border border-slate-200 rounded-lg bg-white transition-colors">
+              {{ 'cases.clearFilters' | transloco }}
             </button>
           </div>
 
-          <!-- LIST TAB -->
-          @if (activeTab() === 'list') {
-            <div>
-              <!-- Search & filters -->
-              <div [formGroup]="searchForm" class="flex flex-wrap items-center gap-2 px-4 py-3 border-b border-slate-100">
-                <div class="relative flex-1 min-w-44">
-                  <svg class="absolute left-2.5 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/>
-                  </svg>
-                  <input formControlName="keyword" type="text" placeholder="{{ 'cases.searchPlaceholder' | transloco }}" class="w-full pl-8 pr-3 py-1.5 text-xs border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-slate-900/20 focus:border-slate-900/40 transition-all">
-                </div>
-                <select formControlName="status" class="text-xs border border-slate-200 rounded-lg px-2 py-1.5 focus:outline-none focus:ring-2 focus:ring-slate-900/20 text-slate-600 bg-white">
-                  <option value="">{{ 'cases.allStatuses' | transloco }}</option>
-                  @for (s of statuses; track s) { 
-                    <option [value]="s">{{ 'cases.statuses.' + s | transloco }}</option>
-                  }
-                </select>
-                <select formControlName="type" class="text-xs border border-slate-200 rounded-lg px-2 py-1.5 focus:outline-none focus:ring-2 focus:ring-slate-900/20 text-slate-600 bg-white">
-                  <option value="">{{ 'cases.allTypes' | transloco }}</option>
-                  @for (t of types; track t) { 
-                    <option [value]="t">{{ 'cases.types.' + t | transloco }}</option>
-                  }
-                </select>
-                <select formControlName="priority" class="text-xs border border-slate-200 rounded-lg px-2 py-1.5 focus:outline-none focus:ring-2 focus:ring-slate-900/20 text-slate-600 bg-white">
-                  <option value="">{{ 'cases.allPriorities' | transloco }}</option>
-                  @for (p of priorities; track p) { 
-                    <option [value]="p">{{ 'cases.priorities.' + p | transloco }}</option>
-                  }
-                </select>
-                <button (click)="clearFilters()" type="button" class="text-xs text-slate-500 hover:text-slate-900 px-2 py-1.5 border border-slate-200 rounded-lg bg-white transition-colors">
-                  {{ 'cases.clearFilters' | transloco }}
-                </button>
+          <!-- Loading -->
+          @if (isLoading()) {
+            <div class="flex items-center justify-center py-16 text-slate-400 text-xs gap-2">
+              <svg class="animate-spin w-4 h-4" fill="none" viewBox="0 0 24 24">
+                <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"/>
+                <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"/>
+              </svg>
+              {{ 'cases.loading' | transloco }}
+            </div>
+          }
+
+          <!-- Table -->
+          @if (!isLoading()) {
+            @if (cases().length === 0) {
+              <div class="flex flex-col items-center justify-center py-16 text-slate-400">
+                <svg class="w-10 h-10 mb-3 text-slate-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M3 7v10a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-6l-2-2H5a2 2 0 00-2 2z"/>
+                </svg>
+                <p class="text-sm font-medium text-slate-500">{{ 'cases.noResults' | transloco }}</p>
+                <p class="text-xs mt-1">{{ 'cases.noResultsHint' | transloco }}</p>
+              </div>
+            } @else {
+              <div class="overflow-x-auto">
+                <table class="w-full text-xs">
+                  <thead>
+                    <tr class="border-b border-slate-100">
+                      <th class="px-4 py-2.5 text-left font-medium text-slate-400 whitespace-nowrap">{{ 'cases.table.caseNumber' | transloco }}</th>
+                      <th class="px-4 py-2.5 text-left font-medium text-slate-400">{{ 'cases.table.subject' | transloco }}</th>
+                      <th class="px-4 py-2.5 text-left font-medium text-slate-400">{{ 'cases.table.type' | transloco }}</th>
+                      <th class="px-4 py-2.5 text-left font-medium text-slate-400">{{ 'cases.table.priority' | transloco }}</th>
+                      <th class="px-4 py-2.5 text-left font-medium text-slate-400">{{ 'cases.table.status' | transloco }}</th>
+                      <th class="px-4 py-2.5 text-left font-medium text-slate-400">{{ 'cases.table.department' | transloco }}</th>
+                      <th class="px-4 py-2.5 text-left font-medium text-slate-400">{{ 'cases.table.assignedTo' | transloco }}</th>
+                      <th class="px-4 py-2.5 text-left font-medium text-slate-400 whitespace-nowrap">{{ 'cases.table.created' | transloco }}</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    @for (c of cases(); track c.id) {
+                      <tr class="border-b border-slate-50 hover:bg-slate-50/60 transition-colors">
+                        <td class="px-4 py-3 font-medium text-slate-900 whitespace-nowrap">{{ c.caseNumber }}</td>
+                        <td class="px-4 py-3 text-slate-700 max-w-48 truncate">{{ c.subject }}</td>
+                        <td class="px-4 py-3">
+                          <span [class]="'inline-flex px-2 py-0.5 rounded text-[11px] font-medium ' + typeBadgeClass(c.type)">
+                            {{ 'cases.types.' + c.type | transloco }}
+                          </span>
+                        </td>
+                        <td class="px-4 py-3">
+                          <span [class]="'inline-flex px-2 py-0.5 rounded text-[11px] font-medium ' + priorityBadgeClass(c.priority)">
+                            {{ 'cases.priorities.' + c.priority | transloco }}
+                          </span>
+                        </td>
+                        <td class="px-4 py-3">
+                          <span [class]="'inline-flex px-2 py-0.5 rounded text-[11px] font-medium ' + statusBadgeClass(c.status)">
+                            {{ 'cases.statuses.' + c.status | transloco }}
+                          </span>
+                        </td>
+                        <td class="px-4 py-3 text-slate-500">{{ c.departmentNameEn }}</td>
+                        <td class="px-4 py-3 text-slate-500">{{ c.assignedToDisplayName ?? '—' }}</td>
+                        <td class="px-4 py-3 text-slate-400 whitespace-nowrap">{{ formatDate(c.createdAt) }}</td>
+                      </tr>
+                    }
+                  </tbody>
+                </table>
               </div>
 
-              <!-- Loading -->
-              @if (isLoading()) {
-                <div class="flex items-center justify-center py-16 text-slate-400 text-xs gap-2">
-                  <svg class="animate-spin w-4 h-4" fill="none" viewBox="0 0 24 24">
+              <!-- Pagination -->
+              <div class="flex items-center justify-between px-4 py-3 border-t border-slate-100">
+                <p class="text-xs text-slate-400">
+                  {{ 'cases.pagination.showing' | transloco }} {{ currentPage() * pageSize + 1 }}–{{ currentPage() * pageSize + cases().length }} {{ 'cases.pagination.of' | transloco }} {{ totalElements() }} {{ 'cases.pagination.cases' | transloco }}
+                </p>
+                <div class="flex gap-1">
+                  <button (click)="goToPage(currentPage() - 1)" [disabled]="currentPage() === 0" class="w-7 h-7 rounded-md border border-slate-200 flex items-center justify-center text-slate-500 hover:bg-slate-50 disabled:opacity-40 disabled:cursor-not-allowed transition-colors">
+                    <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/>
+                    </svg>
+                  </button>
+                  @for (p of pages; track p) {
+                    @if (p < 5 || p === totalPages() - 1 || p === currentPage()) {
+                      <button (click)="goToPage(p)" [class]="p === currentPage() ? 'w-7 h-7 rounded-md text-xs font-medium bg-slate-900 text-white border border-slate-900' : 'w-7 h-7 rounded-md text-xs border border-slate-200 text-slate-600 hover:bg-slate-50 transition-colors'">
+                        {{ p + 1 }}
+                      </button>
+                    }
+                  }
+                  <button (click)="goToPage(currentPage() + 1)" [disabled]="currentPage() >= totalPages() - 1" class="w-7 h-7 rounded-md border border-slate-200 flex items-center justify-center text-slate-500 hover:bg-slate-50 disabled:opacity-40 disabled:cursor-not-allowed transition-colors">
+                    <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/>
+                    </svg>
+                  </button>
+                </div>
+              </div>
+            }
+          }
+        </div>
+      }
+
+      <!-- CREATE TAB -->
+      @if (activeTab() === 'create') {
+        <div>
+          <div class="flex items-center justify-between px-5 py-3.5 border-b border-slate-100">
+            <div class="flex items-center gap-2 text-sm font-medium text-slate-900">
+              <svg class="w-4 h-4 text-amber-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 13h6m-3-3v6m-9 1V7a2 2 0 012-2h6l2 2h6a2 2 0 012 2v8a2 2 0 01-2 2H5a2 2 0 01-2-2z"/>
+              </svg>
+              {{ 'cases.create.title' | transloco }}
+            </div>
+            <button (click)="showTab('list')" class="flex items-center gap-1 text-xs text-slate-500 hover:text-slate-900 border border-slate-200 px-3 py-1.5 rounded-lg bg-white transition-colors">
+              <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/>
+              </svg>
+              {{ 'cases.create.backToList' | transloco }}
+            </button>
+          </div>
+
+          <!-- Success banner -->
+          @if (submitSuccess()) {
+            <div class="mx-5 mt-4 p-3 bg-emerald-50 border-l-4 border-emerald-500 rounded-md flex items-center gap-2">
+              <svg class="w-4 h-4 text-emerald-600 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
+                <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/>
+              </svg>
+              <span class="text-emerald-800 text-xs font-medium">{{ 'cases.create.success' | transloco }}</span>
+            </div>
+          }
+
+          <!-- Error banner -->
+          @if (submitError()) {
+            <div class="mx-5 mt-4 p-3 bg-red-50 border-l-4 border-red-500 rounded-md flex items-center gap-2">
+              <svg class="w-4 h-4 text-red-500 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
+                <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clip-rule="evenodd"/>
+              </svg>
+              <span class="text-red-700 text-xs">{{ submitError() }}</span>
+            </div>
+          }
+
+          <form [formGroup]="createForm" (ngSubmit)="onSubmit()" class="p-5 space-y-5">
+
+            <!-- Section: Citizen Information -->
+            <div>
+              <div class="flex items-center gap-2 mb-3">
+                <svg class="w-4 h-4 text-amber-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"/>
+                </svg>
+                <span class="text-xs font-medium text-slate-900">{{ 'cases.create.sections.citizen' | transloco }}</span>
+              </div>
+              <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
+                <!-- National ID Field -->
+                <div>
+                  <label class="block text-xs font-medium text-slate-700 mb-1">{{ 'cases.create.fields.citizenId' | transloco }} <span class="text-red-500">*</span></label>
+                  <input formControlName="citizenNationalId"
+                         type="text"
+                         placeholder="{{ 'cases.create.fields.citizenIdPlaceholder' | transloco }}"
+                         class="w-full px-3 py-2 text-xs border rounded-lg focus:outline-none focus:ring-2 transition-all"
+                         [class.border-slate-300]="!hasError('citizenNationalId')"
+                         [class.border-red-400]="hasError('citizenNationalId') || serverError('citizenNationalId')">
+                  @if (hasError('citizenNationalId')) {
+                    <p class="mt-1 text-[11px] text-red-600">{{ fieldError('citizenNationalId') }}</p>
+                  }
+                  @if (serverError('citizenNationalId')) {
+                    <p class="mt-1 text-[11px] text-red-600">{{ serverError('citizenNationalId') }}</p>
+                  }
+                </div>
+
+                <!-- Channel Dropdown -->
+                <div>
+                  <label class="block text-xs font-medium text-slate-700 mb-1">{{ 'cases.create.fields.channel' | transloco }} <span class="text-red-500">*</span></label>
+                  <select formControlName="channel"
+                          class="w-full px-3 py-2 text-xs border rounded-lg focus:outline-none focus:ring-2 transition-all bg-white"
+                          [class.border-slate-300]="!hasError('channel')"
+                          [class.border-red-400]="hasError('channel')">
+                    <option value="" disabled selected>{{ 'cases.create.fields.channelPlaceholder' | transloco }}</option>
+                    @for (ch of channels; track ch) {
+                      <option [value]="ch">{{ 'cases.channels.' + ch | transloco }}</option>
+                    }
+                  </select>
+                  @if (hasError('channel')) {
+                    <p class="mt-1 text-[11px] text-red-600">{{ fieldError('channel') }}</p>
+                  }
+                </div>
+              </div>
+            </div>
+
+            <div class="h-px bg-slate-100"></div>
+
+            <!-- Section: Case Details -->
+            <div>
+              <div class="flex items-center gap-2 mb-3">
+                <svg class="w-4 h-4 text-amber-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
+                </svg>
+                <span class="text-xs font-medium text-slate-900">{{ 'cases.create.sections.details' | transloco }}</span>
+              </div>
+              <div class="space-y-3">
+                <div>
+                  <label class="block text-xs font-medium text-slate-700 mb-1">{{ 'cases.create.fields.subject' | transloco }} <span class="text-red-500">*</span></label>
+                  <input formControlName="subject" type="text" placeholder="{{ 'cases.create.fields.subjectPlaceholder' | transloco }}" class="w-full px-3 py-2 text-xs border rounded-lg focus:outline-none focus:ring-2 transition-all" [class.border-slate-300]="!hasError('subject')" [class.border-red-400]="hasError('subject') || serverError('subject')">
+                  @if (hasError('subject')) {
+                    <p class="mt-1 text-[11px] text-red-600">{{ fieldError('subject') }}</p>
+                  }
+                  @if (serverError('subject')) {
+                    <p class="mt-1 text-[11px] text-red-600">{{ serverError('subject') }}</p>
+                  }
+                </div>
+                <div>
+                  <label class="block text-xs font-medium text-slate-700 mb-1">{{ 'cases.create.fields.description' | transloco }} <span class="text-red-500">*</span></label>
+                  <textarea formControlName="description" rows="3" placeholder="{{ 'cases.create.fields.descriptionPlaceholder' | transloco }}" class="w-full px-3 py-2 text-xs border rounded-lg focus:outline-none focus:ring-2 transition-all resize-none" [class.border-slate-300]="!hasError('description')" [class.border-red-400]="hasError('description') || serverError('description')"></textarea>
+                  @if (hasError('description')) {
+                    <p class="mt-1 text-[11px] text-red-600">{{ fieldError('description') }}</p>
+                  }
+                </div>
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-3">
+                  <div>
+                    <label class="block text-xs font-medium text-slate-700 mb-1">{{ 'cases.create.fields.type' | transloco }} <span class="text-red-500">*</span></label>
+                    <select formControlName="type" class="w-full px-3 py-2 text-xs border rounded-lg focus:outline-none focus:ring-2 bg-white transition-all" [class.border-slate-300]="!hasError('type')" [class.border-red-400]="hasError('type')">
+                      <option value="" disabled selected>{{ 'cases.create.fields.typePlaceholder' | transloco }}</option>
+                      @for (t of types; track t) {
+                        <option [value]="t">{{ 'cases.types.' + t | transloco }}</option>
+                      }
+                    </select>
+                    @if (hasError('type')) {
+                      <p class="mt-1 text-[11px] text-red-600">{{ fieldError('type') }}</p>
+                    }
+                  </div>
+                  <div>
+                    <label class="block text-xs font-medium text-slate-700 mb-1">{{ 'cases.create.fields.priority' | transloco }} <span class="text-red-500">*</span></label>
+                    <select formControlName="priority" class="w-full px-3 py-2 text-xs border rounded-lg focus:outline-none focus:ring-2 bg-white transition-all" [class.border-slate-300]="!hasError('priority')" [class.border-red-400]="hasError('priority')">
+                      <option value="" disabled selected>{{ 'cases.create.fields.priorityPlaceholder' | transloco }}</option>
+                      @for (p of priorities; track p) {
+                        <option [value]="p">{{ 'cases.priorities.' + p | transloco }}</option>
+                      }
+                    </select>
+                    @if (hasError('priority')) {
+                      <p class="mt-1 text-[11px] text-red-600">{{ fieldError('priority') }}</p>
+                    }
+                  </div>
+                  <div>
+                    <label class="block text-xs font-medium text-slate-700 mb-1">{{ 'cases.create.fields.dueDate' | transloco }}</label>
+                    <input formControlName="dueAt" type="date" class="w-full px-3 py-2 text-xs border border-slate-300 rounded-lg focus:outline-none focus:ring-2 transition-all bg-white">
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <div class="h-px bg-slate-100"></div>
+
+            <!-- Section: Assignment -->
+            <div>
+              <div class="flex items-center gap-2 mb-3">
+                <svg class="w-4 h-4 text-amber-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"/>
+                </svg>
+                <span class="text-xs font-medium text-slate-900">{{ 'cases.create.sections.assignment' | transloco }}</span>
+              </div>
+              <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
+                <!-- Department Dropdown -->
+                <div>
+                  <label class="block text-xs font-medium text-slate-700 mb-1">{{ 'cases.create.fields.department' | transloco }} <span class="text-red-500">*</span></label>
+                  <select formControlName="departmentId"
+                          class="w-full px-3 py-2 text-xs border rounded-lg focus:outline-none focus:ring-2 transition-all bg-white"
+                          [class.border-slate-300]="!hasError('departmentId')"
+                          [class.border-red-400]="hasError('departmentId') || serverError('departmentId')">
+                    <option value="" disabled selected>{{ 'cases.create.fields.departmentPlaceholder' | transloco }}</option>
+                    @for (dept of departments(); track dept.id) {
+                      <option [value]="dept.id">{{ dept.nameEn }}</option>
+                    }
+                  </select>
+                  @if (hasError('departmentId')) {
+                    <p class="mt-1 text-[11px] text-red-600">{{ fieldError('departmentId') }}</p>
+                  }
+                  @if (serverError('departmentId')) {
+                    <p class="mt-1 text-[11px] text-red-600">{{ serverError('departmentId') }}</p>
+                  }
+                </div>
+
+                <!-- Category Dropdown -->
+                <div>
+                  <label class="block text-xs font-medium text-slate-700 mb-1">{{ 'cases.create.fields.category' | transloco }} <span class="text-red-500">*</span></label>
+                  <select formControlName="categoryId"
+                          class="w-full px-3 py-2 text-xs border rounded-lg focus:outline-none focus:ring-2 transition-all bg-white"
+                          [class.border-slate-300]="!hasError('categoryId')"
+                          [class.border-red-400]="hasError('categoryId') || serverError('categoryId')">
+                    <option value="" disabled selected>{{ 'cases.create.fields.categoryPlaceholder' | transloco }}</option>
+                    @for (cat of filteredCategories(); track cat.id) {
+                      <option [value]="cat.id">{{ cat.nameEn }}</option>
+                    }
+                  </select>
+                  @if (hasError('categoryId')) {
+                    <p class="mt-1 text-[11px] text-red-600">{{ fieldError('categoryId') }}</p>
+                  }
+                  @if (serverError('categoryId')) {
+                    <p class="mt-1 text-[11px] text-red-600">{{ serverError('categoryId') }}</p>
+                  }
+                </div>
+              </div>
+            </div>
+
+            <div class="h-px bg-slate-100"></div>
+
+            <!-- Actions -->
+            <div class="flex items-center justify-end gap-2">
+              <button type="button" (click)="resetForm()" class="px-4 py-2 text-xs border border-slate-200 rounded-lg text-slate-600 hover:bg-slate-50 transition-colors">
+                {{ 'cases.create.actions.reset' | transloco }}
+              </button>
+              <button type="button" (click)="showTab('list')" class="px-4 py-2 text-xs border border-slate-200 rounded-lg text-slate-600 hover:bg-slate-50 transition-colors">
+                {{ 'cases.create.actions.cancel' | transloco }}
+              </button>
+              <button type="submit" [disabled]="isSubmitting()" class="bg-emerald-600 hover:bg-emerald-700 disabled:opacity-50 disabled:cursor-not-allowed text-white text-xs font-medium px-5 py-2 rounded-lg flex items-center gap-1.5 transition-colors shadow-sm">
+                @if (isSubmitting()) {
+                  <svg class="animate-spin w-3.5 h-3.5" fill="none" viewBox="0 0 24 24">
                     <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"/>
                     <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"/>
                   </svg>
-                  {{ 'cases.loading' | transloco }}
-                </div>
-              }
-
-              <!-- Table -->
-              @if (!isLoading()) {
-                @if (cases().length === 0) {
-                  <div class="flex flex-col items-center justify-center py-16 text-slate-400">
-                    <svg class="w-10 h-10 mb-3 text-slate-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M3 7v10a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-6l-2-2H5a2 2 0 00-2 2z"/>
-                    </svg>
-                    <p class="text-sm font-medium text-slate-500">{{ 'cases.noResults' | transloco }}</p>
-                    <p class="text-xs mt-1">{{ 'cases.noResultsHint' | transloco }}</p>
-                  </div>
+                  {{ 'cases.create.actions.creating' | transloco }}
                 } @else {
-                  <div class="overflow-x-auto">
-                    <table class="w-full text-xs">
-                      <thead>
-                        <tr class="border-b border-slate-100">
-                          <th class="px-4 py-2.5 text-left font-medium text-slate-400 whitespace-nowrap">{{ 'cases.table.caseNumber' | transloco }}</th>
-                          <th class="px-4 py-2.5 text-left font-medium text-slate-400">{{ 'cases.table.subject' | transloco }}</th>
-                          <th class="px-4 py-2.5 text-left font-medium text-slate-400">{{ 'cases.table.type' | transloco }}</th>
-                          <th class="px-4 py-2.5 text-left font-medium text-slate-400">{{ 'cases.table.priority' | transloco }}</th>
-                          <th class="px-4 py-2.5 text-left font-medium text-slate-400">{{ 'cases.table.status' | transloco }}</th>
-                          <th class="px-4 py-2.5 text-left font-medium text-slate-400">{{ 'cases.table.department' | transloco }}</th>
-                          <th class="px-4 py-2.5 text-left font-medium text-slate-400">{{ 'cases.table.assignedTo' | transloco }}</th>
-                          <th class="px-4 py-2.5 text-left font-medium text-slate-400 whitespace-nowrap">{{ 'cases.table.created' | transloco }}</th>
-                        </tr>
-                      </thead>
-                      <tbody>
-                        @for (c of cases(); track c.id) {
-                          <tr class="border-b border-slate-50 hover:bg-slate-50/60 transition-colors">
-                            <td class="px-4 py-3 font-medium text-slate-900 whitespace-nowrap">{{ c.caseNumber }}</td>
-                            <td class="px-4 py-3 text-slate-700 max-w-48 truncate">{{ c.subject }}</td>
-                            <td class="px-4 py-3">
-                              <span [class]="'inline-flex px-2 py-0.5 rounded text-[11px] font-medium ' + typeBadgeClass(c.type)">
-                                {{ 'cases.types.' + c.type | transloco }}
-                              </span>
-                            </td>
-                            <td class="px-4 py-3">
-                              <span [class]="'inline-flex px-2 py-0.5 rounded text-[11px] font-medium ' + priorityBadgeClass(c.priority)">
-                                {{ 'cases.priorities.' + c.priority | transloco }}
-                              </span>
-                            </td>
-                            <td class="px-4 py-3">
-                              <span [class]="'inline-flex px-2 py-0.5 rounded text-[11px] font-medium ' + statusBadgeClass(c.status)">
-                                {{ 'cases.statuses.' + c.status | transloco }}
-                              </span>
-                            </td>
-                            <td class="px-4 py-3 text-slate-500">{{ c.departmentNameEn }}</td>
-                            <td class="px-4 py-3 text-slate-500">{{ c.assignedToDisplayName ?? '—' }}</td>
-                            <td class="px-4 py-3 text-slate-400 whitespace-nowrap">{{ formatDate(c.createdAt) }}</td>
-                          </tr>
-                        }
-                      </tbody>
-                    </table>
-                  </div>
-
-                  <!-- Pagination -->
-                  <div class="flex items-center justify-between px-4 py-3 border-t border-slate-100">
-                    <p class="text-xs text-slate-400">
-                      {{ 'cases.pagination.showing' | transloco }} {{ currentPage() * pageSize + 1 }}–{{ currentPage() * pageSize + cases().length }} {{ 'cases.pagination.of' | transloco }} {{ totalElements() }} {{ 'cases.pagination.cases' | transloco }}
-                    </p>
-                    <div class="flex gap-1">
-                      <button (click)="goToPage(currentPage() - 1)" [disabled]="currentPage() === 0" class="w-7 h-7 rounded-md border border-slate-200 flex items-center justify-center text-slate-500 hover:bg-slate-50 disabled:opacity-40 disabled:cursor-not-allowed transition-colors">
-                        <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/>
-                        </svg>
-                      </button>
-                      @for (p of pages; track p) {
-                        @if (p < 5 || p === totalPages() - 1 || p === currentPage()) {
-                          <button (click)="goToPage(p)" [class]="p === currentPage() ? 'w-7 h-7 rounded-md text-xs font-medium bg-slate-900 text-white border border-slate-900' : 'w-7 h-7 rounded-md text-xs border border-slate-200 text-slate-600 hover:bg-slate-50 transition-colors'">
-                            {{ p + 1 }}
-                          </button>
-                        }
-                      }
-                      <button (click)="goToPage(currentPage() + 1)" [disabled]="currentPage() >= totalPages() - 1" class="w-7 h-7 rounded-md border border-slate-200 flex items-center justify-center text-slate-500 hover:bg-slate-50 disabled:opacity-40 disabled:cursor-not-allowed transition-colors">
-                        <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/>
-                        </svg>
-                      </button>
-                    </div>
-                  </div>
+                  <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/>
+                  </svg>
+                  {{ 'cases.create.actions.createCase' | transloco }}
                 }
-              }
+              </button>
             </div>
-          }
-
-          <!-- CREATE TAB -->
-          @if (activeTab() === 'create') {
-            <div>
-              <div class="flex items-center justify-between px-5 py-3.5 border-b border-slate-100">
-                <div class="flex items-center gap-2 text-sm font-medium text-slate-900">
-                  <svg class="w-4 h-4 text-amber-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 13h6m-3-3v6m-9 1V7a2 2 0 012-2h6l2 2h6a2 2 0 012 2v8a2 2 0 01-2 2H5a2 2 0 01-2-2z"/>
-                  </svg>
-                  {{ 'cases.create.title' | transloco }}
-                </div>
-                <button (click)="showTab('list')" class="flex items-center gap-1 text-xs text-slate-500 hover:text-slate-900 border border-slate-200 px-3 py-1.5 rounded-lg bg-white transition-colors">
-                  <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/>
-                  </svg>
-                  {{ 'cases.create.backToList' | transloco }}
-                </button>
-              </div>
-
-              <!-- Success banner -->
-              @if (submitSuccess()) {
-                <div class="mx-5 mt-4 p-3 bg-emerald-50 border-l-4 border-emerald-500 rounded-md flex items-center gap-2">
-                  <svg class="w-4 h-4 text-emerald-600 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
-                    <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/>
-                  </svg>
-                  <span class="text-emerald-800 text-xs font-medium">{{ 'cases.create.success' | transloco }}</span>
-                </div>
-              }
-
-              <!-- Error banner -->
-              @if (submitError()) {
-                <div class="mx-5 mt-4 p-3 bg-red-50 border-l-4 border-red-500 rounded-md flex items-center gap-2">
-                  <svg class="w-4 h-4 text-red-500 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
-                    <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clip-rule="evenodd"/>
-                  </svg>
-                  <span class="text-red-700 text-xs">{{ submitError() }}</span>
-                </div>
-              }
-
-              <form [formGroup]="createForm" (ngSubmit)="onSubmit()" class="p-5 space-y-5">
-
-                <!-- Section: Citizen Information -->
-                <div>
-                  <div class="flex items-center gap-2 mb-3">
-                    <svg class="w-4 h-4 text-amber-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"/>
-                    </svg>
-                    <span class="text-xs font-medium text-slate-900">{{ 'cases.create.sections.citizen' | transloco }}</span>
-                  </div>
-                  <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
-                    <!-- National ID Field -->
-                    <div>
-                      <label class="block text-xs font-medium text-slate-700 mb-1">{{ 'cases.create.fields.citizenId' | transloco }} <span class="text-red-500">*</span></label>
-                      <input formControlName="citizenNationalId" 
-                             type="text" 
-                             placeholder="{{ 'cases.create.fields.citizenIdPlaceholder' | transloco }}" 
-                             class="w-full px-3 py-2 text-xs border rounded-lg focus:outline-none focus:ring-2 transition-all"
-                             [class.border-slate-300]="!hasError('citizenNationalId')"
-                             [class.border-red-400]="hasError('citizenNationalId') || serverError('citizenNationalId')">
-                      @if (hasError('citizenNationalId')) {
-                        <p class="mt-1 text-[11px] text-red-600">{{ fieldError('citizenNationalId') }}</p>
-                      }
-                      @if (serverError('citizenNationalId')) {
-                        <p class="mt-1 text-[11px] text-red-600">{{ serverError('citizenNationalId') }}</p>
-                      }
-                    </div>
-                    
-                    <!-- Channel Dropdown -->
-                    <div>
-                      <label class="block text-xs font-medium text-slate-700 mb-1">{{ 'cases.create.fields.channel' | transloco }} <span class="text-red-500">*</span></label>
-                      <select formControlName="channel" 
-                              class="w-full px-3 py-2 text-xs border rounded-lg focus:outline-none focus:ring-2 transition-all bg-white" 
-                              [class.border-slate-300]="!hasError('channel')" 
-                              [class.border-red-400]="hasError('channel')">
-                        <option value="" disabled selected>{{ 'cases.create.fields.channelPlaceholder' | transloco }}</option>
-                        @for (ch of channels; track ch) { 
-                          <option [value]="ch">{{ 'cases.channels.' + ch | transloco }}</option>
-                        }
-                      </select>
-                      @if (hasError('channel')) {
-                        <p class="mt-1 text-[11px] text-red-600">{{ fieldError('channel') }}</p>
-                      }
-                    </div>
-                  </div>
-                </div>
-
-                <div class="h-px bg-slate-100"></div>
-
-                <!-- Section: Case Details -->
-                <div>
-                  <div class="flex items-center gap-2 mb-3">
-                    <svg class="w-4 h-4 text-amber-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
-                    </svg>
-                    <span class="text-xs font-medium text-slate-900">{{ 'cases.create.sections.details' | transloco }}</span>
-                  </div>
-                  <div class="space-y-3">
-                    <div>
-                      <label class="block text-xs font-medium text-slate-700 mb-1">{{ 'cases.create.fields.subject' | transloco }} <span class="text-red-500">*</span></label>
-                      <input formControlName="subject" type="text" placeholder="{{ 'cases.create.fields.subjectPlaceholder' | transloco }}" class="w-full px-3 py-2 text-xs border rounded-lg focus:outline-none focus:ring-2 transition-all" [class.border-slate-300]="!hasError('subject')" [class.border-red-400]="hasError('subject') || serverError('subject')">
-                      @if (hasError('subject')) {
-                        <p class="mt-1 text-[11px] text-red-600">{{ fieldError('subject') }}</p>
-                      }
-                      @if (serverError('subject')) {
-                        <p class="mt-1 text-[11px] text-red-600">{{ serverError('subject') }}</p>
-                      }
-                    </div>
-                    <div>
-                      <label class="block text-xs font-medium text-slate-700 mb-1">{{ 'cases.create.fields.description' | transloco }} <span class="text-red-500">*</span></label>
-                      <textarea formControlName="description" rows="3" placeholder="{{ 'cases.create.fields.descriptionPlaceholder' | transloco }}" class="w-full px-3 py-2 text-xs border rounded-lg focus:outline-none focus:ring-2 transition-all resize-none" [class.border-slate-300]="!hasError('description')" [class.border-red-400]="hasError('description') || serverError('description')"></textarea>
-                      @if (hasError('description')) {
-                        <p class="mt-1 text-[11px] text-red-600">{{ fieldError('description') }}</p>
-                      }
-                    </div>
-                    <div class="grid grid-cols-1 md:grid-cols-3 gap-3">
-                      <div>
-                        <label class="block text-xs font-medium text-slate-700 mb-1">{{ 'cases.create.fields.type' | transloco }} <span class="text-red-500">*</span></label>
-                        <select formControlName="type" class="w-full px-3 py-2 text-xs border rounded-lg focus:outline-none focus:ring-2 bg-white transition-all" [class.border-slate-300]="!hasError('type')" [class.border-red-400]="hasError('type')">
-                          <option value="" disabled selected>{{ 'cases.create.fields.typePlaceholder' | transloco }}</option>
-                          @for (t of types; track t) { 
-                            <option [value]="t">{{ 'cases.types.' + t | transloco }}</option>
-                          }
-                        </select>
-                        @if (hasError('type')) {
-                          <p class="mt-1 text-[11px] text-red-600">{{ fieldError('type') }}</p>
-                        }
-                      </div>
-                      <div>
-                        <label class="block text-xs font-medium text-slate-700 mb-1">{{ 'cases.create.fields.priority' | transloco }} <span class="text-red-500">*</span></label>
-                        <select formControlName="priority" class="w-full px-3 py-2 text-xs border rounded-lg focus:outline-none focus:ring-2 bg-white transition-all" [class.border-slate-300]="!hasError('priority')" [class.border-red-400]="hasError('priority')">
-                          <option value="" disabled selected>{{ 'cases.create.fields.priorityPlaceholder' | transloco }}</option>
-                          @for (p of priorities; track p) { 
-                            <option [value]="p">{{ 'cases.priorities.' + p | transloco }}</option>
-                          }
-                        </select>
-                        @if (hasError('priority')) {
-                          <p class="mt-1 text-[11px] text-red-600">{{ fieldError('priority') }}</p>
-                        }
-                      </div>
-                      <div>
-                        <label class="block text-xs font-medium text-slate-700 mb-1">{{ 'cases.create.fields.dueDate' | transloco }}</label>
-                        <input formControlName="dueAt" type="date" class="w-full px-3 py-2 text-xs border border-slate-300 rounded-lg focus:outline-none focus:ring-2 transition-all bg-white">
-                      </div>
-                    </div>
-                  </div>
-                </div>
-
-                <div class="h-px bg-slate-100"></div>
-
-                <!-- Section: Assignment -->
-                <div>
-                  <div class="flex items-center gap-2 mb-3">
-                    <svg class="w-4 h-4 text-amber-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"/>
-                    </svg>
-                    <span class="text-xs font-medium text-slate-900">{{ 'cases.create.sections.assignment' | transloco }}</span>
-                  </div>
-                  <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
-                    <!-- Department Dropdown -->
-                    <div>
-                      <label class="block text-xs font-medium text-slate-700 mb-1">{{ 'cases.create.fields.department' | transloco }} <span class="text-red-500">*</span></label>
-                      <select formControlName="departmentId" 
-                              class="w-full px-3 py-2 text-xs border rounded-lg focus:outline-none focus:ring-2 transition-all bg-white"
-                              [class.border-slate-300]="!hasError('departmentId')"
-                              [class.border-red-400]="hasError('departmentId') || serverError('departmentId')">
-                        <option value="" disabled selected>{{ 'cases.create.fields.departmentPlaceholder' | transloco }}</option>
-                        @for (dept of departments(); track dept.id) {
-                          <option [value]="dept.id">{{ dept.nameEn }}</option>
-                        }
-                      </select>
-                      @if (hasError('departmentId')) {
-                        <p class="mt-1 text-[11px] text-red-600">{{ fieldError('departmentId') }}</p>
-                      }
-                      @if (serverError('departmentId')) {
-                        <p class="mt-1 text-[11px] text-red-600">{{ serverError('departmentId') }}</p>
-                      }
-                    </div>
-
-                    <!-- Category Dropdown -->
-                    <div>
-                      <label class="block text-xs font-medium text-slate-700 mb-1">{{ 'cases.create.fields.category' | transloco }} <span class="text-red-500">*</span></label>
-                      <select formControlName="categoryId" 
-                              class="w-full px-3 py-2 text-xs border rounded-lg focus:outline-none focus:ring-2 transition-all bg-white"
-                              [class.border-slate-300]="!hasError('categoryId')"
-                              [class.border-red-400]="hasError('categoryId') || serverError('categoryId')">
-                        <option value="" disabled selected>{{ 'cases.create.fields.categoryPlaceholder' | transloco }}</option>
-                        @for (cat of filteredCategories(); track cat.id) {
-                          <option [value]="cat.id">{{ cat.nameEn }}</option>
-                        }
-                      </select>
-                      @if (hasError('categoryId')) {
-                        <p class="mt-1 text-[11px] text-red-600">{{ fieldError('categoryId') }}</p>
-                      }
-                      @if (serverError('categoryId')) {
-                        <p class="mt-1 text-[11px] text-red-600">{{ serverError('categoryId') }}</p>
-                      }
-                    </div>
-
-                    <!-- Assign to User -->
-                    <div class="md:col-span-2">
-                      <label class="block text-xs font-medium text-slate-700 mb-1">{{ 'cases.create.fields.assignTo' | transloco }} <span class="text-slate-400 font-normal">({{ 'cases.create.fields.optional' | transloco }})</span></label>
-                      <input formControlName="assignedToUserId" type="text" placeholder="{{ 'cases.create.fields.assignToPlaceholder' | transloco }}" class="w-full px-3 py-2 text-xs border border-slate-300 rounded-lg focus:outline-none focus:ring-2 transition-all">
-                    </div>
-                  </div>
-                </div>
-
-                <div class="h-px bg-slate-100"></div>
-
-                <!-- Actions -->
-                <div class="flex items-center justify-end gap-2">
-                  <button type="button" (click)="resetForm()" class="px-4 py-2 text-xs border border-slate-200 rounded-lg text-slate-600 hover:bg-slate-50 transition-colors">
-                    {{ 'cases.create.actions.reset' | transloco }}
-                  </button>
-                  <button type="button" (click)="showTab('list')" class="px-4 py-2 text-xs border border-slate-200 rounded-lg text-slate-600 hover:bg-slate-50 transition-colors">
-                    {{ 'cases.create.actions.cancel' | transloco }}
-                  </button>
-                  <button type="submit" [disabled]="isSubmitting()" class="bg-emerald-600 hover:bg-emerald-700 disabled:opacity-50 disabled:cursor-not-allowed text-white text-xs font-medium px-5 py-2 rounded-lg flex items-center gap-1.5 transition-colors shadow-sm">
-                    @if (isSubmitting()) {
-                      <svg class="animate-spin w-3.5 h-3.5" fill="none" viewBox="0 0 24 24">
-                        <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"/>
-                        <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"/>
-                      </svg>
-                      {{ 'cases.create.actions.creating' | transloco }}
-                    } @else {
-                      <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/>
-                      </svg>
-                      {{ 'cases.create.actions.createCase' | transloco }}
-                    }
-                  </button>
-                </div>
-              </form>
-            </div>
-          }
+          </form>
         </div>
-      </div>
-    </main>
+      }
+    </div>
   </div>
-</div>
+</main>

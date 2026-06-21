@@ -17,13 +17,14 @@ import {
 } from '../../../core/models/case.models';
 import { Department } from '../../../core/models/department.model';
 import { Category } from '../../../core/models/category.model';
+import { TopbarComponent } from '../shared/topbar/topbar';
 
 type ActiveTab = 'list' | 'create';
 
 @Component({
   selector: 'app-cases',
   standalone: true,
-  imports: [CommonModule, ReactiveFormsModule, TranslocoModule],
+  imports: [CommonModule, ReactiveFormsModule, TranslocoModule, TopbarComponent],
   templateUrl: './cases.html',
   styleUrl: './cases.css'
 })
@@ -33,8 +34,8 @@ export class CasesComponent implements OnInit {
   private caseService = inject(CaseService);
   private destroyRef  = inject(DestroyRef);
   private transloco   = inject(TranslocoService);
-  authService  = inject(AuthService);
-  currentUser  = signal<AuthResponse | null>(null);
+  // Breadcrumb title passed to shared topbar
+  pageTitle = () => this.transloco.translate('cases.title');
 
   // ── UI state ──────────────────────────────────────────────────
   activeTab     = signal<ActiveTab>('list');
@@ -83,7 +84,6 @@ export class CasesComponent implements OnInit {
     citizenNationalId: ['', [Validators.required, Validators.pattern(/^\d+$/)]],
     categoryId:       ['', Validators.required],
     departmentId:     ['', Validators.required],
-    assignedToUserId: [''],
     dueAt:            [''],
   });
 
@@ -93,13 +93,6 @@ export class CasesComponent implements OnInit {
   resolvedCount = computed(() => this.cases().filter(c => c.status === 'RESOLVED').length);
 
   ngOnInit(): void {
-    // Apply initial RTL direction based on current language
-    this.applyDirection(this.transloco.getActiveLang());
-
-    // Subscribe to BehaviorSubject from teammate's AuthService
-    this.authService.authState$.pipe(
-      takeUntilDestroyed(this.destroyRef)
-    ).subscribe(user => this.currentUser.set(user));
 
     this.loadCases();
     this.loadDepartments();
@@ -124,27 +117,6 @@ export class CasesComponent implements OnInit {
     });
   }
 
-  // ── Language Toggle ────────────────────────────────────────────
-  toggleLanguage(): void {
-    const currentLang = this.transloco.getActiveLang();
-    const newLang = currentLang === 'en' ? 'ar' : 'en';
-    this.transloco.setActiveLang(newLang);
-    localStorage.setItem('preferredLanguage', newLang);
-    
-    // Apply RTL/LTR direction to the document
-    this.applyDirection(newLang);
-  }
-
-  private applyDirection(lang: string): void {
-    const htmlElement = document.documentElement;
-    if (lang === 'ar') {
-      htmlElement.setAttribute('dir', 'rtl');
-      htmlElement.setAttribute('lang', 'ar');
-    } else {
-      htmlElement.setAttribute('dir', 'ltr');
-      htmlElement.setAttribute('lang', 'en');
-    }
-  }
 
   // ── Load Departments and Categories ───────────────────────────
   loadDepartments(): void {
@@ -249,7 +221,6 @@ export class CasesComponent implements OnInit {
       citizenNationalId: v.citizenNationalId,
       categoryId:       v.categoryId,
       departmentId:     v.departmentId,
-      ...(v.assignedToUserId && { assignedToUserId: v.assignedToUserId }),
       ...(v.dueAt            && { dueAt: new Date(v.dueAt).toISOString() }),
     };
 
