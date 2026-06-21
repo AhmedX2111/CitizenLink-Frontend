@@ -199,6 +199,19 @@
   "cases": {
     "title": "Cases",
     "subtitle": "Manage and track citizen service requests",
+    "detail": {
+      "title": "Case Details",
+      "loading": "Loading case details…",
+      "notFound": "This case could not be found.",
+      "loadError": "Failed to load case details. Please try again.",
+      "citizenName": "Full Name",
+      "citizenNationalId": "National ID",
+      "createdBy": "Created By",
+      "resolutionSummary": "Resolution Summary",
+      "timeline": "Timeline",
+      "updated": "Last Updated",
+      "resolvedAt": "Resolved At"
+    },
     "newCase": "New Case",
     "caseList": "Case List",
     "searchPlaceholder": "Search case number or subject…",

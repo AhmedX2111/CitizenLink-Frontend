@@ -9,8 +9,7 @@ import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { debounceTime, distinctUntilChanged } from 'rxjs/operators';
 import { TranslocoModule, TranslocoService } from '@jsverse/transloco';
 import { CaseService } from '../../../core/services/case.service';
-import { AuthService } from '../../auth/auth.service';
-import { AuthResponse } from '../../auth/models/auth.models';
+
 import {
   CaseResponse, CaseSearchRequest, CaseStatus,
   CaseType, Priority, PagedResponse
@@ -18,13 +17,14 @@ import {
 import { Department } from '../../../core/models/department.model';
 import { Category } from '../../../core/models/category.model';
 import { TopbarComponent } from '../shared/topbar/topbar';
+import { CaseDetailModalComponent } from './case-detail-modal/case-detail-modal';
 
 type ActiveTab = 'list' | 'create';
 
 @Component({
   selector: 'app-cases',
   standalone: true,
-  imports: [CommonModule, ReactiveFormsModule, TranslocoModule, TopbarComponent],
+  imports: [CommonModule, ReactiveFormsModule, TranslocoModule, TopbarComponent, CaseDetailModalComponent],
   templateUrl: './cases.html',
   styleUrl: './cases.css'
 })
@@ -44,6 +44,12 @@ export class CasesComponent implements OnInit {
   submitSuccess = signal(false);
   submitError   = signal<string | null>(null);
   serverErrors  = signal<Record<string, string>>({});
+
+  // ── Case detail modal state ─────────────────────────────────────
+  isModalOpen     = signal(false);
+  isModalLoading  = signal(false);
+  modalError      = signal<string | null>(null);
+  selectedCase    = signal<CaseResponse | null>(null);
 
   // ── Case list state ───────────────────────────────────────────
   cases         = signal<CaseResponse[]>([]);
@@ -307,5 +313,36 @@ export class CasesComponent implements OnInit {
     return new Date(iso).toLocaleDateString('en-GB', {
       day: '2-digit', month: 'short', year: 'numeric'
     });
+  }
+  
+  // ── Case detail modal ──────────────────────────────────────────
+  openCaseDetail(caseId: string): void {
+    this.isModalOpen.set(true);
+    this.isModalLoading.set(true);
+    this.modalError.set(null);
+    this.selectedCase.set(null);
+
+    this.caseService.getCaseById(caseId).pipe(
+      takeUntilDestroyed(this.destroyRef)
+    ).subscribe({
+      next: (res) => {
+        this.selectedCase.set(res);
+        this.isModalLoading.set(false);
+      },
+      error: (err) => {
+        this.isModalLoading.set(false);
+        this.modalError.set(
+          err.status === 404
+            ? this.transloco.translate('cases.detail.notFound')
+            : this.transloco.translate('cases.detail.loadError')
+        );
+      }
+    });
+  }
+
+  closeCaseDetail(): void {
+    this.isModalOpen.set(false);
+    this.selectedCase.set(null);
+    this.modalError.set(null);
   }
 }

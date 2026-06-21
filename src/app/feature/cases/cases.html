@@ -131,7 +131,8 @@
                   </thead>
                   <tbody>
                     @for (c of cases(); track c.id) {
-                      <tr class="border-b border-slate-50 hover:bg-slate-50/60 transition-colors">
+                      <tr (click)="openCaseDetail(c.id)"
++                          class="border-b border-slate-50 hover:bg-slate-50/60 transition-colors cursor-pointer">
                         <td class="px-4 py-3 font-medium text-slate-900 whitespace-nowrap">{{ c.caseNumber }}</td>
                         <td class="px-4 py-3 text-slate-700 max-w-48 truncate">{{ c.subject }}</td>
                         <td class="px-4 py-3">
@@ -418,3 +419,11 @@
     </div>
   </div>
 </main>
+
+<app-case-detail-modal
+  [isOpen]="isModalOpen()"
+  [isLoading]="isModalLoading()"
+  [loadError]="modalError()"
+  [caseDetail]="selectedCase()"
+  (closed)="closeCaseDetail()">
+</app-case-detail-modal>
