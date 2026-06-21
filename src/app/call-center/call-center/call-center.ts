@@ -5,16 +5,18 @@ import { RouterModule, Router } from '@angular/router';
 import { PagedResponse } from '../../../core/models/case.models';
 import { Citizen, PageResponse } from '../../../core/models/citizen.models';
 import { CitizenService } from '../../../core/services/citizen.service';
+import { TranslocoModule, TranslocoService } from '@jsverse/transloco';
 
 @Component({
   selector: 'app-call-center',
-  imports: [CommonModule, FormsModule, RouterModule],
+  imports: [CommonModule, FormsModule, RouterModule, TranslocoModule],
   templateUrl: './call-center.html',
   styleUrl: './call-center.css',
 })
 export class CallCenter {
   private citizenService = inject(CitizenService);
   private router = inject(Router);
+  private transloco = inject(TranslocoService);
 
   // Search state
   protected searchTerm = signal('');
@@ -41,7 +43,7 @@ export class CallCenter {
     const term = this.searchTerm().trim();
     
     if (!term) {
-      this.errorMessage.set('Please enter a search term (name, national ID, or phone number)');
+      this.errorMessage.set(this.transloco.translate('callCenter.errors.searchTermRequired'));
       return;
     }
 
@@ -62,7 +64,7 @@ export class CallCenter {
       },
       error: (error) => {
         console.error('Search error:', error);
-        this.errorMessage.set('An error occurred while searching. Please try again.');
+        this.errorMessage.set(this.transloco.translate('callCenter.errors.searchFailed'));
         this.isLoading.set(false);
         this.citizens.set([]);
       }

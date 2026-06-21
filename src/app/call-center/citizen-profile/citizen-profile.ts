@@ -3,12 +3,13 @@ import { Component, OnInit, inject, signal } from "@angular/core";
 import { RouterModule, ActivatedRoute, Router } from "@angular/router";
 import { CitizenService } from "../../../core/services/citizen.service";
 import { CitizenProfile as CitizenProfileData } from "../../../core/models/citizen.models";
+import { TranslocoModule, TranslocoService } from "@jsverse/transloco";
 
 
 @Component({
   selector: 'app-citizen-profile',
   standalone: true,
-  imports: [CommonModule, RouterModule],
+  imports: [CommonModule, RouterModule, TranslocoModule],
   templateUrl: './citizen-profile.html',
   styleUrls: ['./citizen-profile.css']
 })
@@ -16,6 +17,7 @@ export class CitizenProfile implements OnInit {
   private citizenService = inject(CitizenService);
   private route = inject(ActivatedRoute);
   private router = inject(Router);
+  private transloco = inject(TranslocoService);
 
   protected citizen = signal<CitizenProfileData | null>(null);
   protected isLoading = signal(true);
@@ -26,7 +28,7 @@ export class CitizenProfile implements OnInit {
     if (id) {
       this.loadCitizenProfile(id);
     } else {
-      this.errorMessage.set('Citizen ID not found');
+      this.errorMessage.set(this.transloco.translate('citizenProfile.errors.idNotFound'));
       this.isLoading.set(false);
     }
   }
@@ -42,7 +44,7 @@ export class CitizenProfile implements OnInit {
       },
       error: (error) => {
         console.error('Error loading citizen profile:', error);
-        this.errorMessage.set('Failed to load citizen profile. Please try again.');
+        this.errorMessage.set(this.transloco.translate('citizenProfile.errors.loadFailed'));
         this.isLoading.set(false);
       }
     });

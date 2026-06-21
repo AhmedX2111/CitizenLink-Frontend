@@ -4,8 +4,8 @@
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
       <div class="flex justify-between items-center">
         <div>
-          <h1 class="text-2xl font-bold text-gray-900">Call Center</h1>
-          <p class="text-gray-600 mt-1">Search for citizens to view profile or create a case</p>
+          <h1 class="text-2xl font-bold text-gray-900">{{ 'callCenter.title' | transloco }}</h1>
+          <p class="text-gray-600 mt-1">{{ 'callCenter.subtitle' | transloco }}</p>
         </div>
         <button
           (click)="createNewCitizen()"
@@ -14,7 +14,7 @@
           <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path>
           </svg>
-          New Citizen
+          {{ 'callCenter.newCitizen' | transloco }}
         </button>
       </div>
     </div>
@@ -26,13 +26,13 @@
       <div class="flex flex-col md:flex-row gap-4">
         <div class="flex-1">
           <label class="block text-sm font-medium text-gray-700 mb-2">
-            Search by name, national ID, or phone number
+            {{ 'callCenter.searchLabel' | transloco }}
           </label>
           <input
             type="text"
             [(ngModel)]="searchTerm"
             (keyup.enter)="onSearch()"
-            placeholder="e.g., John, 1234567890, 0123456789"
+            [placeholder]="'callCenter.searchPlaceholder' | transloco"
             class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
           />
         </div>
@@ -48,17 +48,17 @@
                   <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
                   <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
                 </svg>
-                Searching...
+                {{ 'callCenter.searching' | transloco }}
               </span>
             } @else {
-              <span>Search</span>
+              <span>{{ 'common.search' | transloco }}</span>
             }
           </button>
           <button
             (click)="clearSearch()"
             class="px-6 py-2 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300 transition"
           >
-            Clear
+            {{ 'common.clear' | transloco }}
           </button>
         </div>
       </div>
@@ -77,14 +77,14 @@
         <svg class="mx-auto h-12 w-12 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
         </svg>
-        <h3 class="mt-2 text-sm font-medium text-gray-900">No citizens found</h3>
-        <p class="mt-1 text-sm text-gray-500">Try a different search term or create a new citizen record.</p>
+        <h3 class="mt-2 text-sm font-medium text-gray-900">{{ 'callCenter.noResults' | transloco }}</h3>
+        <p class="mt-1 text-sm text-gray-500">{{ 'callCenter.noResultsHint' | transloco }}</p>
         <div class="mt-4">
           <button
             (click)="createNewCitizen()"
             class="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-green-600 hover:bg-green-700"
           >
-            + Create New Citizen
+            + {{ 'callCenter.createNewCitizen' | transloco }}
           </button>
         </div>
       </div>
@@ -97,12 +97,12 @@
           <table class="min-w-full divide-y divide-gray-200">
             <thead class="bg-gray-50">
               <tr>
-                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Full Name</th>
-                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">National ID</th>
-                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Phone</th>
-                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Email</th>
-                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Cases</th>
-                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
+                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">{{ 'callCenter.table.fullName' | transloco }}</th>
+                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">{{ 'callCenter.table.nationalId' | transloco }}</th>
+                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">{{ 'callCenter.table.phone' | transloco }}</th>
+                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">{{ 'callCenter.table.email' | transloco }}</th>
+                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">{{ 'callCenter.table.cases' | transloco }}</th>
+                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">{{ 'callCenter.table.actions' | transloco }}</th>
               </tr>
             </thead>
             <tbody class="bg-white divide-y divide-gray-200">
@@ -122,7 +122,7 @@
                   </td>
                   <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
                     <span class="px-2 py-1 text-xs rounded-full bg-blue-100 text-blue-800">
-                      {{ citizen.caseCount }} cases
+                      {{ citizen.caseCount }} {{ 'callCenter.cases' | transloco }}
                     </span>
                   </td>
                   <td class="px-6 py-4 whitespace-nowrap text-sm">
@@ -130,7 +130,7 @@
                       (click)="viewCitizenProfile(citizen.id)"
                       class="text-blue-600 hover:text-blue-900 mr-3"
                     >
-                      View Profile
+                      {{ 'callCenter.viewProfile' | transloco }}
                     </button>
                   </td>
                 </tr>
@@ -143,8 +143,7 @@
         @if (pagination() && pagination()!.totalPages > 1) {
           <div class="px-6 py-4 bg-gray-50 border-t border-gray-200 flex items-center justify-between">
             <div class="text-sm text-gray-700">
-              Showing page {{ (pagination()!.currentPage + 1) }} of {{ pagination()!.totalPages }} 
-              ({{ pagination()!.totalElements }} total citizens)
+              {{ 'callCenter.pagination.showing' | transloco }} {{ pagination()!.currentPage * pagination()!.pageSize + 1 }}–{{ pagination()!.currentPage * pagination()!.pageSize + citizens().length }} {{ 'callCenter.pagination.of' | transloco }} {{ pagination()!.totalElements }} {{ 'callCenter.pagination.citizens' | transloco }}
             </div>
             <div class="flex gap-2">
               <button
@@ -152,14 +151,14 @@
                 [disabled]="pagination()!.currentPage === 0"
                 class="px-3 py-1 border border-gray-300 rounded text-sm disabled:opacity-50 disabled:cursor-not-allowed hover:bg-gray-50"
               >
-                Previous
+                {{ 'callCenter.pagination.previous' | transloco }}
               </button>
               <button
                 (click)="nextPage()"
                 [disabled]="pagination()!.currentPage + 1 >= pagination()!.totalPages"
                 class="px-3 py-1 border border-gray-300 rounded text-sm disabled:opacity-50 disabled:cursor-not-allowed hover:bg-gray-50"
               >
-                Next
+                {{ 'callCenter.pagination.next' | transloco }}
               </button>
             </div>
           </div>

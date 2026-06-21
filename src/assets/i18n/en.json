@@ -9,6 +9,7 @@
     "back": "Back",
     "search": "Search",
     "reset": "Reset",
+    "clear": "Clear",
     "submit": "Submit",
     "confirm": "Confirm",
     "delete": "Delete",
@@ -32,7 +33,104 @@
     "portal": "Government Portal",
     "main": "Main",
     "dashboard": "Dashboard",
-    "cases": "Cases"
+    "cases": "Cases",
+    "callCenter": "Call Center",
+    "management": "Management",
+    "citizens": "Citizens",
+    "departments": "Departments"
+  },
+  "callCenter": {
+    "title": "Call Center",
+    "subtitle": "Search for citizens to view profile or create a case",
+    "newCitizen": "New Citizen",
+    "searchLabel": "Search by name, national ID, or phone number",
+    "searchPlaceholder": "e.g., John, 1234567890, 0123456789",
+    "searching": "Searching...",
+    "noResults": "No citizens found",
+    "noResultsHint": "Try a different search term or create a new citizen record.",
+    "createNewCitizen": "Create New Citizen",
+    "cases": "cases",
+    "viewProfile": "View Profile",
+    "errors": {
+      "searchTermRequired": "Please enter a search term (name, national ID, or phone number)",
+      "searchFailed": "An error occurred while searching. Please try again."
+    },
+    "table": {
+      "fullName": "Full Name",
+      "nationalId": "National ID",
+      "phone": "Phone",
+      "email": "Email",
+      "cases": "Cases",
+      "actions": "Actions"
+    },
+    "pagination": {
+      "showing": "Showing page",
+      "of": "of",
+      "citizens": "total citizens",
+      "previous": "Previous",
+      "next": "Next"
+    }
+  },
+  "citizenProfile": {
+    "title": "Citizen Profile",
+    "subtitle": "Complete citizen profile and case history",
+    "newCase": "New Case",
+    "noCases": "No cases found for this citizen",
+    "unassigned": "Unassigned",
+    "sections": {
+      "information": "Citizen Information"
+    },
+    "fields": {
+      "fullName": "Full Name",
+      "nationalId": "National ID",
+      "phone": "Phone",
+      "email": "Email",
+      "preferredLanguage": "Preferred Language",
+      "createdBy": "Created By"
+    },
+    "stats": {
+      "totalCases": "Total Cases",
+      "openCases": "Open Cases",
+      "resolvedCases": "Resolved Cases"
+    },
+    "recentCases": "Recent Cases",
+    "caseTable": {
+      "caseNumber": "Case Number",
+      "subject": "Subject",
+      "status": "Status",
+      "priority": "Priority",
+      "assignedTo": "Assigned To",
+      "created": "Created"
+    },
+    "errors": {
+      "idNotFound": "Citizen ID not found",
+      "loadFailed": "Failed to load citizen profile. Please try again."
+    }
+  },
+  "newCitizen": {
+    "title": "Register New Citizen",
+    "subtitle": "Create a new citizen record in the system",
+    "fullName": "Full Name",
+    "fullNamePlaceholder": "Enter citizen's full name",
+    "nationalId": "National ID",
+    "nationalIdPlaceholder": "10-digit national ID",
+    "phone": "Phone Number",
+    "phonePlaceholder": "11-digit phone number",
+    "email": "Email",
+    "emailPlaceholder": "citizen@example.com",
+    "preferredLanguage": "Preferred Language",
+    "english": "English",
+    "arabic": "العربية (Arabic)",
+    "create": "Create Citizen",
+    "creating": "Creating...",
+    "cancel": "Cancel",
+    "required": "Required",
+    "optional": "optional",
+    "successMessage": "Citizen \"{{fullName}}\" created successfully!",
+    "errors": {
+      "duplicate": "Citizen with this information already exists",
+      "unexpected": "An error occurred while creating the citizen. Please try again."
+    }
   },
   "landing": {
     "badge": "Government Digital Transformation",
