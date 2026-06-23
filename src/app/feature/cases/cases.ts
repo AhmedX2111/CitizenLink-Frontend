@@ -87,7 +87,7 @@ export class CasesComponent implements OnInit {
     type:             ['', Validators.required],
     priority:         ['', Validators.required],
     channel:          ['', Validators.required],
-    citizenNationalId: ['', [Validators.required, Validators.pattern(/^\d+$/)]],
+    citizenNationalId: ['', [Validators.required, Validators.pattern(/^\d{16}$/)]],
     categoryId:       ['', Validators.required],
     departmentId:     ['', Validators.required],
     dueAt:            [''],
@@ -271,7 +271,7 @@ export class CasesComponent implements OnInit {
     if (!ctrl?.errors) return '';
     if (ctrl.errors['required']) return 'This field is required';
     if (ctrl.errors['maxlength']) return `Maximum ${ctrl.errors['maxlength'].requiredLength} characters`;
-    if (ctrl.errors['pattern']) return 'National ID must contain only numbers';
+    if (ctrl.errors['pattern']) return 'National ID must be exactly 16 digits';
     return '';
   }
 
