@@ -8,7 +8,6 @@ import { Subscription } from 'rxjs';
 
 @Component({
   selector: 'app-login',
-  standalone: true,
   imports: [CommonModule, ReactiveFormsModule, RouterModule, TranslocoModule],
   templateUrl: './login.component.html',
   styleUrls: ['./login.component.css']
@@ -76,20 +75,23 @@ export class Login implements OnInit, OnDestroy {
   }
 
   private handleLoginError(error: any): void {
-    const t = (key: string) => this.transloco.translate(key);
-    const keyMap: Record<number, string> = {
-      0:   'login.errors.connectionFailed',
-      401: 'login.errors.invalidCredentials',
-      400: 'login.errors.badRequest',
-      403: 'login.errors.accountInactive',
-      404: 'login.errors.endpointNotFound',
-      500: 'login.errors.serverError'
-    };
-    this.errorMessage.set(
-      keyMap[error.status]
-        ? t(keyMap[error.status])
-        : `${t('login.errors.unknown')}: ${error.status}`
-    );
+    if (error.status === 401) {
+      this.errorMessage.set('Invalid username or password. Please try again.');
+    } else {
+      const t = (key: string) => this.transloco.translate(key);
+      const keyMap: Record<number, string> = {
+        0:   'login.errors.connectionFailed',
+        400: 'login.errors.badRequest',
+        403: 'login.errors.accountInactive',
+        404: 'login.errors.endpointNotFound',
+        500: 'login.errors.serverError'
+      };
+      this.errorMessage.set(
+        keyMap[error.status]
+          ? t(keyMap[error.status])
+          : `${t('login.errors.unknown')}: ${error.status}`
+      );
+    }
     this.loginForm.patchValue({ password: '' });
     this.loginForm.get('password')?.markAsUntouched();
   }
