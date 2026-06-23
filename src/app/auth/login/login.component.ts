@@ -98,9 +98,9 @@ export class Login implements OnInit, OnDestroy {
     const role = this.authService.getRoleFromToken();
     switch (role) {
       case 'ADMIN':
-      case 'SUPERVISOR': return '/dashboard';
+      case 'SUPERVISOR': 
       case 'HANDLER':
-      case 'AGENT':      return '/cases';
+      case 'AGENT':      return '/dashboard';
       default:           return '/login';
     }
   }
