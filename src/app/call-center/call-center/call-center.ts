@@ -3,7 +3,7 @@ import { Component, computed, inject, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { RouterModule, Router } from '@angular/router';
 import { PagedResponse } from '../../../core/models/case.models';
-import { Citizen, PageResponse } from '../../../core/models/citizen.models';
+import { Citizen } from '../../../core/models/citizen.models';
 import { CitizenService } from '../../../core/services/citizen.service';
 import { TranslocoModule, TranslocoService } from '@jsverse/transloco';
 
@@ -52,10 +52,10 @@ export class CallCenter {
     this.hasSearched.set(true);
 
     this.citizenService.searchCitizens(term, 0, 20).subscribe({
-      next: (response: PageResponse<Citizen>) => {
+      next: (response: PagedResponse<Citizen>) => {
         this.citizens.set(response.content);
         this.pagination.set({
-          currentPage: response.number,
+          currentPage: response.page,
           pageSize: response.size,
           totalElements: response.totalElements,
           totalPages: response.totalPages
@@ -123,10 +123,10 @@ export class CallCenter {
     this.isLoading.set(true);
     
     this.citizenService.searchCitizens(term, page, 20).subscribe({
-      next: (response: PageResponse<Citizen>) => {
+      next: (response: PagedResponse<Citizen>) => {
         this.citizens.set(response.content);
         this.pagination.set({
-          currentPage: response.number,
+          currentPage: response.page,
           pageSize: response.size,
           totalElements: response.totalElements,
           totalPages: response.totalPages
