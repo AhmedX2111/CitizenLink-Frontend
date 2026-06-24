@@ -6,7 +6,8 @@ import {
   ReactiveFormsModule, FormBuilder, FormGroup, Validators
 } from '@angular/forms';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
-import { debounceTime, distinctUntilChanged } from 'rxjs/operators';
+import { debounceTime, distinctUntilChanged, switchMap } from 'rxjs/operators';
+import { Subject } from 'rxjs';
 import { TranslocoModule, TranslocoService } from '@jsverse/transloco';
 import { CaseService } from '../../../core/services/case.service';
 
@@ -45,6 +46,12 @@ export class CasesComponent implements OnInit {
   submitError   = signal<string | null>(null);
   serverErrors  = signal<Record<string, string>>({});
 
+  // ── List loading error state ────────────────────────────────────
+  listError = signal<string | null>(null);
+
+  // ── Lookup data loading error state ──────────────────────────────
+  lookupError = signal<string | null>(null);
+
   // ── Case detail modal state ─────────────────────────────────────
   isModalOpen     = signal(false);
   isModalLoading  = signal(false);
@@ -57,6 +64,14 @@ export class CasesComponent implements OnInit {
   totalPages    = signal(0);
   currentPage   = signal(0);
   pageSize      = 5;
+
+  // Every reload of the case list goes through this single subject.
+  // switchMap (wired up in ngOnInit) guarantees that triggering a reload
+  // automatically cancels any still-in-flight request from a previous
+  // trigger — this is what prevents a stale, slower response from
+  // overwriting a newer one (e.g. fast filter typing, quick pagination
+  // clicks, or rapid succession of any combination of these).
+  private reloadCases$ = new Subject<void>();
 
   // ── Departments and Categories state ──────────────────────────
   departments = signal<Department[]>([]);
@@ -100,9 +115,50 @@ export class CasesComponent implements OnInit {
 
   ngOnInit(): void {
 
-    this.loadCases();
     this.loadDepartments();
     this.loadCategories();
+
+    // Single pipeline owns ALL case-list HTTP calls. switchMap cancels
+    // any in-flight request the moment a newer reload is triggered —
+    // this is what actually fixes the race condition described by the
+    // lead's review (problem #25), not just a cosmetic reorder of logic.
+    this.reloadCases$.pipe(
+      switchMap(() => {
+        this.isLoading.set(true);
+        this.listError.set(null);
+        const v = this.searchForm.value;
+
+        const filter: CaseSearchRequest = {
+          page: this.currentPage(),
+          size: this.pageSize,
+          ...(v.keyword?.trim() && { keyword: v.keyword.trim() }),
+          ...(v.status           && { status:  v.status as CaseStatus }),
+          ...(v.type             && { type:    v.type   as CaseType }),
+          ...(v.priority         && { priority: v.priority as Priority }),
+        };
+
+        return this.caseService.searchCases(filter);
+      }),
+      takeUntilDestroyed(this.destroyRef)
+    ).subscribe({
+      next: (res: PagedResponse<CaseResponse>) => {
+        this.cases.set(res.content);
+        this.totalElements.set(res.totalElements);
+        this.totalPages.set(res.totalPages);
+        this.isLoading.set(false);
+      },
+      error: (err) => {
+        this.isLoading.set(false);
+        this.listError.set(
+          err.status === 403
+            ? this.transloco.translate('cases.errors.forbidden')
+            : this.transloco.translate('cases.errors.loadFailed')
+        );
+      }
+    });
+
+    // Trigger the very first load on init.
+    this.reloadCases$.next();
 
     // Auto-search on filter change with debounce
     this.searchForm.valueChanges.pipe(
@@ -111,7 +167,7 @@ export class CasesComponent implements OnInit {
       takeUntilDestroyed(this.destroyRef)
     ).subscribe(() => {
       this.currentPage.set(0);
-      this.loadCases();
+      this.reloadCases$.next();
     });
 
     // Watch for department changes to filter categories
@@ -123,18 +179,21 @@ export class CasesComponent implements OnInit {
     });
   }
 
-
   // ── Load Departments and Categories ───────────────────────────
   loadDepartments(): void {
     this.caseService.getDepartments().pipe(
       takeUntilDestroyed(this.destroyRef)
     ).subscribe({
       next: (departments) => {
-        console.log('Departments loaded:', departments);
         this.departments.set(departments);
       },
-      error: (error) => {
-        console.error('Error loading departments:', error);
+      error: (err) => {
+        console.error('Error loading departments:', err);
+        this.lookupError.set(
+          err.status === 403
+            ? this.transloco.translate('cases.errors.forbidden')
+            : this.transloco.translate('cases.errors.loadDepartmentsFailed')
+        );
       }
     });
   }
@@ -144,12 +203,16 @@ export class CasesComponent implements OnInit {
       takeUntilDestroyed(this.destroyRef)
     ).subscribe({
       next: (categories) => {
-        console.log('Categories loaded:', categories);
         this.categories.set(categories);
         this.filteredCategories.set(categories);
       },
-      error: (error) => {
-        console.error('Error loading categories:', error);
+      error: (err) => {
+        console.error('Error loading categories:', err);
+        this.lookupError.set(
+          err.status === 403
+            ? this.transloco.translate('cases.errors.forbidden')
+            : this.transloco.translate('cases.errors.loadCategoriesFailed')
+        );
       }
     });
   }
@@ -165,36 +228,10 @@ export class CasesComponent implements OnInit {
   }
 
   // ── List / Search ─────────────────────────────────────────────
-  loadCases(): void {
-    this.isLoading.set(true);
-    const v = this.searchForm.value;
-
-    const filter: CaseSearchRequest = {
-      page: this.currentPage(),
-      size: this.pageSize,
-      ...(v.keyword?.trim() && { keyword: v.keyword.trim() }),
-      ...(v.status           && { status:  v.status as CaseStatus }),
-      ...(v.type             && { type:    v.type   as CaseType }),
-      ...(v.priority         && { priority: v.priority as Priority }),
-    };
-
-    this.caseService.searchCases(filter).pipe(
-      takeUntilDestroyed(this.destroyRef)
-    ).subscribe({
-      next: (res: PagedResponse<CaseResponse>) => {
-        this.cases.set(res.content);
-        this.totalElements.set(res.totalElements);
-        this.totalPages.set(res.totalPages);
-        this.isLoading.set(false);
-      },
-      error: () => this.isLoading.set(false)
-    });
-  }
-
   goToPage(page: number): void {
     if (page < 0 || page >= this.totalPages()) return;
     this.currentPage.set(page);
-    this.loadCases();
+    this.reloadCases$.next();
   }
 
   get pages(): number[] {
@@ -204,6 +241,9 @@ export class CasesComponent implements OnInit {
   clearFilters(): void {
     this.searchForm.reset({ keyword: '', status: '', type: '', priority: '' });
     this.currentPage.set(0);
+    // searchForm.reset() triggers valueChanges automatically, which already
+    // calls reloadCases$.next() via the subscription set up in ngOnInit —
+    // no separate call needed here.
   }
 
   // ── Create Case ───────────────────────────────────────────────
@@ -237,7 +277,7 @@ export class CasesComponent implements OnInit {
         this.isSubmitting.set(false);
         this.submitSuccess.set(true);
         this.createForm.reset();
-        this.loadCases();
+        this.reloadCases$.next();
         setTimeout(() => this.showTab('list'), 1500);
       },
       error: (err) => {
@@ -314,7 +354,7 @@ export class CasesComponent implements OnInit {
       day: '2-digit', month: 'short', year: 'numeric'
     });
   }
-  
+
   // ── Case detail modal ──────────────────────────────────────────
   openCaseDetail(caseId: string): void {
     this.isModalOpen.set(true);

@@ -52,20 +52,14 @@
               "fileReplacements": [
                 {
                   "src": "src/environments/environment.ts",
-                  "replace": "src/environments/environment.prod.ts"
+                  "replaceWith": "src/environments/environment.prod.ts"
                 }
               ]
             },
             "development": {
               "optimization": false,
               "extractLicenses": false,
-              "sourceMap": true,
-              "fileReplacements": [
-                {
-                  "src": "src/environments/environment.ts",
-                  "replace": "src/environments/environment.ts"
-                }
-              ]
+              "sourceMap": true
             }
           },
           "defaultConfiguration": "production"
