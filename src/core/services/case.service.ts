@@ -9,13 +9,14 @@ import {
 } from '../models/case.models';
 import { Department } from '../models/department.model';
 import { Category } from '../models/category.model';
+import { environment } from '../../environments/environment';
 
 @Injectable({ providedIn: 'root' })
 export class CaseService {
 
-  private readonly baseUrl = 'http://localhost:8080/api/v1/cases';
-  private readonly departmentsUrl = 'http://localhost:8080/api/v1/departments';
-  private readonly categoriesUrl = 'http://localhost:8080/api/v1/categories';
+  private readonly baseUrl = `${environment.apiUrl}/api/v1/cases`;
+  private readonly departmentsUrl = `${environment.apiUrl}/api/v1/departments`;
+  private readonly categoriesUrl = `${environment.apiUrl}/api/v1/categories`;
 
   constructor(private http: HttpClient) {}
 
