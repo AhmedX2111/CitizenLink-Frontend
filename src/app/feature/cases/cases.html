@@ -94,6 +94,14 @@
           </div>
 
           <!-- Loading -->
+          @if (listError()) {
+            <div class="mx-4 mt-3 p-3 bg-red-50 border-l-4 border-red-500 rounded-md flex items-center gap-2">
+              <svg class="w-4 h-4 text-red-500 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
+                <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clip-rule="evenodd"/>
+              </svg>
+              <span class="text-red-700 text-xs">{{ listError() }}</span>
+            </div>
+          }
           @if (isLoading()) {
             <div class="flex items-center justify-center py-16 text-slate-400 text-xs gap-2">
               <svg class="animate-spin w-4 h-4" fill="none" viewBox="0 0 24 24">
@@ -228,6 +236,15 @@
           }
 
           <form [formGroup]="createForm" (ngSubmit)="onSubmit()" class="p-5 space-y-5">
+            
+            @if (lookupError()) {
+              <div class="p-3 bg-red-50 border-l-4 border-red-500 rounded-md flex items-center gap-2">
+                <svg class="w-4 h-4 text-red-500 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
+                  <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clip-rule="evenodd"/>
+                </svg>
+                <span class="text-red-700 text-xs">{{ lookupError() }}</span>
+              </div>
+            }
 
             <!-- Section: Citizen Information -->
             <div>
