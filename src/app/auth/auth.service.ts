@@ -29,6 +29,7 @@ export class AuthService {
     return this.http.post<AuthResponse>(`${this.API_URL}/login`, credentials)
       .pipe(
         tap(response => {
+          // Clear BOTH storages first to prevent old tokens
           this.saveAuthData(response, rememberMe);
           this.authState.next(response);
         }),
@@ -71,7 +72,7 @@ export class AuthService {
       const isValid = expiryDate > new Date();
       
       if (!isValid) {
-        this.clearAuthData(); // Just clear, don't call logout API again
+        this.clearAuthData();
       }
       return isValid;
     } catch {
@@ -102,19 +103,24 @@ export class AuthService {
 
     try {
       const payload = JSON.parse(atob(token.split('.')[1]));
-      return payload.role ?? null; // matches the "role" claim set in JwtService.generateToken()
+      return payload.role ?? null;
     } catch {
       return null;
     }
   }
 
+  // Clear BOTH storages before saving new token
   private saveAuthData(response: AuthResponse, rememberMe: boolean): void {
+    // 🔥 CRITICAL FIX: Clear both storages first to prevent old tokens
+    this.clearAuthData();
+    
     const storage = rememberMe ? localStorage : sessionStorage;
     
     if (response.token) {
       storage.setItem(this.TOKEN_KEY, response.token);
       storage.setItem(this.USER_KEY, JSON.stringify(response));
       storage.setItem(this.REMEMBER_ME_KEY, String(rememberMe));
+      console.log(`Auth data saved to ${rememberMe ? 'localStorage' : 'sessionStorage'}`);
     }
   }
 

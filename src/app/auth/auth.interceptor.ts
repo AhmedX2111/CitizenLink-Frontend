@@ -16,7 +16,8 @@ export class AuthInterceptor implements HttpInterceptor {
     const token = this.authService.getToken();
     let authReq = req;
 
-    if (token) {
+    // Don't add token to login request
+    if (token && !req.url.includes('/auth/login')) {
       authReq = req.clone({
         setHeaders: {
           Authorization: `Bearer ${token}`
@@ -26,10 +27,15 @@ export class AuthInterceptor implements HttpInterceptor {
 
     return next.handle(authReq).pipe(
       catchError((error: HttpErrorResponse) => {
-        if (error.status === 401) {
+        // Only redirect for 401 on non-login requests
+        const isLoginRequest = req.url.includes('/auth/login');
+        
+        if (error.status === 401 && !isLoginRequest) {
+          console.log('Unauthorized request, redirecting to login');
           this.authService.logout();
-          this.router.navigate(['/login']);
+          // Don't navigate here - logout already navigates
         }
+        
         return throwError(() => error);
       })
     );
