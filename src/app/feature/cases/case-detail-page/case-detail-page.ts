@@ -10,11 +10,13 @@ import {
   CaseResponse, CaseStatus, Priority, CaseType,
   StatusHistoryResponse, WorkflowAction
 } from '../../../../core/models/case.models';
+import { CaseNotesComponent } from '../case-notes/case-notes';
+import { CaseAttachmentsComponent } from '../case-attachments/case-attachments';
 
 @Component({
   selector: 'app-case-detail-page',
   standalone: true,
-  imports: [CommonModule, RouterModule, TranslocoModule, TopbarComponent],
+  imports: [CommonModule, RouterModule, TranslocoModule, TopbarComponent, CaseNotesComponent, CaseAttachmentsComponent],
   templateUrl: './case-detail-page.html',
   styleUrl: './case-detail-page.css'
 })
