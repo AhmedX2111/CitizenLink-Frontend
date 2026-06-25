@@ -32,6 +32,11 @@ export const routes: Routes = [
           import('./feature/cases/cases').then(m => m.CasesComponent)
       },
       {
+        path: 'cases/:id',
+        loadComponent: () =>
+          import('./feature/cases/case-detail-page/case-detail-page').then(m => m.CaseDetailPageComponent)
+      },
+      {
         path: 'dashboard',
         loadComponent: () =>
           import('./feature/dashboard/dashboard').then(m => m.DashboardComponent)

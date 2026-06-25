@@ -60,6 +60,7 @@ export interface CaseResponse {
   citizenId:             string;
   citizenFullName:       string;
   citizenNationalId:     string;
+  citizenPhone:          string | null;
   categoryId:            string;
   categoryNameEn:        string;
   categoryNameAr:        string;
@@ -84,4 +85,19 @@ export interface PagedResponse<T> {
   totalPages:    number;
   first:         boolean;
   last:          boolean;
+}
+
+export type WorkflowAction =
+  | 'CREATE' | 'ASSIGN' | 'START' | 'AWAIT_INFO' | 'INFO_RECEIVED'
+  | 'SUSPEND' | 'RESUME' | 'RESOLVE' | 'CLOSE' | 'CANCEL' | 'REOPEN';
+
+export interface StatusHistoryResponse {
+  id:                    string;
+  fromStatus:            CaseStatus | null;   // null = initial creation event
+  toStatus:              CaseStatus;
+  action:                WorkflowAction;
+  comment:               string | null;
+  createdAt:             string;
+  changedByUserId:       string;
+  changedByDisplayName:  string;
 }

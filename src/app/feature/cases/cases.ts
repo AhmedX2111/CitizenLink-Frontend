@@ -10,6 +10,7 @@ import { debounceTime, distinctUntilChanged, switchMap } from 'rxjs/operators';
 import { Subject } from 'rxjs';
 import { TranslocoModule, TranslocoService } from '@jsverse/transloco';
 import { CaseService } from '../../../core/services/case.service';
+import { Router } from '@angular/router';
 
 import {
   CaseResponse, CaseSearchRequest, CaseStatus,
@@ -25,7 +26,7 @@ type ActiveTab = 'list' | 'create';
 @Component({
   selector: 'app-cases',
   standalone: true,
-  imports: [CommonModule, ReactiveFormsModule, TranslocoModule, TopbarComponent, CaseDetailModalComponent],
+  imports: [CommonModule, ReactiveFormsModule, TranslocoModule, TopbarComponent],
   templateUrl: './cases.html',
   styleUrl: './cases.css'
 })
@@ -35,6 +36,7 @@ export class CasesComponent implements OnInit {
   private caseService = inject(CaseService);
   private destroyRef  = inject(DestroyRef);
   private transloco   = inject(TranslocoService);
+  private router      = inject(Router);
   // Breadcrumb title passed to shared topbar
   pageTitle = () => this.transloco.translate('cases.title');
 
@@ -355,34 +357,39 @@ export class CasesComponent implements OnInit {
     });
   }
 
-  // ── Case detail modal ──────────────────────────────────────────
+  // // ── Case detail modal ──────────────────────────────────────────
+  // openCaseDetail(caseId: string): void {
+  //   this.isModalOpen.set(true);
+  //   this.isModalLoading.set(true);
+  //   this.modalError.set(null);
+  //   this.selectedCase.set(null);
+
+  //   this.caseService.getCaseById(caseId).pipe(
+  //     takeUntilDestroyed(this.destroyRef)
+  //   ).subscribe({
+  //     next: (res) => {
+  //       this.selectedCase.set(res);
+  //       this.isModalLoading.set(false);
+  //     },
+  //     error: (err) => {
+  //       this.isModalLoading.set(false);
+  //       this.modalError.set(
+  //         err.status === 404
+  //           ? this.transloco.translate('cases.detail.notFound')
+  //           : this.transloco.translate('cases.detail.loadError')
+  //       );
+  //     }
+  //   });
+  // }
+
+  // closeCaseDetail(): void {
+  //   this.isModalOpen.set(false);
+  //   this.selectedCase.set(null);
+  //   this.modalError.set(null);
+  // }
+ 
+  // ── Navigate to case detail page (US-14) ─────────────────────────
   openCaseDetail(caseId: string): void {
-    this.isModalOpen.set(true);
-    this.isModalLoading.set(true);
-    this.modalError.set(null);
-    this.selectedCase.set(null);
-
-    this.caseService.getCaseById(caseId).pipe(
-      takeUntilDestroyed(this.destroyRef)
-    ).subscribe({
-      next: (res) => {
-        this.selectedCase.set(res);
-        this.isModalLoading.set(false);
-      },
-      error: (err) => {
-        this.isModalLoading.set(false);
-        this.modalError.set(
-          err.status === 404
-            ? this.transloco.translate('cases.detail.notFound')
-            : this.transloco.translate('cases.detail.loadError')
-        );
-      }
-    });
-  }
-
-  closeCaseDetail(): void {
-    this.isModalOpen.set(false);
-    this.selectedCase.set(null);
-    this.modalError.set(null);
+    this.router.navigate(['/cases', caseId]);
   }
 }
