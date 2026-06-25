@@ -1,0 +1,162 @@
+<app-topbar [pageTitle]="pageTitle"></app-topbar>
+
+<main class="flex-1 overflow-y-auto p-6">
+  <div class="max-w-4xl mx-auto">
+
+    <!-- Back button -->
+    <button (click)="goBack()" class="flex items-center gap-1 text-xs text-slate-500 hover:text-slate-900 mb-4 transition-colors">
+      <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/>
+      </svg>
+      {{ 'cases.create.backToList' | transloco }}
+    </button>
+
+    <!-- Header loading -->
+    @if (isLoading()) {
+      <div class="flex items-center justify-center py-16 text-slate-400 text-xs gap-2">
+        <svg class="animate-spin w-4 h-4" fill="none" viewBox="0 0 24 24">
+          <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"/>
+          <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"/>
+        </svg>
+        {{ 'cases.detail.loading' | transloco }}
+      </div>
+    }
+
+    <!-- Header error -->
+    @if (!isLoading() && loadError()) {
+      <div class="p-3 bg-red-50 border-l-4 border-red-500 rounded-md flex items-center gap-2">
+        <svg class="w-4 h-4 text-red-500 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
+          <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clip-rule="evenodd"/>
+        </svg>
+        <span class="text-red-700 text-xs">{{ loadError() }}</span>
+      </div>
+    }
+
+    @if (!isLoading() && !loadError() && caseDetail()) {
+      <!-- ── DET-01, DET-02: Header card ─────────────────────────── -->
+      <div class="bg-white rounded-2xl border border-slate-200 p-5 mb-5">
+        <div class="flex items-start justify-between gap-4">
+          <div>
+            <div class="flex items-center gap-2 mb-1">
+              <span class="text-xs font-medium text-slate-500">{{ caseDetail()!.caseNumber }}</span>
+              <span [class]="'inline-flex px-2 py-0.5 rounded text-[11px] font-medium ' + statusBadgeClass(caseDetail()!.status)">
+                {{ 'cases.statuses.' + caseDetail()!.status | transloco }}
+              </span>
+              <span [class]="'inline-flex px-2 py-0.5 rounded text-[11px] font-medium ' + priorityBadgeClass(caseDetail()!.priority)">
+                {{ 'cases.priorities.' + caseDetail()!.priority | transloco }}
+              </span>
+            </div>
+            <h1 class="text-lg font-semibold text-slate-900">{{ caseDetail()!.subject }}</h1>
+          </div>
+          @if (caseDetail()!.dueAt) {
+            <div class="text-right flex-shrink-0">
+              <p class="text-[11px] text-slate-400">{{ 'cases.create.fields.dueDate' | transloco }}</p>
+              <p class="text-xs font-medium"
+                 [class.text-red-600]="isOverdue(caseDetail()!.dueAt)"
+                 [class.text-slate-700]="!isOverdue(caseDetail()!.dueAt)">
+                {{ formatDateTime(caseDetail()!.dueAt) }}
+              </p>
+            </div>
+          }
+        </div>
+      </div>
+
+      <!-- ── DET-02: Citizen summary card ────────────────────────── -->
+      <div class="bg-white rounded-2xl border border-slate-200 p-5 mb-5">
+        <div class="flex items-center gap-2 mb-3">
+          <svg class="w-4 h-4 text-amber-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"/>
+          </svg>
+          <span class="text-xs font-medium text-slate-900">{{ 'cases.create.sections.citizen' | transloco }}</span>
+        </div>
+        <div class="flex items-center justify-between">
+          <div class="flex gap-6">
+            <div>
+              <p class="text-[11px] text-slate-400">{{ 'cases.detail.citizenName' | transloco }}</p>
+              <p class="text-sm text-slate-700">{{ caseDetail()!.citizenFullName }}</p>
+            </div>
+            <div>
+              <p class="text-[11px] text-slate-400">{{ 'cases.detail.citizenPhone' | transloco }}</p>
+              <p class="text-sm text-slate-700">{{ caseDetail()!.citizenPhone ?? '—' }}</p>
+            </div>
+          </div>
+          <button (click)="goToCitizenProfile(caseDetail()!.citizenId)"
+                  class="flex items-center gap-1.5 text-xs text-amber-600 hover:text-amber-700 font-medium transition-colors">
+            {{ 'cases.detail.viewCitizen' | transloco }}
+            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3"/>
+            </svg>
+          </button>
+        </div>
+      </div>
+
+      <!-- ── DET-03: Timeline ─────────────────────────────────────── -->
+      <div class="bg-white rounded-2xl border border-slate-200 overflow-hidden">
+        <div class="px-5 py-3.5 border-b border-slate-100 flex items-center gap-2">
+          <svg class="w-4 h-4 text-amber-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/>
+          </svg>
+          <span class="text-sm font-medium text-slate-900">{{ 'cases.detail.timeline' | transloco }}</span>
+        </div>
+
+        @if (isTimelineLoading()) {
+          <div class="flex items-center justify-center py-10 text-slate-400 text-xs gap-2">
+            <svg class="animate-spin w-4 h-4" fill="none" viewBox="0 0 24 24">
+              <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"/>
+              <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"/>
+            </svg>
+            {{ 'cases.detail.loading' | transloco }}
+          </div>
+        } @else if (timelineError()) {
+          <div class="p-5">
+            <div class="p-3 bg-red-50 border-l-4 border-red-500 rounded-md flex items-center gap-2">
+              <svg class="w-4 h-4 text-red-500 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
+                <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clip-rule="evenodd"/>
+              </svg>
+              <span class="text-red-700 text-xs">{{ timelineError() }}</span>
+            </div>
+          </div>
+        } @else if (timeline().length === 0) {
+          <div class="flex flex-col items-center justify-center py-10 text-slate-400">
+            <p class="text-xs">{{ 'cases.detail.noTimeline' | transloco }}</p>
+          </div>
+        } @else {
+          <div class="p-5">
+            <ol class="relative border-l-2 border-slate-100 ml-2">
+              @for (entry of timeline(); track entry.id) {
+                <li class="mb-6 ml-5 last:mb-0">
+                  <span class="absolute -left-[9px] w-4 h-4 rounded-full bg-white border-2 border-amber-500"></span>
+
+                  <div class="flex items-center justify-between mb-0.5">
+                    <p class="text-xs font-medium text-slate-900">
+                      @if (isCreationEvent(entry)) {
+                        {{ 'cases.detail.events.created' | transloco }}
+                      } @else {
+                        {{ 'cases.statuses.' + entry.fromStatus | transloco }}
+                        <svg class="w-3 h-3 inline-block mx-1 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3"/>
+                        </svg>
+                        {{ 'cases.statuses.' + entry.toStatus | transloco }}
+                      }
+                    </p>
+                    <p class="text-[11px] text-slate-400 whitespace-nowrap">{{ formatDateTime(entry.createdAt) }}</p>
+                  </div>
+
+                  <p class="text-[11px] text-slate-500">
+                    {{ 'cases.detail.changedBy' | transloco }} {{ entry.changedByDisplayName }}
+                  </p>
+
+                  @if (entry.comment) {
+                    <p class="mt-1 text-xs text-slate-600 bg-slate-50 rounded-lg px-3 py-2 italic">
+                      "{{ entry.comment }}"
+                    </p>
+                  }
+                </li>
+              }
+            </ol>
+          </div>
+        }
+      </div>
+    }
+  </div>
+</main>

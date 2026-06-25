@@ -216,7 +216,15 @@
       "resolutionSummary": "ملخص الحل",
       "timeline": "الجدول الزمني",
       "updated": "آخر تحديث",
-      "resolvedAt": "تاريخ الحل"
+      "resolvedAt": "تاريخ الحل",
+      "citizenPhone": "الهاتف",
+      "viewCitizen": "عرض ملف المواطن الكامل",
+      "timelineLoadError": "فشل تحميل الجدول الزمني للحالة. يرجى المحاولة مرة أخرى.",
+      "noTimeline": "لا يوجد سجل حالة بعد.",
+      "changedBy": "بواسطة",
+      "events": {
+        "created": "تم إنشاء الحالة"
+      }
     },
     "newCase": "حالة جديدة",
     "caseList": "قائمة الحالات",

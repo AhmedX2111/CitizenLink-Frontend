@@ -216,7 +216,15 @@
       "resolutionSummary": "Resolution Summary",
       "timeline": "Timeline",
       "updated": "Last Updated",
-      "resolvedAt": "Resolved At"
+      "resolvedAt": "Resolved At",
+      "citizenPhone": "Phone",
+      "viewCitizen": "View Citizen Profile",
+      "timelineLoadError": "Failed to load case timeline. Please try again.",
+      "noTimeline": "No status history yet.",
+      "changedBy": "by",
+      "events": {
+      "created": "Case created"
+    }
     },
     "newCase": "New Case",
     "caseList": "Case List",

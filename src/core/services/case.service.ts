@@ -5,6 +5,7 @@ import {
   CaseResponse,
   CaseSearchRequest,
   CreateCaseRequest,
+  StatusHistoryResponse,
   PagedResponse
 } from '../models/case.models';
 import { Department } from '../models/department.model';
@@ -45,6 +46,14 @@ export class CaseService {
    */
   getCaseById(id: string): Observable<CaseResponse> {
     return this.http.get<CaseResponse>(`${this.baseUrl}/${id}`);
+  }
+
+  /**
+   * US-14: fetches the full chronological status-history timeline for a case.
+   * Backend enforces Phase 1 visibility — 404 if not visible to current user.
+   */
+  getCaseTimeline(id: string): Observable<StatusHistoryResponse[]> {
+    return this.http.get<StatusHistoryResponse[]>(`${this.baseUrl}/${id}/timeline`);
   }
 
   getDepartments(): Observable<Department[]> {
