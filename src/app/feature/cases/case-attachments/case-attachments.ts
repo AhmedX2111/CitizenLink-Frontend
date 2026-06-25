@@ -1,0 +1,171 @@
+import { Component, Input, signal, inject, OnInit } from '@angular/core';
+import { CommonModule } from '@angular/common';
+import { TranslocoModule, TranslocoService } from '@jsverse/transloco';
+import { AttachmentService } from '../../../../core/services/attachment.service';
+import { Attachment } from '../../../../core/models/attachment.models';
+
+@Component({
+    selector: 'app-case-attachments',
+    standalone: true,
+    imports: [CommonModule, TranslocoModule],
+    templateUrl: './case-attachments.html',
+    styleUrls: ['./case-attachments.css']
+})
+export class CaseAttachmentsComponent implements OnInit {
+    @Input() caseId!: string;
+
+    private attachmentService = inject(AttachmentService);
+    private transloco = inject(TranslocoService);
+
+    attachments = signal<Attachment[]>([]);
+    isLoading = signal(true);
+    isUploading = signal(false);
+    errorMessage = signal<string | null>(null);
+    successMessage = signal<string | null>(null);
+    confirmDeleteId = signal<string | null>(null);  // Track which attachment to delete
+
+    allowedTypes = ['application/pdf', 'image/png', 'image/jpeg', 'image/jpg', 'application/vnd.openxmlformats-officedocument.wordprocessingml.document'];
+    maxFileSize = 5 * 1024 * 1024; // 5 MB
+
+    ngOnInit(): void {
+        this.loadAttachments();
+    }
+
+    loadAttachments(): void {
+        this.isLoading.set(true);
+        this.errorMessage.set(null);
+
+        this.attachmentService.getAttachmentsByCaseId(this.caseId).subscribe({
+            next: (attachments) => {
+                this.attachments.set(attachments);
+                this.isLoading.set(false);
+            },
+            error: (error) => {
+                this.errorMessage.set(this.transloco.translate('cases.detail.attachments.loadError'));
+                this.isLoading.set(false);
+                console.error('Error loading attachments:', error);
+            }
+        });
+    }
+
+    onFileSelected(event: Event): void {
+        const input = event.target as HTMLInputElement;
+        if (input.files && input.files.length > 0) {
+            const file = input.files[0];
+            this.uploadFile(file);
+        }
+        input.value = '';
+    }
+
+    uploadFile(file: File): void {
+        if (!this.allowedTypes.includes(file.type) && !this.isAllowedExtension(file.name)) {
+            this.errorMessage.set(this.transloco.translate('cases.detail.attachments.invalidType'));
+            setTimeout(() => this.errorMessage.set(null), 5000);
+            return;
+        }
+
+        if (file.size > this.maxFileSize) {
+            this.errorMessage.set(this.transloco.translate('cases.detail.attachments.fileTooLarge'));
+            setTimeout(() => this.errorMessage.set(null), 5000);
+            return;
+        }
+
+        this.isUploading.set(true);
+        this.errorMessage.set(null);
+        this.successMessage.set(null);
+
+        this.attachmentService.uploadAttachment(this.caseId, file).subscribe({
+            next: (attachment) => {
+                this.isUploading.set(false);
+                this.successMessage.set(this.transloco.translate('cases.detail.attachments.uploadSuccess'));
+                this.attachments.update(list => [attachment, ...list]);
+                setTimeout(() => this.successMessage.set(null), 3000);
+            },
+            error: (error) => {
+                this.isUploading.set(false);
+                this.errorMessage.set(error.error?.message || this.transloco.translate('cases.detail.attachments.uploadError'));
+                console.error('Error uploading file:', error);
+            }
+        });
+    }
+
+    isAllowedExtension(fileName: string): boolean {
+        const allowedExtensions = ['.pdf', '.png', '.jpg', '.jpeg', '.docx'];
+        const ext = fileName.toLowerCase().substring(fileName.lastIndexOf('.'));
+        return allowedExtensions.includes(ext);
+    }
+
+    downloadAttachment(attachment: Attachment): void {
+        this.attachmentService.downloadAttachment(this.caseId, attachment.id).subscribe({
+            next: (blob) => {
+                const url = window.URL.createObjectURL(blob);
+                const link = document.createElement('a');
+                link.href = url;
+                link.download = attachment.originalFileName;
+                document.body.appendChild(link);
+                link.click();
+                document.body.removeChild(link);
+                window.URL.revokeObjectURL(url);
+
+                this.successMessage.set(this.transloco.translate('cases.detail.attachments.downloadSuccess'));
+                setTimeout(() => this.successMessage.set(null), 3000);
+            },
+            error: (error) => {
+                this.errorMessage.set(this.transloco.translate('cases.detail.attachments.downloadError'));
+                console.error('Error downloading file:', error);
+                setTimeout(() => this.errorMessage.set(null), 5000);
+            }
+        });
+    }
+
+    requestDelete(attachmentId: string): void {
+        this.confirmDeleteId.set(attachmentId);
+        // Auto-cancel after 5 seconds if user doesn't confirm
+        setTimeout(() => {
+            if (this.confirmDeleteId() === attachmentId) {
+                this.confirmDeleteId.set(null);
+            }
+        }, 5000);
+    }
+
+    cancelDelete(): void {
+        this.confirmDeleteId.set(null);
+    }
+
+    confirmDelete(attachment: Attachment): void {
+        this.attachmentService.deleteAttachment(this.caseId, attachment.id).subscribe({
+            next: () => {
+                this.attachments.update(list => list.filter(a => a.id !== attachment.id));
+                this.successMessage.set(this.transloco.translate('cases.detail.attachments.deleteSuccess'));
+                this.confirmDeleteId.set(null);
+                setTimeout(() => this.successMessage.set(null), 3000);
+            },
+            error: (error) => {
+                this.errorMessage.set(this.transloco.translate('cases.detail.attachments.deleteError'));
+                console.error('Error deleting attachment:', error);
+                setTimeout(() => this.errorMessage.set(null), 5000);
+            }
+        });
+    }
+
+    formatFileSize(bytes: number): string {
+        if (bytes < 1024) return bytes + ' B';
+        if (bytes < 1024 * 1024) return (bytes / 1024).toFixed(1) + ' KB';
+        return (bytes / (1024 * 1024)).toFixed(1) + ' MB';
+    }
+
+    formatDate(date: string): string {
+        const lang = this.transloco.getActiveLang();
+        return new Date(date).toLocaleDateString(lang === 'ar' ? 'ar-EG' : 'en-GB', {
+            day: '2-digit', month: 'short', year: 'numeric',
+            hour: '2-digit', minute: '2-digit'
+        });
+    }
+
+    triggerFileUpload(): void {
+        const fileInput = document.getElementById('fileInput') as HTMLInputElement;
+        if (fileInput) {
+            fileInput.click();
+        }
+    }
+}

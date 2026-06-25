@@ -1,0 +1,135 @@
+<div class="case-attachments">
+    <!-- Header -->
+    <div class="flex items-center justify-between mb-4">
+        <div class="flex items-center gap-2">
+            <svg class="w-4 h-4 text-amber-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.172 7l-6.586 6.586a2 2 0 102.828 2.828l6.414-6.586a4 4 0 00-5.656-5.656l-6.415 6.585a6 6 0 108.486 8.486L20.5 13"/>
+            </svg>
+            <span class="text-sm font-medium text-slate-900">{{ 'cases.detail.attachments.title' | transloco }}</span>
+            <span class="text-xs text-slate-400">({{ attachments().length }})</span>
+        </div>
+        <div>
+            <input type="file" id="fileInput" class="hidden" (change)="onFileSelected($event)" 
+                   [accept]="'.pdf,.png,.jpg,.jpeg,.docx'">
+            <button (click)="triggerFileUpload()" [disabled]="isUploading()"
+                    class="text-xs bg-blue-600 hover:bg-blue-700 text-white px-3 py-1.5 rounded-lg transition flex items-center gap-1">
+                @if (isUploading()) {
+                    <svg class="animate-spin w-3.5 h-3.5" fill="none" viewBox="0 0 24 24">
+                        <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"/>
+                        <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"/>
+                    </svg>
+                    {{ 'cases.detail.attachments.uploading' | transloco }}
+                } @else {
+                    <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12"/>
+                    </svg>
+                    {{ 'cases.detail.attachments.upload' | transloco }}
+                }
+            </button>
+        </div>
+    </div>
+
+    <!-- Success/Error Messages -->
+    @if (successMessage()) {
+        <div class="mb-3 p-2 bg-emerald-50 border-l-4 border-emerald-500 rounded flex items-center gap-2">
+            <svg class="w-4 h-4 text-emerald-600 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
+                <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/>
+            </svg>
+            <span class="text-emerald-700 text-xs">{{ successMessage() }}</span>
+        </div>
+    }
+
+    @if (errorMessage()) {
+        <div class="mb-3 p-2 bg-red-50 border-l-4 border-red-500 rounded flex items-center gap-2">
+            <svg class="w-4 h-4 text-red-500 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
+                <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clip-rule="evenodd"/>
+            </svg>
+            <span class="text-red-700 text-xs">{{ errorMessage() }}</span>
+        </div>
+    }
+
+    <!-- Attachments List -->
+    @if (isLoading()) {
+        <div class="flex items-center justify-center py-8">
+            <svg class="animate-spin w-5 h-5 text-slate-400" fill="none" viewBox="0 0 24 24">
+                <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"/>
+                <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"/>
+            </svg>
+        </div>
+    } @else if (attachments().length === 0) {
+        <div class="text-center py-8 text-slate-400">
+            <svg class="mx-auto w-10 h-10 text-slate-300 mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M15.172 7l-6.586 6.586a2 2 0 102.828 2.828l6.414-6.586a4 4 0 00-5.656-5.656l-6.415 6.585a6 6 0 108.486 8.486L20.5 13"/>
+            </svg>
+            <p class="text-xs">{{ 'cases.detail.attachments.noAttachments' | transloco }}</p>
+        </div>
+    } @else {
+        <div class="space-y-2 max-h-96 overflow-y-auto">
+            @for (attachment of attachments(); track attachment.id) {
+                <div class="bg-white border border-slate-100 rounded-lg p-3 hover:shadow-sm transition flex items-center justify-between">
+                    <div class="flex-1 min-w-0">
+                        <div class="flex items-center gap-2">
+                            @if (attachment.mimeType.includes('pdf')) {
+                                <svg class="w-5 h-5 text-red-500 flex-shrink-0" fill="currentColor" viewBox="0 0 24 24">
+                                    <path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8l-6-6zM6 20V4h7v5h5v11H6z"/>
+                                </svg>
+                            } @else if (attachment.mimeType.includes('image')) {
+                                <svg class="w-5 h-5 text-blue-500 flex-shrink-0" fill="currentColor" viewBox="0 0 24 24">
+                                    <path d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm0 16H5V5h14v14zM7 10h2v7H7zm4-3h2v10h-2zm4 6h2v4h-2z"/>
+                                </svg>
+                            } @else {
+                                <svg class="w-5 h-5 text-emerald-500 flex-shrink-0" fill="currentColor" viewBox="0 0 24 24">
+                                    <path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8l-6-6zM6 20V4h7v5h5v11H6z"/>
+                                </svg>
+                            }
+                            <span class="text-xs font-medium text-slate-900 truncate">{{ attachment.originalFileName }}</span>
+                        </div>
+                        <div class="flex items-center gap-3 mt-1 text-[10px] text-slate-400">
+                            <span>{{ attachment.fileSizeFormatted }}</span>
+                            <span>•</span>
+                            <span>{{ 'cases.detail.attachments.uploader' | transloco }}: {{ attachment.uploadedByUserName }}</span>
+                            <span>•</span>
+                            <span>{{ formatDate(attachment.createdAt) }}</span>
+                        </div>
+                    </div>
+                    <div class="flex items-center gap-1 flex-shrink-0 ml-2">
+                        <button (click)="downloadAttachment(attachment)" 
+                                class="p-1.5 text-slate-400 hover:text-blue-600 transition rounded hover:bg-blue-50" 
+                                title="{{ 'cases.detail.attachments.download' | transloco }}">
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"/>
+                            </svg>
+                        </button>
+                        @if (confirmDeleteId() === attachment.id) {
+                            <div class="flex items-center gap-1 bg-red-50 rounded-lg p-1">
+                                <span class="text-[10px] text-red-700 whitespace-nowrap">Confirm?</span>
+                                <button (click)="confirmDelete(attachment)" 
+                                        class="p-1 text-green-600 hover:text-green-700 transition rounded hover:bg-green-50"
+                                        title="Confirm delete">
+                                    <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/>
+                                    </svg>
+                                </button>
+                                <button (click)="cancelDelete()" 
+                                        class="p-1 text-red-600 hover:text-red-700 transition rounded hover:bg-red-50"
+                                        title="Cancel delete">
+                                    <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+                                    </svg>
+                                </button>
+                            </div>
+                        } @else {
+                            <button (click)="requestDelete(attachment.id)" 
+                                    class="p-1.5 text-slate-400 hover:text-red-600 transition rounded hover:bg-red-50" 
+                                    title="{{ 'cases.detail.attachments.delete' | transloco }}">
+                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+                                </svg>
+                            </button>
+                        }
+                    </div>
+                </div>
+            }
+        </div>
+    }
+</div>
