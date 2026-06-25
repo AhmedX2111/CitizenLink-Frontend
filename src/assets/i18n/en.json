@@ -199,6 +199,12 @@
   "cases": {
     "title": "Cases",
     "subtitle": "Manage and track citizen service requests",
+    "errors": {
+      "forbidden": "You do not have permission to view this data.",
+      "loadFailed": "Failed to load cases. Please try again.",
+      "loadDepartmentsFailed": "Failed to load departments. Please refresh the page.",
+      "loadCategoriesFailed": "Failed to load categories. Please refresh the page."
+    },
     "detail": {
       "title": "Case Details",
       "loading": "Loading case details…",
