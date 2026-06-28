@@ -194,7 +194,7 @@ export class CaseDetailPageComponent implements OnInit {
   }
 
   goBack(): void {
-    this.router.navigate(['/cases']);
+    this.router.navigate(['/dashboard']);
   }
 
   // ── Template helpers ──────────────────────────────────────────

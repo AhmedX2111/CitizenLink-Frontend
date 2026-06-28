@@ -38,7 +38,7 @@ export class Login implements OnInit, OnDestroy {
 
   ngOnInit(): void {
     if (this.authService.isAuthenticated()) {
-      this.router.navigate([this.getRoleRoute()]);
+      this.router.navigate(['/dashboard']);
       return;
     }
     this.returnUrl = this.route.snapshot.queryParams['returnUrl'] || null;
@@ -60,7 +60,7 @@ export class Login implements OnInit, OnDestroy {
       this.authService.login({ username, password }, rememberMe).subscribe({
         next: () => {
           this.isLoading.set(false);
-          this.router.navigate([this.returnUrl ?? this.getRoleRoute()]);
+          this.router.navigate(['/dashboard']);
         },
         error: (error) => {
           this.isLoading.set(false);

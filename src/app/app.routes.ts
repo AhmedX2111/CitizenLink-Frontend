@@ -27,6 +27,11 @@ export const routes: Routes = [
     canActivate: [AuthGuard],
     children: [
       {
+        path: 'dashboard',
+        loadComponent: () =>
+          import('./feature/dashboard/dashboard').then(m => m.DashboardComponent)
+      },
+      {
         path: 'cases',
         loadComponent: () =>
           import('./feature/cases/cases').then(m => m.CasesComponent)
@@ -35,11 +40,6 @@ export const routes: Routes = [
         path: 'cases/:id',
         loadComponent: () =>
           import('./feature/cases/case-detail-page/case-detail-page').then(m => m.CaseDetailPageComponent)
-      },
-      {
-        path: 'dashboard',
-        loadComponent: () =>
-          import('./feature/dashboard/dashboard').then(m => m.DashboardComponent)
       },
       {
         path: 'app/call-center',
