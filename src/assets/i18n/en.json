@@ -205,6 +205,17 @@
       "loadDepartmentsFailed": "Failed to load departments. Please refresh the page.",
       "loadCategoriesFailed": "Failed to load categories. Please refresh the page."
     },
+    "actions": {
+      "assign": "Assign",
+      "start": "Start Work",
+      "requestInfo": "Request Info",
+      "resume": "Resume",
+      "suspend": "Suspend",
+      "resolve": "Resolve",
+      "close": "Close",
+      "reopen": "Reopen",
+      "cancel": "Cancel"
+    },
     "detail": {
       "title": "Case Details",
       "loading": "Loading case details…",
@@ -222,6 +233,15 @@
       "timelineLoadError": "Failed to load case timeline. Please try again.",
       "noTimeline": "No status history yet.",
       "changedBy": "by",
+      "actionsLoadError": "Could not load available actions.",
+      "commentRequired": "A reason is required.",
+      "resolutionRequired": "A resolution summary is required.",
+      "transitionConflict": "This action is no longer valid for the case's current status.",
+      "transitionFailed": "Failed to update the case. Please try again.",
+      "reasonLabel": "Reason",
+      "reasonPlaceholder": "Provide a brief reason for this action",
+      "resolutionLabel": "Resolution Summary",
+      "resolutionPlaceholder": "Provide a brief summary of how the case was resolved",
       "events": {
       "created": "Case created"
     }

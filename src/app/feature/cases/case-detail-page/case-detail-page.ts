@@ -8,13 +8,14 @@ import { CaseService } from '../../../../core/services/case.service';
 import { TopbarComponent } from '../../shared/topbar/topbar';
 import {
   CaseResponse, CaseStatus, Priority, CaseType,
-  StatusHistoryResponse, WorkflowAction
+  StatusHistoryResponse, WorkflowAction, CaseActionResponse
 } from '../../../../core/models/case.models';
+import { FormsModule } from '@angular/forms';
 
 @Component({
   selector: 'app-case-detail-page',
   standalone: true,
-  imports: [CommonModule, RouterModule, TranslocoModule, TopbarComponent],
+  imports: [CommonModule, RouterModule, TranslocoModule, TopbarComponent, FormsModule],
   templateUrl: './case-detail-page.html',
   styleUrl: './case-detail-page.css'
 })
@@ -38,6 +39,19 @@ export class CaseDetailPageComponent implements OnInit {
   timelineError      = signal<string | null>(null);
   timeline           = signal<StatusHistoryResponse[]>([]);
 
+  // ── Actions state (US-17) ────────────────────────────────────────
+  isActionsLoading   = signal(true);
+  actionsError        = signal<string | null>(null);
+  availableActions    = signal<CaseActionResponse[]>([]);
+
+  // ── Transition modal state ───────────────────────────────────────
+  pendingAction       = signal<CaseActionResponse | null>(null);
+  transitionComment    = '';
+  transitionResolution = '';
+  isSubmittingAction   = signal(false);
+  transitionError      = signal<string | null>(null);
+
+
   ngOnInit(): void {
     const caseId = this.route.snapshot.paramMap.get('id');
 
@@ -45,11 +59,13 @@ export class CaseDetailPageComponent implements OnInit {
       this.loadError.set(this.transloco.translate('cases.detail.notFound'));
       this.isLoading.set(false);
       this.isTimelineLoading.set(false);
+      this.isActionsLoading.set(false);
       return;
     }
 
     this.loadCaseDetail(caseId);
     this.loadTimeline(caseId);
+    this.loadActions(caseId);
   }
 
   private loadCaseDetail(caseId: string): void {
@@ -91,6 +107,81 @@ export class CaseDetailPageComponent implements OnInit {
           err.status === 404
             ? this.transloco.translate('cases.detail.notFound')
             : this.transloco.translate('cases.detail.timelineLoadError')
+        );
+      }
+    });
+  }
+
+
+  private loadActions(caseId: string): void {
+    this.isActionsLoading.set(true);
+    this.actionsError.set(null);
+
+    this.caseService.getCaseActions(caseId).pipe(
+      takeUntilDestroyed(this.destroyRef)
+    ).subscribe({
+      next: (res) => {
+        this.availableActions.set(res);
+        this.isActionsLoading.set(false);
+      },
+      error: (err) => {
+        this.isActionsLoading.set(false);
+        // Non-fatal: a failure here just means no action buttons show.
+        // The page itself is still usable for viewing.
+        this.actionsError.set(this.transloco.translate('cases.detail.actionsLoadError'));
+      }
+    });
+  }
+
+  // ── Transition handling ──────────────────────────────────────────
+  openActionModal(action: CaseActionResponse): void {
+    this.pendingAction.set(action);
+    this.transitionComment = '';
+    this.transitionResolution = '';
+    this.transitionError.set(null);
+  }
+
+  closeActionModal(): void {
+    this.pendingAction.set(null);
+  }
+
+  submitAction(): void {
+    const action = this.pendingAction();
+    const caseId = this.caseDetail()?.id;
+    if (!action || !caseId) return;
+
+    if (action.requiresComment && !this.transitionComment.trim()) {
+      this.transitionError.set(this.transloco.translate('cases.detail.commentRequired'));
+      return;
+    }
+    if (action.requiresResolutionSummary && !this.transitionResolution.trim()) {
+      this.transitionError.set(this.transloco.translate('cases.detail.resolutionRequired'));
+      return;
+    }
+
+    this.isSubmittingAction.set(true);
+    this.transitionError.set(null);
+
+    this.caseService.transitionCase(caseId, {
+      action: action.action,
+      ...(action.requiresComment && { comment: this.transitionComment.trim() }),
+      ...(action.requiresResolutionSummary && { resolutionSummary: this.transitionResolution.trim() })
+    }).pipe(
+      takeUntilDestroyed(this.destroyRef)
+    ).subscribe({
+      next: (updatedCase) => {
+        this.isSubmittingAction.set(false);
+        this.caseDetail.set(updatedCase);
+        this.closeActionModal();
+        this.loadTimeline(caseId);
+        this.loadActions(caseId);
+      },
+      error: (err) => {
+        this.isSubmittingAction.set(false);
+        this.transitionError.set(
+          err.status === 409
+            ? (err.error?.message ?? this.transloco.translate('cases.detail.transitionConflict'))
+            : this.transloco.translate('cases.detail.transitionFailed')
         );
       }
     });

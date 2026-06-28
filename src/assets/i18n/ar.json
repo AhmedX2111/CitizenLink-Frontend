@@ -205,6 +205,17 @@
       "loadDepartmentsFailed": "فشل تحميل الأقسام. يرجى تحديث الصفحة.",
       "loadCategoriesFailed": "فشل تحميل الفئات. يرجى تحديث الصفحة."
     },
+    "actions": {
+      "assign": "إسناد",
+      "start": "بدء العمل",
+      "requestInfo": "طلب معلومات",
+      "resume": "استئناف",
+      "suspend": "تعليق",
+      "resolve": "حل",
+      "close": "إغلاق",
+      "reopen": "إعادة فتح",
+      "cancel": "إلغاء"
+    },
     "detail": {
       "title": "تفاصيل الحالة",
       "loading": "جاري تحميل تفاصيل الحالة...",
@@ -222,6 +233,15 @@
       "timelineLoadError": "فشل تحميل الجدول الزمني للحالة. يرجى المحاولة مرة أخرى.",
       "noTimeline": "لا يوجد سجل حالة بعد.",
       "changedBy": "بواسطة",
+      "actionsLoadError": "تعذر تحميل الإجراءات المتاحة.",
+      "commentRequired": "السبب مطلوب.",
+      "resolutionRequired": "ملخص الحل مطلوب.",
+      "transitionConflict": "هذا الإجراء غير صالح لحالة الحالة الحالية.",
+      "transitionFailed": "فشل تحديث الحالة. يرجى المحاولة مرة أخرى.",
+      "reasonLabel": "السبب",
+      "reasonPlaceholder": "قدم سببًا موجزًا لهذا الإجراء",
+      "resolutionLabel": "ملخص الحل",
+      "resolutionPlaceholder": "قدم ملخصًا موجزًا لكيفية حل الحالة",
       "events": {
         "created": "تم إنشاء الحالة"
       }
