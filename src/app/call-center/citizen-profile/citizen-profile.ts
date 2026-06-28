@@ -53,7 +53,7 @@ export class CitizenProfile implements OnInit {
   createNewCase(): void {
     const citizen = this.citizen();
     if (citizen?.id) {
-      this.router.navigate(['/cases/new'], { 
+      this.router.navigate(['/cases'], { 
         queryParams: { citizenId: citizen.id } 
       });
     }
