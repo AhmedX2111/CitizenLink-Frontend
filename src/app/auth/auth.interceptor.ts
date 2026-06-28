@@ -1,43 +1,36 @@
-// src/app/auth/auth.interceptor.ts
-
-import { Injectable, inject } from '@angular/core';
-import { HttpInterceptor, HttpRequest, HttpHandler, HttpEvent, HttpErrorResponse } from '@angular/common/http';
-import { Observable, throwError } from 'rxjs';
-import { catchError } from 'rxjs/operators';
-import { AuthService } from './auth.service';
+import { HttpInterceptorFn, HttpErrorResponse } from '@angular/common/http';
+import { inject } from '@angular/core';
 import { Router } from '@angular/router';
+import { throwError } from 'rxjs';
+import { catchError } from 'rxjs/operators';
+import { AuthTokenService } from './auth-token.service';
+import { LoggerService } from '../../core/services/logger.service';
 
-@Injectable()
-export class AuthInterceptor implements HttpInterceptor {
-  private authService = inject(AuthService);
-  private router = inject(Router);
+export const authInterceptor: HttpInterceptorFn = (req, next) => {
+  const tokenService = inject(AuthTokenService);
+  const logger = inject(LoggerService);
+  const router = inject(Router);
 
-  intercept(req: HttpRequest<any>, next: HttpHandler): Observable<HttpEvent<any>> {
-    const token = this.authService.getToken();
-    let authReq = req;
+  const token = tokenService.getToken();
+  let authReq = req;
 
-    // Don't add token to login request
-    if (token && !req.url.includes('/auth/login')) {
-      authReq = req.clone({
-        setHeaders: {
-          Authorization: `Bearer ${token}`
-        }
-      });
-    }
-
-    return next.handle(authReq).pipe(
-      catchError((error: HttpErrorResponse) => {
-        // Only redirect for 401 on non-login requests
-        const isLoginRequest = req.url.includes('/auth/login');
-        
-        if (error.status === 401 && !isLoginRequest) {
-          console.log('Unauthorized request, redirecting to login');
-          this.authService.logout();
-          // Don't navigate here - logout already navigates
-        }
-        
-        return throwError(() => error);
-      })
-    );
+  if (token && !req.url.includes('/auth/login')) {
+    authReq = req.clone({
+      setHeaders: { Authorization: `Bearer ${token}` }
+    });
   }
-}
+
+  return next(authReq).pipe(
+    catchError((error: HttpErrorResponse) => {
+      const isLoginRequest = req.url.includes('/auth/login');
+
+      if (error.status === 401 && !isLoginRequest) {
+        logger.info('AuthInterceptor', 'Unauthorized request, redirecting to login');
+        tokenService.clearAuthData();
+        router.navigate(['/login']);
+      }
+
+      return throwError(() => error);
+    })
+  );
+};

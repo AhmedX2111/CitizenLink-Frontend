@@ -1,20 +1,16 @@
-// src/app/auth/auth.guard.ts
-
-import { Injectable } from '@angular/core';
+import { Injectable, inject } from '@angular/core';
 import { Router, ActivatedRouteSnapshot, RouterStateSnapshot } from '@angular/router';
-import { AuthService } from './auth.service';
+import { AuthTokenService } from './auth-token.service';
 
 @Injectable({
   providedIn: 'root'
 })
 export class AuthGuard {
-  constructor(
-    private authService: AuthService,
-    private router: Router
-  ) {}
+  private tokenService = inject(AuthTokenService);
+  private router = inject(Router);
 
   canActivate(route: ActivatedRouteSnapshot, state: RouterStateSnapshot): boolean {
-    if (this.authService.isAuthenticated()) {
+    if (this.tokenService.isAuthenticated()) {
       return true;
     }
 

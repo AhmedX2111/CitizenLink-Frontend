@@ -5,6 +5,7 @@ import { RouterModule, Router } from '@angular/router';
 import { PagedResponse } from '../../../core/models/case.models';
 import { Citizen } from '../../../core/models/citizen.models';
 import { CitizenService } from '../../../core/services/citizen.service';
+import { LoggerService } from '../../../core/services/logger.service';
 import { TranslocoModule, TranslocoService } from '@jsverse/transloco';
 
 @Component({
@@ -17,6 +18,7 @@ export class CallCenter {
   private citizenService = inject(CitizenService);
   private router = inject(Router);
   private transloco = inject(TranslocoService);
+  private logger = inject(LoggerService);
 
   // Search state
   protected searchTerm = signal('');
@@ -63,7 +65,7 @@ export class CallCenter {
         this.isLoading.set(false);
       },
       error: (error) => {
-        console.error('Search error:', error);
+        this.logger.error('CallCenter', 'Search error:', error);
         this.errorMessage.set(this.transloco.translate('callCenter.errors.searchFailed'));
         this.isLoading.set(false);
         this.citizens.set([]);
@@ -77,12 +79,12 @@ export class CallCenter {
   viewCitizenProfile(citizenId: string): void {
     this.router.navigate(['/app/call-center/citizen', citizenId]);
   }
-
+  
   /**
    * Navigate to create new citizen
    */
   createNewCitizen(): void {
-    this.router.navigate(['/app/call-center/new-citizen']);
+    this.router.navigate(['/call-center/new-citizen']);
   }
 
   /**
@@ -134,7 +136,7 @@ export class CallCenter {
         this.isLoading.set(false);
       },
       error: (error) => {
-        console.error('Page load error:', error);
+        this.logger.error('CallCenter', 'Page load error:', error);
         this.isLoading.set(false);
       }
     });

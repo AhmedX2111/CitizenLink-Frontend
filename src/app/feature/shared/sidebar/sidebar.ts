@@ -1,10 +1,9 @@
-import { Component, OnInit, signal, inject, DestroyRef } from '@angular/core';
+import { Component, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterModule } from '@angular/router';
 import { TranslocoModule } from '@jsverse/transloco';
-import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
+import { toSignal } from '@angular/core/rxjs-interop';
 import { AuthService } from '../../../auth/auth.service';
-import { AuthResponse } from '../../../auth/models/auth.models';
 
 @Component({
   selector: 'app-sidebar',
@@ -13,18 +12,11 @@ import { AuthResponse } from '../../../auth/models/auth.models';
   templateUrl: './sidebar.html',
   styleUrl: './sidebar.css'
 })
-export class SidebarComponent implements OnInit {
+export class SidebarComponent {
 
   private authService = inject(AuthService);
-  private destroyRef   = inject(DestroyRef);
 
-  currentUser = signal<AuthResponse | null>(null);
-
-  ngOnInit(): void {
-    this.authService.authState$.pipe(
-      takeUntilDestroyed(this.destroyRef)
-    ).subscribe(user => this.currentUser.set(user));
-  }
+  currentUser = toSignal(this.authService.authState$);
 
   logout(): void {
     this.authService.logout();

@@ -1,27 +1,27 @@
-import { Injectable } from '@angular/core';
+import { Injectable, inject } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
-import { Observable, BehaviorSubject, throwError } from 'rxjs';
-import { tap, catchError, finalize } from 'rxjs/operators';
+import { Observable, BehaviorSubject } from 'rxjs';
+import { tap, finalize } from 'rxjs/operators';
 import { Router } from '@angular/router';
 import { LoginRequest, AuthResponse } from './models/auth.models';
+import { AuthTokenService } from './auth-token.service';
 import { environment } from '../../environments/environment';
+import { LoggerService } from '../../core/services/logger.service';
 
 @Injectable({
   providedIn: 'root',
 })
 export class AuthService {
   private readonly API_URL = `${environment.apiUrl}/api/v1/auth`;
-  private readonly TOKEN_KEY = 'auth_token';
-  private readonly USER_KEY = 'auth_user';
-  private readonly REMEMBER_ME_KEY = 'remember_me';
-  
+  private http = inject(HttpClient);
+  private router = inject(Router);
+  private tokenService = inject(AuthTokenService);
+  private logger = inject(LoggerService);
+
   private authState = new BehaviorSubject<AuthResponse | null>(null);
   authState$ = this.authState.asObservable();
 
-  constructor(
-    private http: HttpClient,
-    private router: Router
-  ) {
+  constructor() {
     this.loadStoredAuth();
   }
 
@@ -29,116 +29,29 @@ export class AuthService {
     return this.http.post<AuthResponse>(`${this.API_URL}/login`, credentials)
       .pipe(
         tap(response => {
-          // Clear BOTH storages first to prevent old tokens
-          this.saveAuthData(response, rememberMe);
+          this.tokenService.saveAuthData(response, rememberMe);
           this.authState.next(response);
-        }),
-        catchError(error => {
-          return throwError(() => error);
         })
       );
   }
 
   logout(): void {
-    // Call backend logout endpoint to log the event (fire and forget)
     this.http.post(`${this.API_URL}/logout`, {}).pipe(
       finalize(() => {
-        // Always clear local storage regardless of API response
-        this.clearAuthData();
+        this.tokenService.clearAuthData();
         this.authState.next(null);
-        this.router.navigate(['/login']);
+        this.router.navigate(['/Landing']);
       })
     ).subscribe({
-      next: () => console.log('Logout successful'),
-      error: (error) => console.error('Logout API error:', error)
+      next: () => this.logger.info('AuthService', 'Logout successful'),
+      error: (error) => this.logger.error('AuthService', 'Logout API error:', error)
     });
   }
 
-  getToken(): string | null {
-    const rememberMe = localStorage.getItem(this.REMEMBER_ME_KEY) === 'true';
-    if (rememberMe) {
-      return localStorage.getItem(this.TOKEN_KEY);
-    }
-    return sessionStorage.getItem(this.TOKEN_KEY);
-  }
-
-  isAuthenticated(): boolean {
-    const token = this.getToken();
-    if (!token) return false;
-    
-    try {
-      const payload = JSON.parse(atob(token.split('.')[1]));
-      const expiryDate = new Date(payload.exp * 1000);
-      const isValid = expiryDate > new Date();
-      
-      if (!isValid) {
-        this.clearAuthData();
-      }
-      return isValid;
-    } catch {
-      return false;
-    }
-  }
-
-  getCurrentUser(): Observable<AuthResponse> {
-    return this.http.get<AuthResponse>(`${this.API_URL}/me`);
-  }
-
-  getUserData(): AuthResponse | null {
-    const userData = localStorage.getItem(this.USER_KEY) || sessionStorage.getItem(this.USER_KEY);
-    if (userData) {
-      return JSON.parse(userData);
-    }
-    return null;
-  }
-
-  hasRole(role: string): boolean {
-    const user = this.getUserData();
-    return user?.role === role;
-  }
-
-  getRoleFromToken(): string | null {
-    const token = this.getToken();
-    if (!token) return null;
-
-    try {
-      const payload = JSON.parse(atob(token.split('.')[1]));
-      return payload.role ?? null;
-    } catch {
-      return null;
-    }
-  }
-
-  // Clear BOTH storages before saving new token
-  private saveAuthData(response: AuthResponse, rememberMe: boolean): void {
-    // 🔥 CRITICAL FIX: Clear both storages first to prevent old tokens
-    this.clearAuthData();
-    
-    const storage = rememberMe ? localStorage : sessionStorage;
-    
-    if (response.token) {
-      storage.setItem(this.TOKEN_KEY, response.token);
-      storage.setItem(this.USER_KEY, JSON.stringify(response));
-      storage.setItem(this.REMEMBER_ME_KEY, String(rememberMe));
-      console.log(`Auth data saved to ${rememberMe ? 'localStorage' : 'sessionStorage'}`);
-    }
-  }
-
-  private clearAuthData(): void {
-    console.log('Clearing all auth data from storage');
-    localStorage.removeItem(this.TOKEN_KEY);
-    localStorage.removeItem(this.USER_KEY);
-    localStorage.removeItem(this.REMEMBER_ME_KEY);
-    sessionStorage.removeItem(this.TOKEN_KEY);
-    sessionStorage.removeItem(this.USER_KEY);
-    sessionStorage.removeItem(this.REMEMBER_ME_KEY);
-  }
-
   private loadStoredAuth(): void {
-    const token = this.getToken();
-    const user = this.getUserData();
-    
-    if (token && user && this.isAuthenticated()) {
+    const token = this.tokenService.getToken();
+    const user = this.tokenService.getUserData();
+    if (token && user && this.tokenService.isAuthenticated()) {
       this.authState.next(user);
     }
   }

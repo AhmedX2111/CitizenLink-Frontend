@@ -1,10 +1,11 @@
 import { CommonModule } from "@angular/common";
-import { Component, OnInit, inject, signal } from "@angular/core";
-import { RouterModule, ActivatedRoute, Router } from "@angular/router";
+import { Component, inject, signal, DestroyRef } from "@angular/core";
+import { ActivatedRoute, Router, RouterModule } from "@angular/router";
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { CitizenService } from "../../../core/services/citizen.service";
 import { CitizenProfile as CitizenProfileData } from "../../../core/models/citizen.models";
 import { TranslocoModule, TranslocoService } from "@jsverse/transloco";
-
+import { LoggerService } from "../../../core/services/logger.service";
 
 @Component({
   selector: 'app-citizen-profile',
@@ -13,17 +14,19 @@ import { TranslocoModule, TranslocoService } from "@jsverse/transloco";
   templateUrl: './citizen-profile.html',
   styleUrls: ['./citizen-profile.css']
 })
-export class CitizenProfile implements OnInit {
+export class CitizenProfile {
   private citizenService = inject(CitizenService);
   private route = inject(ActivatedRoute);
   private router = inject(Router);
+  private logger = inject(LoggerService);
   private transloco = inject(TranslocoService);
+  private destroyRef = inject(DestroyRef);
 
   protected citizen = signal<CitizenProfileData | null>(null);
   protected isLoading = signal(true);
   protected errorMessage = signal<string | null>(null);
 
-  ngOnInit(): void {
+  constructor() {
     const id = this.route.snapshot.paramMap.get('id');
     if (id) {
       this.loadCitizenProfile(id);
@@ -33,17 +36,19 @@ export class CitizenProfile implements OnInit {
     }
   }
 
-  loadCitizenProfile(id: string): void {
+  private loadCitizenProfile(id: string): void {
     this.isLoading.set(true);
     this.errorMessage.set(null);
-    
-    this.citizenService.getCitizenProfile(id).subscribe({
-      next: (response: CitizenProfileData) => {
+
+    this.citizenService.getCitizenProfile(id).pipe(
+      takeUntilDestroyed(this.destroyRef)
+    ).subscribe({
+      next: (response) => {
         this.citizen.set(response);
         this.isLoading.set(false);
       },
       error: (error) => {
-        console.error('Error loading citizen profile:', error);
+        this.logger.error('CitizenProfile', 'Error loading citizen profile:', error);
         this.errorMessage.set(this.transloco.translate('citizenProfile.errors.loadFailed'));
         this.isLoading.set(false);
       }
@@ -53,14 +58,14 @@ export class CitizenProfile implements OnInit {
   createNewCase(): void {
     const citizen = this.citizen();
     if (citizen?.id) {
-      this.router.navigate(['/cases'], { 
-        queryParams: { citizenId: citizen.id } 
+      this.router.navigate(['/cases'], {
+        queryParams: { citizenId: citizen.id }
       });
     }
   }
 
   goBack(): void {
-    this.router.navigate(['/app/call-center']);
+    this.router.navigate(['/call-center']);
   }
 
   getStatusBadgeClass(status: string): string {

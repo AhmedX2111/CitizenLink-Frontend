@@ -1,15 +1,21 @@
-import { Component, OnInit, signal, computed, inject } from '@angular/core';
+import { Component, signal, computed, inject, DestroyRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Router } from '@angular/router';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { TranslocoModule, TranslocoService } from '@jsverse/transloco';
 import { DashboardService } from '../../../core/services/dashboard.service';
-import { AuthService } from '../../auth/auth.service';
+import { AuthUserService } from '../../auth/auth-user.service';
 import {
   DashboardSummaryResponse,
   MyOpenCaseResponse
 } from '../../../core/models/dashboard.models';
 import { CaseStatus } from '../../../core/models/case.models';
 import { TopbarComponent } from '../shared/topbar/topbar';
+import {
+  statusBadgeClass as statusBadge,
+  formatDate as fmtDate,
+  isOverdue as overdue
+} from '../shared/utils/case-display.utils';
 
 @Component({
   selector: 'app-dashboard',
@@ -18,14 +24,14 @@ import { TopbarComponent } from '../shared/topbar/topbar';
   templateUrl: './dashboard.html',
   styleUrl: './dashboard.css'
 })
-export class DashboardComponent implements OnInit {
+export class DashboardComponent {
 
   private dashboardService = inject(DashboardService);
-  private authService      = inject(AuthService);
+  private authUserService  = inject(AuthUserService);
   private router           = inject(Router);
   private transloco        = inject(TranslocoService);
+  private destroyRef       = inject(DestroyRef);
 
-  // Breadcrumb title passed to shared topbar
   pageTitle = () => this.transloco.translate('dashboard.title');
 
   isLoading      = signal(true);
@@ -34,10 +40,8 @@ export class DashboardComponent implements OnInit {
   myOpenCases    = signal<MyOpenCaseResponse[]>([]);
   isLoadingCases = signal(false);
 
-  // HANDLER-only widget visibility (US-06)
-  isHandler = computed(() => this.authService.hasRole('HANDLER'));
+  isHandler = computed(() => this.authUserService.hasRole('HANDLER'));
 
-  // US-05 chart data — derived from summary signal
   statusChartData = computed(() => {
     const s = this.summary();
     if (!s) return [];
@@ -56,7 +60,12 @@ export class DashboardComponent implements OnInit {
     }));
   });
 
-  ngOnInit(): void {
+  // Template helpers
+  statusBadgeClass = statusBadge;
+  formatDate = fmtDate;
+  isOverdue = overdue;
+
+  constructor() {
     this.loadSummary();
     if (this.isHandler()) {
       this.loadMyOpenCases();
@@ -67,7 +76,9 @@ export class DashboardComponent implements OnInit {
     this.isLoading.set(true);
     this.loadError.set(null);
 
-    this.dashboardService.getSummary().subscribe({
+    this.dashboardService.getSummary().pipe(
+      takeUntilDestroyed(this.destroyRef)
+    ).subscribe({
       next: (res) => {
         this.summary.set(res);
         this.isLoading.set(false);
@@ -81,7 +92,9 @@ export class DashboardComponent implements OnInit {
 
   private loadMyOpenCases(): void {
     this.isLoadingCases.set(true);
-    this.dashboardService.getMyOpenCases().subscribe({
+    this.dashboardService.getMyOpenCases().pipe(
+      takeUntilDestroyed(this.destroyRef)
+    ).subscribe({
       next: (res) => {
         this.myOpenCases.set(res);
         this.isLoadingCases.set(false);
@@ -94,31 +107,5 @@ export class DashboardComponent implements OnInit {
 
   onRowClick(caseId: string): void {
     this.router.navigate(['/cases', caseId]);
-  }
-
-  statusBadgeClass(status: CaseStatus): string {
-    const map: Record<CaseStatus, string> = {
-      NEW:           'bg-blue-50 text-blue-700',
-      ASSIGNED:      'bg-yellow-50 text-yellow-800',
-      IN_PROGRESS:   'bg-indigo-50 text-indigo-700',
-      AWAITING_INFO: 'bg-orange-50 text-orange-700',
-      SUSPENDED:     'bg-gray-100 text-gray-600',
-      RESOLVED:      'bg-emerald-50 text-emerald-700',
-      CLOSED:        'bg-slate-100 text-slate-600',
-      CANCELLED:     'bg-red-50 text-red-700'
-    };
-    return map[status] ?? 'bg-gray-100 text-gray-600';
-  }
-
-  formatDate(iso: string | null): string {
-    if (!iso) return '—';
-    return new Date(iso).toLocaleDateString('en-GB', {
-      day: '2-digit', month: 'short', year: 'numeric'
-    });
-  }
-
-  isOverdue(dueAt: string | null): boolean {
-    if (!dueAt) return false;
-    return new Date(dueAt).getTime() < Date.now();
   }
 }
