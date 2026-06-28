@@ -243,8 +243,47 @@
       "resolutionLabel": "Resolution Summary",
       "resolutionPlaceholder": "Provide a brief summary of how the case was resolved",
       "events": {
-      "created": "Case created"
-    }
+        "created": "Case created"
+      },
+      "notes": {
+        "title": "Notes",
+        "addNote": "Add Note",
+        "noteBody": "Note",
+        "notePlaceholder": "Write your note here...",
+        "internalNote": "Internal note",
+        "internalNoteHint": "Visible only to staff",
+        "saveNote": "Save Note",
+        "saving": "Saving...",
+        "cancel": "Cancel",
+        "delete": "Delete",
+        "noNotes": "No notes yet. Add the first note!",
+        "internal": "Internal",
+        "public": "Public",
+        "bodyRequired": "Note body is required",
+        "bodyMaxLength": "Note cannot exceed 5000 characters",
+        "deleted": "Note deleted successfully!",
+        "deleteConfirm": "Are you sure you want to delete this note?"
+      },
+      "attachments": {
+        "title": "Attachments",
+        "upload": "Upload File",
+        "noAttachments": "No attachments yet. Upload a file!",
+        "file": "File",
+        "uploader": "Uploaded by",
+        "uploadedAt": "Uploaded at",
+        "size": "Size",
+        "delete": "Delete",
+        "download": "Download",
+        "uploadSuccess": "File uploaded successfully!",
+        "uploadError": "Failed to upload file. Please try again.",
+        "deleteConfirm": "Are you sure you want to delete this attachment?",
+        "deleteSuccess": "Attachment deleted successfully!",
+        "deleteError": "Failed to delete attachment.",
+        "invalidType": "File type not allowed. Allowed: PDF, PNG, JPG, DOCX",
+        "fileTooLarge": "File size exceeds 5 MB limit",
+        "fileRequired": "Please select a file to upload",
+        "uploading": "Uploading..."
+      }
     },
     "newCase": "New Case",
     "caseList": "Case List",
@@ -368,6 +407,15 @@
       "title": "My Open Cases",
       "dueDate": "Due Date",
       "empty": "You have no open cases assigned."
+    },
+    "attachments": {
+    "loadError": "Failed to load attachments. Please try again.",
+    "downloadSuccess": "File downloaded successfully!",
+    "downloadError": "Failed to download file. Please try again.",
+    "deleteConfirmTitle": "Confirm Delete",
+    "deleteConfirm": "Are you sure you want to delete this attachment? This action cannot be undone.",
+    "confirmDelete": "Confirm?",
+    "cancelDelete": "Cancel"
     }
   }
 }

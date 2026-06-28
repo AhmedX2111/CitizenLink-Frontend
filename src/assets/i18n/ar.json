@@ -244,6 +244,45 @@
       "resolutionPlaceholder": "قدم ملخصًا موجزًا لكيفية حل الحالة",
       "events": {
         "created": "تم إنشاء الحالة"
+      },
+      "notes": {
+        "title": "ملاحظات",
+        "addNote": "إضافة ملاحظة",
+        "noteBody": "الملاحظة",
+        "notePlaceholder": "اكتب ملاحظتك هنا...",
+        "internalNote": "ملاحظة داخلية",
+        "internalNoteHint": "مرئية للموظفين فقط",
+        "saveNote": "حفظ الملاحظة",
+        "saving": "جاري الحفظ...",
+        "cancel": "إلغاء",
+        "delete": "حذف",
+        "noNotes": "لا توجد ملاحظات. أضف الملاحظة الأولى!",
+        "internal": "داخلية",
+        "public": "عامة",
+        "bodyRequired": "نص الملاحظة مطلوب",
+        "bodyMaxLength": "لا يمكن أن تتجاوز الملاحظة 5000 حرف",
+        "deleted": "تم حذف الملاحظة بنجاح!",
+        "deleteConfirm": "هل أنت متأكد من حذف هذه الملاحظة؟"
+      },
+      "attachments": {
+        "title": "المرفقات",
+        "upload": "رفع ملف",
+        "noAttachments": "لا توجد مرفقات. قم برفع ملف!",
+        "file": "الملف",
+        "uploader": "تم الرفع بواسطة",
+        "uploadedAt": "تاريخ الرفع",
+        "size": "الحجم",
+        "delete": "حذف",
+        "download": "تحميل",
+        "uploadSuccess": "تم رفع الملف بنجاح!",
+        "uploadError": "فشل رفع الملف. يرجى المحاولة مرة أخرى.",
+        "deleteConfirm": "هل أنت متأكد من حذف هذا المرفق؟",
+        "deleteSuccess": "تم حذف المرفق بنجاح!",
+        "deleteError": "فشل حذف المرفق.",
+        "invalidType": "نوع الملف غير مسموح. المسموح: PDF, PNG, JPG, DOCX",
+        "fileTooLarge": "حجم الملف يتجاوز الحد الأقصى 5 ميجابايت",
+        "fileRequired": "يرجى اختيار ملف للرفع",
+        "uploading": "جاري الرفع..."
       }
     },
     "newCase": "حالة جديدة",
@@ -368,6 +407,15 @@
       "title": "حالاتي المفتوحة",
       "dueDate": "تاريخ الاستحقاق",
       "empty": "لا توجد حالات مفتوحة مسندة إليك."
+    },
+    "attachments": {
+    "loadError": "فشل تحميل المرفقات. يرجى المحاولة مرة أخرى.",
+    "downloadSuccess": "تم تحميل الملف بنجاح!",
+    "downloadError": "فشل تحميل الملف. يرجى المحاولة مرة أخرى.",
+    "deleteConfirmTitle": "تأكيد الحذف",
+    "deleteConfirm": "هل أنت متأكد من حذف هذا المرفق؟ لا يمكن التراجع عن هذا الإجراء.",
+    "confirmDelete": "تأكيد؟",
+    "cancelDelete": "إلغاء"
     }
   }
 }
