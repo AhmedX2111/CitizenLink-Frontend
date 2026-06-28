@@ -101,3 +101,18 @@ export interface StatusHistoryResponse {
   changedByUserId:       string;
   changedByDisplayName:  string;
 }
+
+
+export interface CaseActionResponse {
+  action:                     WorkflowAction;
+  labelKey:                   string;
+  resultingStatus:            CaseStatus;
+  requiresComment:            boolean;
+  requiresResolutionSummary:  boolean;
+}
+
+export interface CaseTransitionRequest {
+  action:             WorkflowAction;
+  comment?:           string;
+  resolutionSummary?: string;
+}

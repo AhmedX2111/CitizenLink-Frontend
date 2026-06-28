@@ -6,7 +6,9 @@ import {
   CaseSearchRequest,
   CreateCaseRequest,
   StatusHistoryResponse,
-  PagedResponse
+  PagedResponse,
+  CaseTransitionRequest,
+  CaseActionResponse
 } from '../models/case.models';
 import { Department } from '../models/department.model';
 import { Category } from '../models/category.model';
@@ -54,6 +56,24 @@ export class CaseService {
    */
   getCaseTimeline(id: string): Observable<StatusHistoryResponse[]> {
     return this.http.get<StatusHistoryResponse[]>(`${this.baseUrl}/${id}/timeline`);
+  }
+
+  /**
+   * US-17: fetches the workflow action buttons the current user may
+   * use on this case right now.
+   */
+  getCaseActions(id: string): Observable<CaseActionResponse[]> {
+    return this.http.get<CaseActionResponse[]>(`${this.baseUrl}/${id}/actions`);
+  }
+
+  /**
+   * WFL-01: executes a workflow transition. Backend independently
+   * validates and returns 409 if the transition is illegal — the
+   * frontend's button visibility is a UX convenience, not the source
+   * of truth for authorization.
+   */
+  transitionCase(id: string, request: CaseTransitionRequest): Observable<CaseResponse> {
+    return this.http.post<CaseResponse>(`${this.baseUrl}/${id}/transition`, request);
   }
 
   getDepartments(): Observable<Department[]> {
