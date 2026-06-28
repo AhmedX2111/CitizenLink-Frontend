@@ -4,6 +4,8 @@ import { Router, ActivatedRoute, RouterModule } from '@angular/router';
 import { CommonModule } from '@angular/common';
 import { TranslocoModule, TranslocoService } from '@jsverse/transloco';
 import { AuthService } from '../auth.service';
+import { AuthTokenService } from '../auth-token.service';
+import { AuthUserService } from '../auth-user.service';
 import { Subscription } from 'rxjs';
 
 @Component({
@@ -15,6 +17,8 @@ import { Subscription } from 'rxjs';
 export class Login implements OnInit, OnDestroy {
 
   private transloco = inject(TranslocoService);
+  private tokenService = inject(AuthTokenService);
+  private userService = inject(AuthUserService);
 
   loginForm: FormGroup;
   protected readonly isLoading     = signal(false);
@@ -37,7 +41,7 @@ export class Login implements OnInit, OnDestroy {
   }
 
   ngOnInit(): void {
-    if (this.authService.isAuthenticated()) {
+    if (this.tokenService.isAuthenticated()) {
       this.router.navigate(['/dashboard']);
       return;
     }
@@ -97,7 +101,7 @@ export class Login implements OnInit, OnDestroy {
   }
 
   private getRoleRoute(): string {
-    const role = this.authService.getRoleFromToken();
+    const role = this.userService.getRoleFromToken();
     switch (role) {
       case 'ADMIN':
       case 'SUPERVISOR': 

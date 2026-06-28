@@ -4,6 +4,7 @@ import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angula
 import { TranslocoModule, TranslocoService } from '@jsverse/transloco';
 import { Note } from '../../../../core/models/note.models';
 import { NoteService } from '../../../../core/services/note.service';
+import { LoggerService } from '../../../../core/services/logger.service';
 
 @Component({
     selector: 'app-case-notes',
@@ -17,6 +18,7 @@ export class CaseNotesComponent implements OnInit {
 
     private noteService = inject(NoteService);
     private fb = inject(FormBuilder);
+    private logger = inject(LoggerService);
     private transloco = inject(TranslocoService);
 
     notes = signal<Note[]>([]);
@@ -48,7 +50,7 @@ export class CaseNotesComponent implements OnInit {
             error: (error) => {
                 this.errorMessage.set('Failed to load notes. Please try again.');
                 this.isLoading.set(false);
-                console.error('Error loading notes:', error);
+                this.logger.error('CaseNotesComponent', 'Error loading notes:', error);
             }
         });
     }
@@ -92,7 +94,7 @@ export class CaseNotesComponent implements OnInit {
             error: (error) => {
                 this.isSubmitting.set(false);
                 this.errorMessage.set('Failed to add note. Please try again.');
-                console.error('Error adding note:', error);
+                this.logger.error('CaseNotesComponent', 'Error adding note:', error);
             }
         });
     }
@@ -110,7 +112,7 @@ export class CaseNotesComponent implements OnInit {
             },
             error: (error) => {
                 this.errorMessage.set('Failed to delete note. Please try again.');
-                console.error('Error deleting note:', error);
+                this.logger.error('CaseNotesComponent', 'Error deleting note:', error);
             }
         });
     }

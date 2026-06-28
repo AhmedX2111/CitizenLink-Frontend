@@ -1,12 +1,13 @@
-import { ApplicationConfig, provideZoneChangeDetection, isDevMode } from '@angular/core';
+import { ApplicationConfig, provideZoneChangeDetection, isDevMode, ErrorHandler } from '@angular/core';
 import { provideRouter } from '@angular/router';
 import {
   provideHttpClient,
-  withInterceptorsFromDi,
+  withInterceptors,
   HttpClient
 } from '@angular/common/http';
-import { HTTP_INTERCEPTORS } from '@angular/common/http';
-import { AuthInterceptor } from './auth/auth.interceptor';
+import { authInterceptor } from './auth/auth.interceptor';
+import { httpErrorInterceptor } from '../core/services/http-error.interceptor';
+import { GlobalErrorHandler } from '../core/services/error-handler.service';
 import { routes } from './app.routes';
 import { provideTransloco, TranslocoLoader } from '@jsverse/transloco';
 import { Injectable } from '@angular/core';
@@ -26,12 +27,10 @@ export const appConfig: ApplicationConfig = {
   providers: [
     provideZoneChangeDetection({ eventCoalescing: true }),
     provideRouter(routes),
-    provideHttpClient(withInterceptorsFromDi()),
-    {
-      provide: HTTP_INTERCEPTORS,
-      useClass: AuthInterceptor,
-      multi: true
-    },
+    provideHttpClient(
+      withInterceptors([authInterceptor, httpErrorInterceptor])
+    ),
+    { provide: ErrorHandler, useClass: GlobalErrorHandler },
     provideTransloco({
       config: {
         availableLangs: ['en', 'ar'],

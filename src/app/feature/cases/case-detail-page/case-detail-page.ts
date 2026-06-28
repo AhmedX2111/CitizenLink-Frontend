@@ -190,7 +190,7 @@ export class CaseDetailPageComponent implements OnInit {
   }
 
   goToCitizenProfile(citizenId: string): void {
-    this.router.navigate(['/app/call-center/citizen', citizenId]);
+    this.router.navigate(['/call-center/citizen', citizenId]);
   }
 
   goBack(): void {

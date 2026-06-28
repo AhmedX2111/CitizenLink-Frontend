@@ -10,6 +10,7 @@ import { debounceTime, distinctUntilChanged, switchMap } from 'rxjs/operators';
 import { Subject } from 'rxjs';
 import { TranslocoModule, TranslocoService } from '@jsverse/transloco';
 import { CaseService } from '../../../core/services/case.service';
+import { LoggerService } from '../../../core/services/logger.service';
 import { Router } from '@angular/router';
 
 import {
@@ -37,6 +38,7 @@ export class CasesComponent implements OnInit {
   private destroyRef  = inject(DestroyRef);
   private transloco   = inject(TranslocoService);
   private router      = inject(Router);
+  private logger      = inject(LoggerService);
   // Breadcrumb title passed to shared topbar
   pageTitle = () => this.transloco.translate('cases.title');
 
@@ -190,7 +192,7 @@ export class CasesComponent implements OnInit {
         this.departments.set(departments);
       },
       error: (err) => {
-        console.error('Error loading departments:', err);
+        this.logger.error('CasesComponent', 'Error loading departments:', err);
         this.lookupError.set(
           err.status === 403
             ? this.transloco.translate('cases.errors.forbidden')
@@ -209,7 +211,7 @@ export class CasesComponent implements OnInit {
         this.filteredCategories.set(categories);
       },
       error: (err) => {
-        console.error('Error loading categories:', err);
+        this.logger.error('CasesComponent', 'Error loading categories:', err);
         this.lookupError.set(
           err.status === 403
             ? this.transloco.translate('cases.errors.forbidden')

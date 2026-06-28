@@ -3,6 +3,7 @@ import { Component, inject, signal } from '@angular/core';
 import { ReactiveFormsModule, FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { RouterModule, Router } from '@angular/router';
 import { CitizenService } from '../../../../core/services/citizen.service';
+import { LoggerService } from '../../../../core/services/logger.service';
 import { TranslocoModule, TranslocoService } from '@jsverse/transloco';
 
 @Component({
@@ -16,6 +17,7 @@ export class NewCitizen {
   private fb = inject(FormBuilder);
   private citizenService = inject(CitizenService);
   private router = inject(Router);
+  private logger = inject(LoggerService);
   private transloco = inject(TranslocoService);
 
   protected citizenForm: FormGroup;
@@ -61,12 +63,12 @@ export class NewCitizen {
             );
             
             setTimeout(() => {
-                this.router.navigate(['/app/call-center/citizen', response.id]);
+                this.router.navigate(['/call-center/citizen', response.id]);
             }, 2000);
         },
         error: (error) => {
             this.isLoading.set(false);
-            console.error('Create citizen error:', error);
+            this.logger.error('NewCitizen', 'Create citizen error:', error);
             
             if (error.status === 400 && error.error?.fieldErrors) {
                 const fieldErrors = error.error.fieldErrors;
@@ -84,7 +86,7 @@ export class NewCitizen {
   }
 
   cancel(): void {
-    this.router.navigate(['/app/call-center']);
+    this.router.navigate(['/call-center']);
   }
 
   private markFormGroupTouched(formGroup: FormGroup): void {

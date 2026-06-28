@@ -2,6 +2,7 @@ import { Component, Input, signal, inject, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { TranslocoModule, TranslocoService } from '@jsverse/transloco';
 import { AttachmentService } from '../../../../core/services/attachment.service';
+import { LoggerService } from '../../../../core/services/logger.service';
 import { Attachment } from '../../../../core/models/attachment.models';
 
 @Component({
@@ -15,6 +16,7 @@ export class CaseAttachmentsComponent implements OnInit {
     @Input() caseId!: string;
 
     private attachmentService = inject(AttachmentService);
+    private logger = inject(LoggerService);
     private transloco = inject(TranslocoService);
 
     attachments = signal<Attachment[]>([]);
@@ -43,7 +45,7 @@ export class CaseAttachmentsComponent implements OnInit {
             error: (error) => {
                 this.errorMessage.set(this.transloco.translate('cases.detail.attachments.loadError'));
                 this.isLoading.set(false);
-                console.error('Error loading attachments:', error);
+                this.logger.error('CaseAttachmentsComponent', 'Error loading attachments:', error);
             }
         });
     }
@@ -84,7 +86,7 @@ export class CaseAttachmentsComponent implements OnInit {
             error: (error) => {
                 this.isUploading.set(false);
                 this.errorMessage.set(error.error?.message || this.transloco.translate('cases.detail.attachments.uploadError'));
-                console.error('Error uploading file:', error);
+                this.logger.error('CaseAttachmentsComponent', 'Error uploading file:', error);
             }
         });
     }
@@ -112,7 +114,7 @@ export class CaseAttachmentsComponent implements OnInit {
             },
             error: (error) => {
                 this.errorMessage.set(this.transloco.translate('cases.detail.attachments.downloadError'));
-                console.error('Error downloading file:', error);
+                this.logger.error('CaseAttachmentsComponent', 'Error downloading file:', error);
                 setTimeout(() => this.errorMessage.set(null), 5000);
             }
         });
@@ -142,7 +144,7 @@ export class CaseAttachmentsComponent implements OnInit {
             },
             error: (error) => {
                 this.errorMessage.set(this.transloco.translate('cases.detail.attachments.deleteError'));
-                console.error('Error deleting attachment:', error);
+                this.logger.error('CaseAttachmentsComponent', 'Error deleting attachment:', error);
                 setTimeout(() => this.errorMessage.set(null), 5000);
             }
         });
