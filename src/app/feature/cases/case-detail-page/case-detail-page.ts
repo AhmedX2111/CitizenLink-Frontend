@@ -17,7 +17,7 @@ import { CaseAttachmentsComponent } from '../case-attachments/case-attachments';
 @Component({
   selector: 'app-case-detail-page',
   standalone: true,
-  imports: [CommonModule, RouterModule, TranslocoModule, TopbarComponent, CaseNotesComponent, CaseAttachmentsComponent],
+  imports: [CommonModule, RouterModule, TranslocoModule, TopbarComponent, CaseNotesComponent, CaseAttachmentsComponent, FormsModule],
   templateUrl: './case-detail-page.html',
   styleUrl: './case-detail-page.css'
 })
