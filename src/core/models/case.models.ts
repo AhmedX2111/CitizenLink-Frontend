@@ -115,4 +115,11 @@ export interface CaseTransitionRequest {
   action:             WorkflowAction;
   comment?:           string;
   resolutionSummary?: string;
+  assignedToUserId?:  string;
+}
+
+export interface HandlerResponse {
+  id:           string;
+  displayName:  string;
+  email:        string;
 }

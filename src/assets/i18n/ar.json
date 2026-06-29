@@ -20,6 +20,7 @@
     "no": "لا",
     "required": "هذا الحقل مطلوب",
     "contactSupport": "تواصل مع الدعم",
+    "retry": "إعادة المحاولة",
     "privacyPolicy": "سياسة الخصوصية",
     "termsOfService": "شروط الخدمة",
     "contact": "اتصل بنا",
@@ -113,7 +114,7 @@
     "fullName": "الاسم الكامل",
     "fullNamePlaceholder": "أدخل الاسم الكامل للمواطن",
     "nationalId": "الرقم الوطني",
-    "nationalIdPlaceholder": "الرقم الوطني 10 أرقام",
+    "nationalIdPlaceholder": "الرقم الوطني 16 رقمًا",
     "phone": "رقم الهاتف",
     "phonePlaceholder": "رقم الهاتف 11 رقم",
     "email": "البريد الإلكتروني",
@@ -129,7 +130,12 @@
     "successMessage": "تم إنشاء المواطن \"{{fullName}}\" بنجاح!",
     "errors": {
       "duplicate": "مواطن بهذه المعلومات موجود بالفعل",
-      "unexpected": "حدث خطأ أثناء إنشاء المواطن. يرجى المحاولة مرة أخرى."
+      "unexpected": "حدث خطأ أثناء إنشاء المواطن. يرجى المحاولة مرة أخرى.",
+      "nationalIdPattern": "يجب أن يتكون الرقم الوطني من 16 رقمًا بالضبط",
+      "minLength": "يجب أن يكون على الأقل حرفين",
+      "maxLength": "يجب ألا يتجاوز 200 حرف",
+      "phonePattern": "يجب أن يتكون رقم الهاتف من 11 رقمًا بالضبط",
+      "emailPattern": "يرجى إدخال بريد إلكتروني صالح"
     }
   },
   "landing": {
@@ -238,6 +244,12 @@
       "resolutionRequired": "ملخص الحل مطلوب.",
       "transitionConflict": "هذا الإجراء غير صالح لحالة الحالة الحالية.",
       "transitionFailed": "فشل تحديث الحالة. يرجى المحاولة مرة أخرى.",
+      "assignConflict": "تعذر إسناد هذه الحالة. ربما تم إسنادها بالفعل من قبل مستخدم آخر.",
+      "assignFailed": "فشل إسناد هذه الحالة. يرجى المحاولة مرة أخرى.",
+      "loadingHandlers": "جاري تحميل المعالجين...",
+      "searchHandlers": "ابحث عن معالج بالاسم أو البريد الإلكتروني...",
+      "noHandlersMatch": "لا يوجد معالجون يطابقون بحثك.",
+      "handlersLoadError": "فشل تحميل قائمة المعالجين.",
       "reasonLabel": "السبب",
       "reasonPlaceholder": "قدم سببًا موجزًا لهذا الإجراء",
       "resolutionLabel": "ملخص الحل",

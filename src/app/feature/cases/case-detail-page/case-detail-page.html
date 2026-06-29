@@ -222,6 +222,105 @@
   </div>
 </main>
 
+<!-- ── US-18: Handler picker modal (ASSIGN) ─────────────────────── -->
+@if (isHandlerPickerOpen()) {
+  <div (click)="closeHandlerPicker()" class="fixed inset-0 bg-slate-900/50 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+    <div (click)="$event.stopPropagation()" class="bg-white rounded-2xl shadow-xl w-full max-w-md overflow-hidden">
+      <div class="px-5 py-4 border-b border-slate-100 flex items-center justify-between">
+        <span class="text-sm font-medium text-slate-900">{{ 'cases.actions.assign' | transloco }}</span>
+        <button (click)="closeHandlerPicker()" class="text-slate-400 hover:text-slate-700 transition-colors">
+          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+          </svg>
+        </button>
+      </div>
+
+      <div class="p-5 space-y-4">
+        @if (assignError()) {
+          <div class="p-3 bg-red-50 border-l-4 border-red-500 rounded-md flex items-center gap-2">
+            <svg class="w-4 h-4 text-red-500 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
+              <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clip-rule="evenodd"/>
+            </svg>
+            <span class="text-red-700 text-xs">{{ assignError() }}</span>
+          </div>
+        }
+
+        @if (isLoadingHandlers()) {
+          <div class="flex items-center justify-center py-8 text-slate-400 text-xs gap-2">
+            <svg class="animate-spin w-4 h-4" fill="none" viewBox="0 0 24 24">
+              <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"/>
+              <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"/>
+            </svg>
+            {{ 'cases.detail.loadingHandlers' | transloco }}
+          </div>
+        } @else if (handlersLoadError()) {
+          <div class="flex flex-col items-center gap-3 py-6">
+            <p class="text-xs text-red-600">{{ handlersLoadError() }}</p>
+            <button (click)="retryLoadHandlers()"
+              class="px-4 py-2 text-xs font-medium rounded-lg border border-slate-200 text-slate-700 hover:bg-slate-50 transition-colors">
+              {{ 'common.retry' | transloco }}
+            </button>
+          </div>
+        } @else {
+          <div>
+            <div class="relative mb-3">
+              <svg class="absolute left-3 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/>
+              </svg>
+              <input [ngModel]="handlerSearchQuery()" (ngModelChange)="handlerSearchQuery.set($event)" type="text"
+                class="w-full pl-9 pr-3 py-2 text-xs border border-slate-300 rounded-lg focus:outline-none focus:ring-2 transition-all"
+                [placeholder]="'cases.detail.searchHandlers' | transloco" />
+            </div>
+
+            <div class="max-h-60 overflow-y-auto space-y-1">
+              @for (handler of filteredHandlers(); track handler.id) {
+                <button (click)="selectHandler(handler.id)"
+                  [class.border-amber-400]="selectedHandlerId() === handler.id"
+                  class="w-full text-left px-3 py-2.5 rounded-lg border border-slate-200 hover:bg-slate-50 hover:border-amber-400 transition-colors flex items-center gap-3">
+                  <div class="w-8 h-8 rounded-full bg-amber-100 flex items-center justify-center flex-shrink-0">
+                    <span class="text-xs font-medium text-amber-700">{{ handler.displayName.charAt(0).toUpperCase() }}</span>
+                  </div>
+                  <div class="min-w-0">
+                    <p class="text-xs font-medium text-slate-900 truncate">{{ handler.displayName }}</p>
+                    <p class="text-[11px] text-slate-400 truncate">{{ handler.email }}</p>
+                  </div>
+                  @if (selectedHandlerId() === handler.id) {
+                    <svg class="w-4 h-4 text-amber-500 ml-auto flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
+                      <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"/>
+                    </svg>
+                  }
+                </button>
+              } @empty {
+                <div class="py-8 text-center text-xs text-slate-400">
+                  {{ 'cases.detail.noHandlersMatch' | transloco }}
+                </div>
+              }
+            </div>
+          </div>
+        }
+      </div>
+
+      <div class="px-5 py-3 border-t border-slate-100 flex justify-end gap-2">
+        <button (click)="closeHandlerPicker()" class="px-4 py-2 text-xs border border-slate-200 rounded-lg text-slate-600 hover:bg-slate-50 transition-colors">
+          {{ 'common.cancel' | transloco }}
+        </button>
+        <button (click)="confirmAssign()" [disabled]="!selectedHandlerId() || isSubmittingAssign()"
+                class="bg-emerald-600 hover:bg-emerald-700 disabled:opacity-50 disabled:cursor-not-allowed text-white text-xs font-medium px-5 py-2 rounded-lg transition-colors flex items-center gap-1.5">
+          @if (isSubmittingAssign()) {
+            <svg class="animate-spin w-3.5 h-3.5" fill="none" viewBox="0 0 24 24">
+              <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"/>
+              <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"/>
+            </svg>
+            {{ 'common.loading' | transloco }}
+          } @else {
+            {{ 'common.confirm' | transloco }}
+          }
+        </button>
+      </div>
+    </div>
+  </div>
+}
+
 <!-- ── US-17: Transition confirmation modal ────────────────────────── -->
 @if (pendingAction()) {
   <div (click)="closeActionModal()" class="fixed inset-0 bg-slate-900/50 backdrop-blur-sm z-50 flex items-center justify-center p-4">

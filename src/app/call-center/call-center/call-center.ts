@@ -84,7 +84,7 @@ export class CallCenter {
    * Navigate to create new citizen
    */
   createNewCitizen(): void {
-    this.router.navigate(['/call-center/new-citizen']);
+    this.router.navigate(['/app/call-center/new-citizen']);
   }
 
   /**

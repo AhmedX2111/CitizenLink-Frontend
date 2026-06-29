@@ -20,6 +20,7 @@
     "no": "No",
     "required": "This field is required",
     "contactSupport": "Contact Support",
+    "retry": "Retry",
     "privacyPolicy": "Privacy Policy",
     "termsOfService": "Terms of Service",
     "contact": "Contact",
@@ -113,7 +114,7 @@
     "fullName": "Full Name",
     "fullNamePlaceholder": "Enter citizen's full name",
     "nationalId": "National ID",
-    "nationalIdPlaceholder": "10-digit national ID",
+    "nationalIdPlaceholder": "16-digit national ID",
     "phone": "Phone Number",
     "phonePlaceholder": "11-digit phone number",
     "email": "Email",
@@ -129,7 +130,12 @@
     "successMessage": "Citizen \"{{fullName}}\" created successfully!",
     "errors": {
       "duplicate": "Citizen with this information already exists",
-      "unexpected": "An error occurred while creating the citizen. Please try again."
+      "unexpected": "An error occurred while creating the citizen. Please try again.",
+      "nationalIdPattern": "National ID must be exactly 16 digits",
+      "minLength": "Must be at least 2 characters",
+      "maxLength": "Must be at most 200 characters",
+      "phonePattern": "Phone must be exactly 11 digits",
+      "emailPattern": "Please enter a valid email address"
     }
   },
   "landing": {
@@ -238,6 +244,12 @@
       "resolutionRequired": "A resolution summary is required.",
       "transitionConflict": "This action is no longer valid for the case's current status.",
       "transitionFailed": "Failed to update the case. Please try again.",
+      "assignConflict": "This case could not be assigned. It may have been already assigned by another user.",
+      "assignFailed": "Failed to assign this case. Please try again.",
+      "loadingHandlers": "Loading handlers…",
+      "searchHandlers": "Search handlers by name or email…",
+      "noHandlersMatch": "No handlers match your search.",
+      "handlersLoadError": "Failed to load handlers.",
       "reasonLabel": "Reason",
       "reasonPlaceholder": "Provide a brief reason for this action",
       "resolutionLabel": "Resolution Summary",

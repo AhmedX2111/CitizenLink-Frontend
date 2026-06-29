@@ -1,4 +1,4 @@
-import { Component, OnInit, signal, inject } from '@angular/core';
+import { Component, OnInit, signal, computed, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ActivatedRoute, Router, RouterModule } from '@angular/router';
 import { TranslocoModule, TranslocoService } from '@jsverse/transloco';
@@ -8,7 +8,8 @@ import { CaseService } from '../../../../core/services/case.service';
 import { TopbarComponent } from '../../shared/topbar/topbar';
 import {
   CaseResponse, CaseStatus, Priority, CaseType,
-  StatusHistoryResponse, WorkflowAction, CaseActionResponse
+  StatusHistoryResponse, WorkflowAction, CaseActionResponse,
+  HandlerResponse
 } from '../../../../core/models/case.models';
 import { FormsModule } from '@angular/forms';
 import { CaseNotesComponent } from '../case-notes/case-notes';
@@ -52,6 +53,25 @@ export class CaseDetailPageComponent implements OnInit {
   transitionResolution = '';
   isSubmittingAction   = signal(false);
   transitionError      = signal<string | null>(null);
+
+  // ── Handler picker (ASSIGN) state ───────────────────────────────
+  isHandlerPickerOpen = signal(false);
+  isLoadingHandlers    = signal(false);
+  handlersLoadError    = signal<string | null>(null);
+  handlers             = signal<HandlerResponse[]>([]);
+  handlerSearchQuery   = signal('');
+  selectedHandlerId    = signal<string | null>(null);
+  assignError          = signal<string | null>(null);
+  isSubmittingAssign   = signal(false);
+
+  filteredHandlers = computed(() => {
+    const query = this.handlerSearchQuery().toLowerCase().trim();
+    if (!query) return this.handlers();
+    return this.handlers().filter(h =>
+      h.displayName.toLowerCase().includes(query) ||
+      h.email.toLowerCase().includes(query)
+    );
+  });
 
 
   ngOnInit(): void {
@@ -137,6 +157,10 @@ export class CaseDetailPageComponent implements OnInit {
 
   // ── Transition handling ──────────────────────────────────────────
   openActionModal(action: CaseActionResponse): void {
+    if (action.action === 'ASSIGN') {
+      this.openHandlerPicker();
+      return;
+    }
     this.pendingAction.set(action);
     this.transitionComment = '';
     this.transitionResolution = '';
@@ -145,6 +169,83 @@ export class CaseDetailPageComponent implements OnInit {
 
   closeActionModal(): void {
     this.pendingAction.set(null);
+  }
+
+  // ── Handler picker (ASSIGN) ──────────────────────────────────────
+  openHandlerPicker(): void {
+    this.isHandlerPickerOpen.set(true);
+    this.isLoadingHandlers.set(true);
+    this.handlersLoadError.set(null);
+    this.handlerSearchQuery.set('');
+    this.selectedHandlerId.set(null);
+    this.assignError.set(null);
+
+    this.caseService.getHandlers().pipe(
+      takeUntilDestroyed(this.destroyRef)
+    ).subscribe({
+      next: (res) => {
+        this.handlers.set(res);
+        this.isLoadingHandlers.set(false);
+      },
+      error: () => {
+        this.isLoadingHandlers.set(false);
+        this.handlersLoadError.set(
+          this.transloco.translate('cases.detail.handlersLoadError')
+        );
+      }
+    });
+  }
+
+  closeHandlerPicker(): void {
+    this.isHandlerPickerOpen.set(false);
+    this.handlers.set([]);
+    this.handlersLoadError.set(null);
+    this.selectedHandlerId.set(null);
+    this.assignError.set(null);
+    this.isSubmittingAssign.set(false);
+  }
+
+  selectHandler(id: string): void {
+    this.selectedHandlerId.set(id);
+  }
+
+  retryLoadHandlers(): void {
+    const caseId = this.route.snapshot.paramMap.get('id');
+    if (!caseId) return;
+    this.openHandlerPicker();
+  }
+
+  confirmAssign(): void {
+    const caseId = this.caseDetail()?.id;
+    const handlerId = this.selectedHandlerId();
+
+    if (!caseId || !handlerId) return;
+
+    this.isSubmittingAssign.set(true);
+    this.assignError.set(null);
+
+    this.caseService.transitionCase(caseId, {
+      action: 'ASSIGN',
+      assignedToUserId: handlerId
+    }).pipe(
+      takeUntilDestroyed(this.destroyRef)
+    ).subscribe({
+      next: (updatedCase) => {
+        this.isSubmittingAssign.set(false);
+        this.caseDetail.set(updatedCase);
+        this.closeHandlerPicker();
+        this.loadTimeline(caseId);
+        this.loadActions(caseId);
+      },
+      error: (err) => {
+        this.isSubmittingAssign.set(false);
+        this.assignError.set(
+          err.status === 409
+            ? (err.error?.message ?? this.transloco.translate('cases.detail.assignConflict'))
+            : this.transloco.translate('cases.detail.assignFailed')
+        );
+      }
+    });
   }
 
   submitAction(): void {
@@ -190,7 +291,7 @@ export class CaseDetailPageComponent implements OnInit {
   }
 
   goToCitizenProfile(citizenId: string): void {
-    this.router.navigate(['/call-center/citizen', citizenId]);
+    this.router.navigate(['/app/call-center/citizen', citizenId]);
   }
 
   goBack(): void {

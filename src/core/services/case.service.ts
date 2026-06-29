@@ -8,7 +8,8 @@ import {
   StatusHistoryResponse,
   PagedResponse,
   CaseTransitionRequest,
-  CaseActionResponse
+  CaseActionResponse,
+  HandlerResponse
 } from '../models/case.models';
 import { Department } from '../models/department.model';
 import { Category } from '../models/category.model';
@@ -18,6 +19,7 @@ import { environment } from '../../environments/environment';
 export class CaseService {
 
   private readonly baseUrl = `${environment.apiUrl}/api/v1/cases`;
+  private readonly usersUrl = `${environment.apiUrl}/api/v1/users`;
   private readonly departmentsUrl = `${environment.apiUrl}/api/v1/departments`;
   private readonly categoriesUrl = `${environment.apiUrl}/api/v1/categories`;
 
@@ -74,6 +76,10 @@ export class CaseService {
    */
   transitionCase(id: string, request: CaseTransitionRequest): Observable<CaseResponse> {
     return this.http.post<CaseResponse>(`${this.baseUrl}/${id}/transition`, request);
+  }
+
+  getHandlers(): Observable<HandlerResponse[]> {
+    return this.http.get<HandlerResponse[]>(`${this.usersUrl}/handlers`);
   }
 
   getDepartments(): Observable<Department[]> {

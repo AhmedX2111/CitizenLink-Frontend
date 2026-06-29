@@ -28,7 +28,7 @@ export class NewCitizen {
   constructor() {
     this.citizenForm = this.fb.group({
       fullName: ['', [Validators.required, Validators.minLength(2), Validators.maxLength(200)]],
-      nationalId: ['', [Validators.required, Validators.pattern('^[0-9]{10}$')]],
+      nationalId: ['', [Validators.required, Validators.pattern('^[0-9]{16}$')]],
       phone: ['', [Validators.required, Validators.pattern('^[0-9]{11}$')]],
       email: ['', [Validators.pattern('^[A-Za-z0-9+_.-]+@(.+)$')]],
       preferredLanguage: ['en', Validators.required]
@@ -63,7 +63,7 @@ export class NewCitizen {
             );
             
             setTimeout(() => {
-                this.router.navigate(['/call-center/citizen', response.id]);
+                this.router.navigate(['/app/call-center/citizen', response.id]);
             }, 2000);
         },
         error: (error) => {
