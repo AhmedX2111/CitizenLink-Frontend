@@ -268,7 +268,8 @@ export class CaseDetailPageComponent implements OnInit {
     this.caseService.transitionCase(caseId, {
       action: action.action,
       ...(action.requiresComment && { comment: this.transitionComment.trim() }),
-      ...(action.requiresResolutionSummary && { resolutionSummary: this.transitionResolution.trim() })
+      ...(action.requiresResolutionSummary && { resolutionSummary: this.transitionResolution.trim() }),
+      ...(action.action === 'AWAIT_INFO' && this.transitionComment.trim() && { comment: this.transitionComment.trim() })
     }).pipe(
       takeUntilDestroyed(this.destroyRef)
     ).subscribe({
