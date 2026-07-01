@@ -366,3 +366,8 @@
     text-align: left;
   }
 }
+
+/* ---------- Zebra row for tables ---------- */
+.zebra-row:nth-child(even) {
+  background-color: var(--surface-container, #f8f9fa);
+}

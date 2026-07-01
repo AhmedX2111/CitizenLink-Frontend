@@ -9,13 +9,10 @@ import { AuthService } from '../../../auth/auth.service';
   selector: 'app-sidebar',
   standalone: true,
   imports: [CommonModule, RouterModule, TranslocoModule],
-  templateUrl: './sidebar.html',
-  styleUrl: './sidebar.css'
+  templateUrl: './sidebar.html'
 })
 export class SidebarComponent {
-
   private authService = inject(AuthService);
-
   currentUser = toSignal(this.authService.authState$);
 
   logout(): void {

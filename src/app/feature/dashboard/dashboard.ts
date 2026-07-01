@@ -10,7 +10,6 @@ import {
   MyOpenCaseResponse
 } from '../../../core/models/dashboard.models';
 import { CaseStatus } from '../../../core/models/case.models';
-import { TopbarComponent } from '../shared/topbar/topbar';
 import {
   statusBadgeClass as statusBadge,
   formatDate as fmtDate,
@@ -20,7 +19,7 @@ import {
 @Component({
   selector: 'app-dashboard',
   standalone: true,
-  imports: [CommonModule, TranslocoModule, TopbarComponent],
+  imports: [CommonModule, TranslocoModule],
   templateUrl: './dashboard.html',
   styleUrl: './dashboard.css'
 })

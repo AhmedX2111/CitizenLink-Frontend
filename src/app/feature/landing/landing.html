@@ -1,161 +1,244 @@
 <ng-container *transloco="let t">
-<div class="min-h-screen bg-gradient-to-br from-slate-50 to-slate-100">
-
-  <!-- Navigation Bar -->
-  <nav class="bg-white/95 backdrop-blur-sm border-b border-slate-200 sticky top-0 z-50">
-    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-      <div class="flex justify-between items-center h-16">
-        <div class="flex items-center gap-3">
-          <div class="w-10 h-10 rounded-full bg-amber-500 flex items-center justify-center">
-            <svg class="w-5 h-5 text-slate-900" fill="currentColor" viewBox="0 0 20 20">
-              <path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"/>
-            </svg>
-          </div>
-          <div>
-            <p class="text-slate-900 text-lg font-semibold leading-tight">{{ t('common.appName') }}</p>
-            <p class="text-slate-400 text-xs">{{ t('nav.portal') }}</p>
-          </div>
-        </div>
-        <div class="flex items-center gap-3">
-          <button (click)="toggleLanguage()"
-                  class="flex items-center gap-2 px-3 py-2 rounded-lg border border-slate-200 bg-white text-slate-600 hover:bg-slate-50 transition-colors text-sm font-medium">
-            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 5h12M9 3v2m1.048 9.5A18.022 18.022 0 016.412 9m6.088 9h7M11 21l5-10 5 10M12.751 5C11.783 10.77 8.07 15.61 3 18.129"/>
-            </svg>
-            {{ currentLang() === 'en' ? t('nav.switchToArabic') : t('nav.switchToEnglish') }}
-          </button>
-          <button routerLink="/login"
-                  class="bg-emerald-600 hover:bg-emerald-700 text-white px-5 py-2 rounded-lg flex items-center gap-2 transition-colors shadow-sm text-sm font-medium">
-            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 16l-4-4m0 0l-4-4m-4 4h14m-5 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h7a3 3 0 013 3v1"/>
-            </svg>
-            {{ t('nav.staffLogin') }}
-          </button>
-        </div>
+  <div class="min-h-screen bg-background flex flex-col">
+    <!-- Top Navigation Header -->
+    <header class="fixed top-0 right-0 left-0 h-16 bg-surface z-50 border-b border-outline-variant flex justify-between items-center px-6 w-full">
+      <div class="flex items-center gap-6">
+        <span class="font-headline-md text-headline-md text-primary font-bold tracking-tight">CitizenLink</span>
+        <nav class="hidden md:flex gap-6 items-center">
+          <a class="font-label-md text-label-md text-on-surface-variant hover:text-primary transition-colors" href="#services">{{ 'landing.nav.publicServices' | transloco }}</a>
+          <a class="font-label-md text-label-md text-on-surface-variant hover:text-primary transition-colors" href="#features">{{ 'landing.nav.howItWorks' | transloco }}</a>
+          <a class="font-label-md text-label-md text-on-surface-variant hover:text-primary transition-colors" href="#transparency">{{ 'landing.nav.transparency' | transloco }}</a>
+        </nav>
       </div>
-    </div>
-  </nav>
-
-  <!-- Hero Section -->
-  <section class="relative overflow-hidden">
-    <div class="absolute inset-0 bg-gradient-to-br from-amber-50 via-white to-slate-50"></div>
-    <div class="absolute top-0 right-0 w-96 h-96 bg-amber-100 rounded-full blur-3xl opacity-30"></div>
-    <div class="absolute bottom-0 left-0 w-96 h-96 bg-blue-100 rounded-full blur-3xl opacity-20"></div>
-    <div class="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-20 md:py-28">
-      <div class="text-center max-w-3xl mx-auto">
-        <div class="inline-flex items-center gap-2 bg-amber-50 border border-amber-200 rounded-full px-4 py-1.5 mb-6">
-          <span class="w-2 h-2 rounded-full bg-amber-500 animate-pulse"></span>
-          <span class="text-amber-700 text-xs font-medium">{{ t('landing.badge') }}</span>
-        </div>
-        <h1 class="text-4xl md:text-6xl font-bold text-slate-900 mb-6 tracking-tight">
-          {{ t('landing.heroTitle') }}
-          <span class="text-amber-500 block text-2xl md:text-3xl mt-2">
-            {{ t('landing.heroSubtitle') }}
-          </span>
-        </h1>
-        <p class="text-lg md:text-xl text-slate-600 mb-8 max-w-2xl mx-auto leading-relaxed">
-          {{ t('landing.heroDescription') }}
-        </p>
-        <div class="flex flex-col sm:flex-row gap-4 justify-center items-center">
-          <button routerLink="/login"
-                  class="bg-amber-500 hover:bg-amber-600 text-slate-900 px-8 py-3 rounded-lg flex items-center gap-2 transition-all shadow-md hover:shadow-lg text-base font-semibold">
-            {{ t('landing.getStarted') }}
-            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6"/>
-            </svg>
-          </button>
-          <button class="border-2 border-slate-300 hover:border-amber-400 text-slate-700 hover:text-amber-600 px-8 py-3 rounded-lg transition-all text-base font-medium">
-            {{ t('landing.learnMore') }}
-          </button>
-        </div>
-        <div class="grid grid-cols-2 md:grid-cols-4 gap-6 mt-16 pt-8 border-t border-slate-200">
-          <div>
-            <p class="text-2xl font-bold text-slate-900">100K+</p>
-            <p class="text-xs text-slate-500">{{ t('landing.stats.casesResolved') }}</p>
-          </div>
-          <div>
-            <p class="text-2xl font-bold text-slate-900">98%</p>
-            <p class="text-xs text-slate-500">{{ t('landing.stats.satisfactionRate') }}</p>
-          </div>
-          <div>
-            <p class="text-2xl font-bold text-slate-900">24/7</p>
-            <p class="text-xs text-slate-500">{{ t('landing.stats.supportAvailable') }}</p>
-          </div>
-          <div>
-            <p class="text-2xl font-bold text-slate-900">50+</p>
-            <p class="text-xs text-slate-500">{{ t('landing.stats.governmentServices') }}</p>
-          </div>
-        </div>
+      <div class="flex items-center gap-4">
+        <button routerLink="/login" class="font-label-md text-label-md text-primary border-2 border-primary px-4 py-2 rounded-lg hover:bg-surface-container transition-colors">{{ 'nav.staffLogin' | transloco }}</button>
+        <button routerLink="/login" class="font-label-md text-label-md bg-primary text-on-primary px-4 py-2 rounded-lg hover:opacity-90 transition-colors">{{ 'landing.openCase' | transloco }}</button>
+        <button (click)="toggleLanguage()" class="flex items-center gap-2 text-primary hover:text-primary/80 transition-colors">
+          <span class="material-symbols-outlined text-[20px]">language</span>
+          <span class="font-label-md text-label-md">{{ currentLang() === 'en' ? 'AR' : 'EN' }}</span>
+        </button>
       </div>
-    </div>
-  </section>
+    </header>
 
-  <!-- Features Section -->
-  <section class="py-20 bg-white">
-    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-      <div class="text-center max-w-2xl mx-auto mb-12">
-        <div class="inline-flex items-center gap-2 bg-slate-100 rounded-full px-4 py-1.5 mb-4">
-          <svg class="w-4 h-4 text-amber-500" fill="currentColor" viewBox="0 0 20 20">
-            <path d="M13 6a3 3 0 11-6 0 3 3 0 016 0zM18 8a2 2 0 11-4 0 2 2 0 014 0zM14 15a4 4 0 00-8 0v3h8v-3zM6 8a2 2 0 11-4 0 2 2 0 014 0zM16 18v-3a5.972 5.972 0 00-.75-2.906A3.005 3.005 0 0119 15v3h-3zM4.75 12.094A5.973 5.973 0 004 15v3H1v-3a3 3 0 013.75-2.906z"/>
-          </svg>
-          <span class="text-slate-600 text-xs font-medium">{{ t('landing.features.badge') }}</span>
-        </div>
-        <h2 class="text-3xl md:text-4xl font-bold text-slate-900 mb-4">
-          {{ t('landing.features.sectionTitle') }}
-        </h2>
-        <p class="text-slate-500 text-base">{{ t('landing.features.sectionDescription') }}</p>
-      </div>
-      <div class="grid md:grid-cols-2 lg:grid-cols-4 gap-6">
-        @for (feature of features(); track feature.key) {
-          <div class="bg-white rounded-2xl border border-slate-200 p-6 hover:shadow-lg transition-all duration-300 group">
-            <div class="w-12 h-12 bg-amber-50 rounded-xl flex items-center justify-center mb-4 group-hover:bg-amber-100 transition-colors">
-              <svg class="w-6 h-6 text-amber-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" [attr.d]="feature.icon"/>
-              </svg>
+    <main class="mt-16">
+      <!-- Hero Section -->
+      <section class="relative min-h-[819px] flex items-center overflow-hidden bg-surface-container-low">
+        <div class="absolute inset-0 bg-gradient-to-br from-primary/5 to-transparent pointer-events-none"></div>
+        <div class="container mx-auto max-w-[1280px] px-6 relative z-10 grid md:grid-cols-2 gap-6 items-center">
+          <div class="space-y-6">
+            <div class="inline-flex items-center gap-2 px-3 py-1 bg-primary-fixed text-on-primary-fixed rounded-full text-label-sm font-label-sm">
+              <span class="material-symbols-outlined text-[16px]">verified_user</span>
+              {{ 'landing.badge' | transloco }}
             </div>
-            <h3 class="text-lg font-semibold text-slate-900 mb-2">{{ t(feature.titleKey) }}</h3>
-            <p class="text-slate-500 text-sm leading-relaxed">{{ t(feature.descKey) }}</p>
+            <h1 class="font-display-lg text-display-lg text-primary max-w-xl">
+              {{ 'landing.heroTitle' | transloco }} <span class="text-on-tertiary-container">{{ 'landing.heroSubtitle' | transloco }}</span>
+            </h1>
+            <p class="font-body-lg text-body-lg text-on-surface-variant max-w-lg">
+              {{ 'landing.heroDescription' | transloco }}
+            </p>
+            <div class="flex flex-wrap gap-4 pt-2">
+              <button routerLink="/login"
+                class="bg-primary text-on-primary font-label-md text-label-md px-8 py-4 rounded-lg flex items-center gap-2 shadow-lg shadow-primary/10 hover:translate-y-[-2px] transition-all">
+                {{ 'landing.startServiceRequest' | transloco }}
+                <span class="material-symbols-outlined text-[20px]">arrow_forward</span>
+              </button>
+              <button routerLink="/login"
+                class="border-2 border-primary text-primary font-label-md text-label-md px-8 py-4 rounded-lg hover:bg-primary/5 transition-colors">
+                {{ 'landing.trackCase' | transloco }}
+              </button>
+            </div>
           </div>
-        }
-      </div>
-    </div>
-  </section>
-
-  <!-- CTA Section -->
-  <section class="py-20 bg-gradient-to-r from-slate-900 to-slate-800">
-    <div class="max-w-4xl mx-auto text-center px-4 sm:px-6 lg:px-8">
-      <h2 class="text-3xl md:text-4xl font-bold text-white mb-4">{{ t('landing.cta.title') }}</h2>
-      <p class="text-slate-300 text-base mb-8 max-w-2xl mx-auto">{{ t('landing.cta.description') }}</p>
-      <button routerLink="/login"
-              class="bg-amber-500 hover:bg-amber-600 text-slate-900 px-8 py-3 rounded-lg flex items-center gap-2 transition-all shadow-lg hover:shadow-xl text-base font-semibold mx-auto">
-        {{ t('nav.staffLogin') }}
-        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 16l-4-4m0 0l4-4m-4 4h14m-5 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h7a3 3 0 013 3v1"/>
-        </svg>
-      </button>
-    </div>
-  </section>
-
-  <!-- Footer -->
-  <footer class="bg-white border-t border-slate-200 py-8">
-    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-      <div class="flex flex-col md:flex-row justify-between items-center gap-4">
-        <div class="flex items-center gap-3">
-          <div class="w-8 h-8 rounded-full bg-amber-500 flex items-center justify-center">
-            <svg class="w-4 h-4 text-slate-900" fill="currentColor" viewBox="0 0 20 20">
-              <path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"/>
-            </svg>
+          <div class="hidden md:block">
+            <div class="relative">
+              <div class="absolute -top-12 -right-12 w-64 h-64 bg-tertiary-fixed opacity-20 rounded-full blur-3xl"></div>
+              <div class="bg-surface-container-lowest border border-outline-variant p-6 rounded-xl relative z-10 backdrop-blur-sm">
+                <div class="flex justify-between items-center mb-6 border-b border-outline-variant pb-4">
+                  <h3 class="font-label-md text-label-md text-primary">{{ 'landing.dashboard.title' | transloco }}</h3>
+                  <span class="material-symbols-outlined text-outline">more_horiz</span>
+                </div>
+                <div class="space-y-4">
+                  <div class="h-2 w-3/4 bg-surface-container-highest rounded"></div>
+                  <div class="grid grid-cols-3 gap-2">
+                    <div class="h-16 bg-primary-fixed/30 rounded flex items-center justify-center">
+                      <span class="material-symbols-outlined text-primary text-[24px]">monitoring</span>
+                    </div>
+                    <div class="h-16 bg-secondary-container rounded flex items-center justify-center">
+                      <span class="material-symbols-outlined text-secondary text-[24px]">groups</span>
+                    </div>
+                    <div class="h-16 bg-tertiary-fixed/30 rounded flex items-center justify-center">
+                      <span class="material-symbols-outlined text-on-tertiary-container text-[24px]">done_all</span>
+                    </div>
+                  </div>
+                  <div class="h-2 w-1/2 bg-surface-container-highest rounded"></div>
+                  <div class="h-32 bg-surface rounded border border-dashed border-outline-variant flex items-center justify-center">
+                    <span class="text-on-surface-variant text-label-md">{{ 'landing.dashboard.preview' | transloco }}</span>
+                  </div>
+                </div>
+              </div>
+              <div class="absolute -bottom-6 -left-6 bg-tertiary-container text-tertiary-fixed p-4 rounded-lg flex items-center gap-3 shadow-lg">
+                <span class="material-symbols-outlined text-[28px]">bolt</span>
+                <div>
+                  <p class="text-label-sm opacity-80">{{ 'landing.dashboard.liveUptime' | transloco }}</p>
+                  <p class="font-bold text-lg">99.98%</p>
+                </div>
+              </div>
+            </div>
           </div>
-          <p class="text-slate-500 text-xs">{{ t('common.allRightsReserved') }}</p>
         </div>
-        <div class="flex gap-6">
-          <a href="#" class="text-slate-400 hover:text-slate-600 text-xs transition-colors">{{ t('common.privacyPolicy') }}</a>
-          <a href="#" class="text-slate-400 hover:text-slate-600 text-xs transition-colors">{{ t('common.termsOfService') }}</a>
-          <a href="#" class="text-slate-400 hover:text-slate-600 text-xs transition-colors">{{ t('common.contact') }}</a>
+      </section>
+
+      <!-- Stats Section -->
+      <section class="py-8 bg-surface border-y border-outline-variant">
+        <div class="container mx-auto max-w-[1280px] px-6">
+          <div class="grid grid-cols-1 md:grid-cols-4 gap-6">
+            <div class="flex flex-col items-center md:items-start text-center md:text-left p-6">
+              <span class="text-display-lg font-display-lg text-primary">12.5M+</span>
+              <span class="text-label-md font-label-md text-on-surface-variant uppercase tracking-widest">{{ 'landing.stats.casesResolved' | transloco }}</span>
+            </div>
+            <div class="flex flex-col items-center md:items-start text-center md:text-left p-6 border-l border-outline-variant">
+              <span class="text-display-lg font-display-lg text-primary">48h</span>
+              <span class="text-label-md font-label-md text-on-surface-variant uppercase tracking-widest">{{ 'landing.stats.averageSla' | transloco }}</span>
+            </div>
+            <div class="flex flex-col items-center md:items-start text-center md:text-left p-6 border-l border-outline-variant">
+              <span class="text-display-lg font-display-lg text-primary">100%</span>
+              <span class="text-label-md font-label-md text-on-surface-variant uppercase tracking-widest">{{ 'landing.stats.dataEncryption' | transloco }}</span>
+            </div>
+            <div class="flex flex-col items-center md:items-start text-center md:text-left p-6 border-l border-outline-variant">
+              <span class="text-display-lg font-display-lg text-primary">94%</span>
+              <span class="text-label-md font-label-md text-on-surface-variant uppercase tracking-widest">{{ 'landing.stats.satisfactionRate' | transloco }}</span>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Features Section -->
+      <section class="py-24 bg-background" id="features">
+        <div class="container mx-auto max-w-[1280px] px-6">
+          <div class="flex flex-col md:flex-row gap-6 mb-16 items-end">
+            <div class="md:w-1/2">
+              <h2 class="font-headline-lg text-headline-lg text-primary mb-4">{{ 'landing.features.sectionTitle' | transloco }}</h2>
+              <p class="font-body-lg text-body-lg text-on-surface-variant">{{ 'landing.features.sectionDescription' | transloco }}</p>
+            </div>
+            <div class="md:w-1/2 flex justify-end">
+              <div class="h-1 w-32 bg-primary rounded"></div>
+            </div>
+          </div>
+          <div class="grid grid-cols-1 md:grid-cols-12 gap-6">
+            <!-- Multi-Channel Intake -->
+            <div class="md:col-span-8 bg-surface-container-lowest border border-outline-variant p-10 flex flex-col md:flex-row gap-8 items-center rounded-xl">
+              <div class="md:w-1/2 space-y-4">
+                <span class="material-symbols-outlined text-4xl text-primary fill">dynamic_feed</span>
+                <h3 class="font-headline-md text-headline-md text-primary">{{ 'landing.features.channels.title' | transloco }}</h3>
+                <p class="font-body-md text-body-md text-on-surface-variant">{{ 'landing.features.channels.description' | transloco }}</p>
+              </div>
+              <div class="md:w-1/2 w-full h-64 rounded-lg bg-surface-container-high flex items-center justify-center">
+                <span class="material-symbols-outlined text-6xl text-primary/30">dynamic_feed</span>
+              </div>
+            </div>
+            <!-- SLA Tracking -->
+            <div class="md:col-span-4 bg-primary-container text-on-primary-container p-10 flex flex-col justify-between rounded-xl">
+              <div class="space-y-4">
+                <span class="material-symbols-outlined text-4xl">timer</span>
+                <h3 class="font-headline-md text-headline-md">{{ 'landing.features.sla.title' | transloco }}</h3>
+                <p class="font-body-md text-body-md opacity-80">{{ 'landing.features.sla.description' | transloco }}</p>
+              </div>
+              <div class="mt-8 flex items-baseline gap-2">
+                <span class="text-4xl font-bold">100%</span>
+                <span class="text-label-sm font-label-sm">{{ 'landing.features.sla.complianceTarget' | transloco }}</span>
+              </div>
+            </div>
+            <!-- Automated Workflows -->
+            <div class="md:col-span-4 bg-surface-container-lowest border border-outline-variant p-10 flex flex-col rounded-xl">
+              <div class="space-y-4">
+                <span class="material-symbols-outlined text-4xl text-on-tertiary-container">rule_settings</span>
+                <h3 class="font-headline-md text-headline-md text-primary">{{ 'landing.features.workflow.title' | transloco }}</h3>
+                <p class="font-body-md text-body-md text-on-surface-variant">{{ 'landing.features.workflow.description' | transloco }}</p>
+              </div>
+            </div>
+            <!-- Deep Reporting -->
+            <div class="md:col-span-8 bg-surface-container-lowest border border-outline-variant p-10 flex flex-col md:flex-row-reverse gap-8 items-center rounded-xl">
+              <div class="md:w-1/2 space-y-4">
+                <span class="material-symbols-outlined text-4xl text-primary fill">analytics</span>
+                <h3 class="font-headline-md text-headline-md text-primary">{{ 'landing.features.reports.title' | transloco }}</h3>
+                <p class="font-body-md text-body-md text-on-surface-variant">{{ 'landing.features.reports.description' | transloco }}</p>
+              </div>
+              <div class="md:w-1/2 w-full h-64 rounded-lg bg-surface-container-high flex items-center justify-center">
+                <span class="material-symbols-outlined text-6xl text-primary/30">analytics</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- CTA Section -->
+      <section class="py-24 bg-primary text-on-primary relative overflow-hidden" id="transparency">
+        <div class="absolute inset-0 bg-gradient-to-t from-black/10 to-transparent pointer-events-none"></div>
+        <div class="container mx-auto max-w-[1280px] px-6 text-center relative z-10">
+          <h2 class="font-display-lg text-display-lg mb-6">{{ 'landing.cta.title' | transloco }}</h2>
+          <p class="font-body-lg text-body-lg max-w-2xl mx-auto opacity-80 mb-10">
+            {{ 'landing.cta.description' | transloco }}
+          </p>
+          <div class="grid grid-cols-1 md:grid-cols-3 gap-6 max-w-5xl mx-auto">
+            <div class="bg-primary-container/80 p-8 rounded-xl text-left">
+              <span class="material-symbols-outlined text-4xl text-tertiary-fixed mb-4">gavel</span>
+              <h4 class="font-headline-md text-headline-md mb-2">{{ 'landing.cta.legalCompliance' | transloco }}</h4>
+              <p class="font-body-md text-body-md opacity-70">{{ 'landing.cta.legalComplianceDesc' | transloco }}</p>
+            </div>
+            <div class="bg-primary-container/80 p-8 rounded-xl text-left">
+              <span class="material-symbols-outlined text-4xl text-tertiary-fixed mb-4">shield</span>
+              <h4 class="font-headline-md text-headline-md mb-2">{{ 'landing.cta.secureAccess' | transloco }}</h4>
+              <p class="font-body-md text-body-md opacity-70">{{ 'landing.cta.secureAccessDesc' | transloco }}</p>
+            </div>
+            <div class="bg-primary-container/80 p-8 rounded-xl text-left">
+              <span class="material-symbols-outlined text-4xl text-tertiary-fixed mb-4">history_edu</span>
+              <h4 class="font-headline-md text-headline-md mb-2">{{ 'landing.cta.auditTrails' | transloco }}</h4>
+              <p class="font-body-md text-body-md opacity-70">{{ 'landing.cta.auditTrailsDesc' | transloco }}</p>
+            </div>
+          </div>
+        </div>
+      </section>
+    </main>
+
+    <footer class="bg-surface py-20 border-t border-outline-variant">
+      <div class="container mx-auto max-w-[1280px] px-6">
+        <div class="grid grid-cols-1 md:grid-cols-4 gap-8">
+          <div class="space-y-4">
+            <span class="font-headline-md text-headline-md text-primary font-bold">CitizenLink</span>
+            <p class="font-body-md text-body-md text-on-surface-variant">{{ 'landing.footer.description' | transloco }}</p>
+          </div>
+          <div>
+            <h5 class="font-label-md text-label-md text-primary mb-6 uppercase tracking-wider">{{ 'landing.footer.publicServices' | transloco }}</h5>
+            <ul class="space-y-3">
+              <li><a class="font-label-sm text-label-sm text-on-surface-variant hover:text-primary transition-colors" href="#">{{ 'landing.footer.submitComplaint' | transloco }}</a></li>
+              <li><a class="font-label-sm text-label-sm text-on-surface-variant hover:text-primary transition-colors" href="#">{{ 'landing.footer.permitApplications' | transloco }}</a></li>
+              <li><a class="font-label-sm text-label-sm text-on-surface-variant hover:text-primary transition-colors" href="#">{{ 'landing.footer.publicInfoAccess' | transloco }}</a></li>
+            </ul>
+          </div>
+          <div>
+            <h5 class="font-label-md text-label-md text-primary mb-6 uppercase tracking-wider">{{ 'landing.footer.staffTools' | transloco }}</h5>
+            <ul class="space-y-3">
+              <li><a class="font-label-sm text-label-sm text-on-surface-variant hover:text-primary transition-colors" href="#">{{ 'landing.footer.employeeLogin' | transloco }}</a></li>
+              <li><a class="font-label-sm text-label-sm text-on-surface-variant hover:text-primary transition-colors" href="#">{{ 'landing.footer.crmDashboard' | transloco }}</a></li>
+              <li><a class="font-label-sm text-label-sm text-on-surface-variant hover:text-primary transition-colors" href="#">{{ 'landing.footer.itSupport' | transloco }}</a></li>
+            </ul>
+          </div>
+          <div>
+            <h5 class="font-label-md text-label-md text-primary mb-6 uppercase tracking-wider">{{ 'landing.footer.support' | transloco }}</h5>
+            <ul class="space-y-3">
+              <li><a class="font-label-sm text-label-sm text-on-surface-variant hover:text-primary transition-colors" href="#">{{ 'landing.footer.helpCenter' | transloco }}</a></li>
+              <li><a class="font-label-sm text-label-sm text-on-surface-variant hover:text-primary transition-colors" href="#">{{ 'landing.footer.privacyPolicy' | transloco }}</a></li>
+              <li><a class="font-label-sm text-label-sm text-on-surface-variant hover:text-primary transition-colors" href="#">{{ 'landing.footer.termsOfService' | transloco }}</a></li>
+            </ul>
+          </div>
+        </div>
+        <div class="mt-16 pt-8 border-t border-outline-variant flex flex-col md:flex-row justify-between items-center gap-4">
+          <p class="text-label-sm text-outline">{{ 'common.allRightsReserved' | transloco }}</p>
+          <div class="flex gap-6 text-label-sm text-outline">
+            <span>{{ 'landing.footer.serverInfo' | transloco }}</span>
+            <span>{{ 'landing.footer.lastUpdated' | transloco }}</span>
+          </div>
         </div>
       </div>
-    </div>
-  </footer>
-
-</div>
+    </footer>
+  </div>
 </ng-container>

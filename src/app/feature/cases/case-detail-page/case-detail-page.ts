@@ -5,7 +5,6 @@ import { TranslocoModule, TranslocoService } from '@jsverse/transloco';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { DestroyRef } from '@angular/core';
 import { CaseService } from '../../../../core/services/case.service';
-import { TopbarComponent } from '../../shared/topbar/topbar';
 import {
   CaseResponse, CaseStatus, Priority, CaseType,
   StatusHistoryResponse, WorkflowAction, CaseActionResponse,
@@ -18,7 +17,7 @@ import { CaseAttachmentsComponent } from '../case-attachments/case-attachments';
 @Component({
   selector: 'app-case-detail-page',
   standalone: true,
-  imports: [CommonModule, RouterModule, TranslocoModule, TopbarComponent, CaseNotesComponent, CaseAttachmentsComponent, FormsModule],
+  imports: [CommonModule, RouterModule, TranslocoModule, CaseNotesComponent, CaseAttachmentsComponent, FormsModule],
   templateUrl: './case-detail-page.html',
   styleUrl: './case-detail-page.css'
 })

@@ -26,6 +26,7 @@ export class CaseNotesComponent implements OnInit {
     isSubmitting = signal(false);
     errorMessage = signal<string | null>(null);
     successMessage = signal<string | null>(null);
+    confirmDeleteId = signal<string | null>(null);
 
     noteForm: FormGroup = this.fb.group({
         body: ['', [Validators.required, Validators.minLength(1), Validators.maxLength(5000)]],
@@ -99,11 +100,12 @@ export class CaseNotesComponent implements OnInit {
         });
     }
 
-    deleteNote(noteId: string): void {
-        if (!confirm('Are you sure you want to delete this note?')) {
-            return;
-        }
+    requestDeleteNote(noteId: string): void {
+        this.confirmDeleteId.set(noteId);
+    }
 
+    confirmDeleteNote(noteId: string): void {
+        this.confirmDeleteId.set(null);
         this.noteService.deleteNote(this.caseId, noteId).subscribe({
             next: () => {
                 this.notes.update(notes => notes.filter(n => n.id !== noteId));
@@ -115,6 +117,10 @@ export class CaseNotesComponent implements OnInit {
                 this.logger.error('CaseNotesComponent', 'Error deleting note:', error);
             }
         });
+    }
+
+    cancelDeleteNote(): void {
+        this.confirmDeleteId.set(null);
     }
 
     isAuthor(note: Note): boolean {

@@ -19,6 +19,7 @@ export interface CitizenProfile {
     email: string;
     preferredLanguage: string;
     createdAt: string;
+    lastContact: string | null;
     createdByUserName: string;
     totalCases: number;
     openCases: number;

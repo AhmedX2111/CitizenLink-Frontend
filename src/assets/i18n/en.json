@@ -95,6 +95,7 @@
       "resolvedCases": "Resolved Cases"
     },
     "recentCases": "Recent Cases",
+    "lastContact": "Last Contact",
     "caseTable": {
       "caseNumber": "Case Number",
       "subject": "Subject",
@@ -143,13 +144,24 @@
     "heroTitle": "CitizenLink",
     "heroSubtitle": "Empowering Citizens, Simplifying Services",
     "heroDescription": "A comprehensive case management system connecting citizens with government services. Track requests, monitor progress, and get real-time updates.",
-    "getStarted": "Get Started",
-    "learnMore": "Learn More",
+    "openCase": "Open a Case",
+    "startServiceRequest": "Start a Service Request",
+    "trackCase": "Track Your Case",
+    "nav": {
+      "publicServices": "Public Services",
+      "howItWorks": "How It Works",
+      "transparency": "Transparency"
+    },
     "stats": {
       "casesResolved": "Cases Resolved",
-      "satisfactionRate": "Satisfaction Rate",
-      "supportAvailable": "Support Available",
-      "governmentServices": "Government Services"
+      "averageSla": "Avg. SLA",
+      "dataEncryption": "Data Encryption",
+      "satisfactionRate": "Satisfaction Rate"
+    },
+    "dashboard": {
+      "title": "Dashboard Preview",
+      "preview": "Interactive Analytics Dashboard",
+      "liveUptime": "System Uptime"
     },
     "features": {
       "badge": "Platform Capabilities",
@@ -157,7 +169,8 @@
       "sectionDescription": "Powerful features designed to streamline case management and improve citizen satisfaction.",
       "sla": {
         "title": "SLA Tracking",
-        "description": "Automated tracking of service level agreements with real-time alerts"
+        "description": "Automated tracking of service level agreements with real-time alerts",
+        "complianceTarget": "Compliance Target"
       },
       "channels": {
         "title": "Multi-Channel Intake",
@@ -174,7 +187,30 @@
     },
     "cta": {
       "title": "Ready to get started?",
-      "description": "Join thousands of government employees using CitizenLink to serve citizens better."
+      "description": "Join thousands of government employees using CitizenLink to serve citizens better.",
+      "legalCompliance": "Legal Compliance",
+      "legalComplianceDesc": "All processes adhere to government regulations and data protection laws.",
+      "secureAccess": "Secure Access",
+      "secureAccessDesc": "Role-based access control with multi-factor authentication.",
+      "auditTrails": "Audit Trails",
+      "auditTrailsDesc": "Complete audit logs for every action taken in the system."
+    },
+    "footer": {
+      "description": "A comprehensive case management system connecting citizens with government services.",
+      "publicServices": "Public Services",
+      "submitComplaint": "Submit a Complaint",
+      "permitApplications": "Permit Applications",
+      "publicInfoAccess": "Public Information Access",
+      "staffTools": "Staff Tools",
+      "employeeLogin": "Employee Login",
+      "crmDashboard": "CRM Dashboard",
+      "itSupport": "IT Support",
+      "support": "Support",
+      "helpCenter": "Help Center",
+      "privacyPolicy": "Privacy Policy",
+      "termsOfService": "Terms of Service",
+      "serverInfo": "Server: UAE East Region",
+      "lastUpdated": "Last updated: 2026"
     }
   },
   "login": {
@@ -277,7 +313,8 @@
         "bodyRequired": "Note body is required",
         "bodyMaxLength": "Note cannot exceed 5000 characters",
         "deleted": "Note deleted successfully!",
-        "deleteConfirm": "Are you sure you want to delete this note?"
+        "deleteConfirm": "Are you sure you want to delete this note?",
+        "confirmDelete": "Confirm?"
       },
       "attachments": {
         "title": "Attachments",

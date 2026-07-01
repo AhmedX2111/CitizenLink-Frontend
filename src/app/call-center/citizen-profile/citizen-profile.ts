@@ -65,7 +65,7 @@ export class CitizenProfile {
   }
 
   goBack(): void {
-    this.router.navigate(['/call-center']);
+    this.router.navigate(['/app/call-center']);
   }
 
   getStatusBadgeClass(status: string): string {
