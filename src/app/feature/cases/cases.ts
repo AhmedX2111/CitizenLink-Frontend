@@ -19,7 +19,6 @@ import {
 } from '../../../core/models/case.models';
 import { Department } from '../../../core/models/department.model';
 import { Category } from '../../../core/models/category.model';
-import { TopbarComponent } from '../shared/topbar/topbar';
 import { CaseDetailModalComponent } from './case-detail-modal/case-detail-modal';
 
 type ActiveTab = 'list' | 'create';
@@ -27,7 +26,7 @@ type ActiveTab = 'list' | 'create';
 @Component({
   selector: 'app-cases',
   standalone: true,
-  imports: [CommonModule, ReactiveFormsModule, TranslocoModule, TopbarComponent],
+  imports: [CommonModule, ReactiveFormsModule, TranslocoModule],
   templateUrl: './cases.html',
   styleUrl: './cases.css'
 })

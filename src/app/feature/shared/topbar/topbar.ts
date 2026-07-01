@@ -1,4 +1,4 @@
-import { Component, Input, computed, inject } from '@angular/core';
+import { Component, computed, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { TranslocoModule, TranslocoService } from '@jsverse/transloco';
 
@@ -6,14 +6,9 @@ import { TranslocoModule, TranslocoService } from '@jsverse/transloco';
   selector: 'app-topbar',
   standalone: true,
   imports: [CommonModule, TranslocoModule],
-  templateUrl: './topbar.html',
-  styleUrl: './topbar.css'
+  templateUrl: './topbar.html'
 })
 export class TopbarComponent {
-
-  /** Breadcrumb label shown after "Portal /" — passed in by each page. */
-  @Input() pageTitle = () => '';
-
   private transloco = inject(TranslocoService);
 
   isArabic = computed(() => this.transloco.getActiveLang() === 'ar');

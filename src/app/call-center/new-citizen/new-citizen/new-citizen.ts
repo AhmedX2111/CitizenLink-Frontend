@@ -86,7 +86,7 @@ export class NewCitizen {
   }
 
   cancel(): void {
-    this.router.navigate(['/call-center']);
+    this.router.navigate(['/app/call-center']);
   }
 
   private markFormGroupTouched(formGroup: FormGroup): void {

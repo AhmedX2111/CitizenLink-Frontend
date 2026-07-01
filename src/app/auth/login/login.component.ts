@@ -41,11 +41,11 @@ export class Login implements OnInit, OnDestroy {
   }
 
   ngOnInit(): void {
+    this.returnUrl = this.route.snapshot.queryParams['returnUrl'] || null;
     if (this.tokenService.isAuthenticated()) {
-      this.router.navigate(['/dashboard']);
+      this.router.navigateByUrl(this.returnUrl || '/dashboard');
       return;
     }
-    this.returnUrl = this.route.snapshot.queryParams['returnUrl'] || null;
   }
 
   ngOnDestroy(): void {
@@ -64,7 +64,8 @@ export class Login implements OnInit, OnDestroy {
       this.authService.login({ username, password }, rememberMe).subscribe({
         next: () => {
           this.isLoading.set(false);
-          this.router.navigate(['/dashboard']);
+          const target = this.returnUrl || '/dashboard';
+          this.router.navigateByUrl(target);
         },
         error: (error) => {
           this.isLoading.set(false);

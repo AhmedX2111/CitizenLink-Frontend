@@ -95,6 +95,7 @@
       "resolvedCases": "الحالات المحلولة"
     },
     "recentCases": "الحالات الأخيرة",
+    "lastContact": "آخر اتصال",
     "caseTable": {
       "caseNumber": "رقم الحالة",
       "subject": "الموضوع",
@@ -143,13 +144,24 @@
     "heroTitle": "رابط المواطن",
     "heroSubtitle": "تمكين المواطنين، تبسيط الخدمات",
     "heroDescription": "نظام متكامل لإدارة الحالات يربط المواطنين بالخدمات الحكومية. تتبع الطلبات، راقب التقدم، واحصل على تحديثات فورية.",
-    "getStarted": "ابدأ الآن",
-    "learnMore": "اعرف أكثر",
+    "openCase": "فتح حالة",
+    "startServiceRequest": "ابدأ طلب الخدمة",
+    "trackCase": "تتبع حالتك",
+    "nav": {
+      "publicServices": "الخدمات العامة",
+      "howItWorks": "كيف يعمل",
+      "transparency": "الشفافية"
+    },
     "stats": {
       "casesResolved": "حالات تم حلها",
-      "satisfactionRate": "معدل الرضا",
-      "supportAvailable": "الدعم متاح",
-      "governmentServices": "خدمة حكومية"
+      "averageSla": "متوسط مستوى الخدمة",
+      "dataEncryption": "تشفير البيانات",
+      "satisfactionRate": "معدل الرضا"
+    },
+    "dashboard": {
+      "title": "معاينة لوحة المعلومات",
+      "preview": "لوحة تحليلات تفاعلية",
+      "liveUptime": "وقت تشغيل النظام"
     },
     "features": {
       "badge": "إمكانيات المنصة",
@@ -157,7 +169,8 @@
       "sectionDescription": "ميزات قوية مصممة لتبسيط إدارة الحالات وتحسين رضا المواطنين.",
       "sla": {
         "title": "تتبع مستوى الخدمة",
-        "description": "تتبع آلي لاتفاقيات مستوى الخدمة مع تنبيهات فورية"
+        "description": "تتبع آلي لاتفاقيات مستوى الخدمة مع تنبيهات فورية",
+        "complianceTarget": "هدف الامتثال"
       },
       "channels": {
         "title": "استقبال متعدد القنوات",
@@ -174,7 +187,30 @@
     },
     "cta": {
       "title": "هل أنت مستعد للبدء؟",
-      "description": "انضم إلى آلاف الموظفين الحكوميين الذين يستخدمون رابط المواطن لخدمة المواطنين بشكل أفضل."
+      "description": "انضم إلى آلاف الموظفين الحكوميين الذين يستخدمون رابط المواطن لخدمة المواطنين بشكل أفضل.",
+      "legalCompliance": "الامتثال القانوني",
+      "legalComplianceDesc": "جميع العمليات تتوافق مع اللوائح الحكومية وقوانين حماية البيانات.",
+      "secureAccess": "وصول آمن",
+      "secureAccessDesc": "التحكم في الوصول قائم على الأدوار مع المصادقة متعددة العوامل.",
+      "auditTrails": "سجلات التدقيق",
+      "auditTrailsDesc": "سجلات تدقيق كاملة لكل إجراء يتم في النظام."
+    },
+    "footer": {
+      "description": "نظام متكامل لإدارة الحالات يربط المواطنين بالخدمات الحكومية.",
+      "publicServices": "الخدمات العامة",
+      "submitComplaint": "تقديم شكوى",
+      "permitApplications": "طلبات التصاريح",
+      "publicInfoAccess": "الوصول إلى المعلومات العامة",
+      "staffTools": "أدوات الموظفين",
+      "employeeLogin": "تسجيل دخول الموظفين",
+      "crmDashboard": "لوحة إدارة العلاقات",
+      "itSupport": "دعم تقني",
+      "support": "الدعم",
+      "helpCenter": "مركز المساعدة",
+      "privacyPolicy": "سياسة الخصوصية",
+      "termsOfService": "شروط الخدمة",
+      "serverInfo": "الخادم: منطقة الإمارات الشرقية",
+      "lastUpdated": "آخر تحديث: 2026"
     }
   },
   "login": {
@@ -274,7 +310,8 @@
         "bodyRequired": "نص الملاحظة مطلوب",
         "bodyMaxLength": "لا يمكن أن تتجاوز الملاحظة 5000 حرف",
         "deleted": "تم حذف الملاحظة بنجاح!",
-        "deleteConfirm": "هل أنت متأكد من حذف هذه الملاحظة؟"
+        "deleteConfirm": "هل أنت متأكد من حذف هذه الملاحظة؟",
+        "confirmDelete": "تأكيد الحذف؟"
       },
       "attachments": {
         "title": "المرفقات",

@@ -1,204 +1,147 @@
-<!-- src/app/call-center/new-citizen/new-citizen/new-citizen.html -->
+<div class="max-w-3xl mx-auto px-6 py-6">
+  <div class="card p-6">
+    <!-- Success Message -->
+    @if (successMessage()) {
+      <div class="mb-6 p-4 bg-tertiary-fixed text-on-tertiary-fixed rounded-lg flex items-center gap-2">
+        <span class="material-symbols-outlined text-on-tertiary-fixed">check_circle</span>
+        <span class="font-label-md text-label-md">{{ successMessage() }}</span>
+      </div>
+    }
 
-<div class="min-h-screen bg-gray-100">
-  <!-- Header -->
-  <div class="bg-white shadow">
-    <div class="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
-      <div class="flex items-center justify-between">
-        <div>
-          <h1 class="text-2xl font-bold text-gray-900">{{ 'newCitizen.title' | transloco }}</h1>
-          <p class="text-gray-600 mt-1">{{ 'newCitizen.subtitle' | transloco }}</p>
+    <!-- Error Message -->
+    @if (errorMessage()) {
+      <div class="mb-6 p-4 bg-error-container text-on-error-container rounded-lg flex items-center gap-2">
+        <span class="material-symbols-outlined text-on-error-container">error</span>
+        <span class="font-label-md text-label-md">{{ errorMessage() }}</span>
+      </div>
+    }
+
+    <form [formGroup]="citizenForm" (ngSubmit)="onSubmit()">
+      <!-- Full Name -->
+      <div class="mb-5">
+        <label class="font-label-md text-label-md text-on-surface mb-2 block">
+          {{ 'newCitizen.fullName' | transloco }} <span class="text-error">*</span>
+        </label>
+        <input type="text" formControlName="fullName" maxlength="200"
+          class="w-full px-3 py-2 border border-outline-variant rounded bg-surface text-on-surface text-body-md focus:outline-none focus:border-primary transition-colors"
+          [class.border-error]="fullName?.invalid && fullName?.touched"
+          [placeholder]="'newCitizen.fullNamePlaceholder' | transloco">
+        <div class="flex justify-between items-center mt-1">
+          @if (fullName?.invalid && fullName?.touched) {
+            <div class="text-xs text-error">
+              @if (fullName?.errors?.['required']) { <span>{{ 'common.required' | transloco }}</span> }
+              @if (fullName?.errors?.['minlength']) { <span>{{ 'newCitizen.errors.minLength' | transloco }}</span> }
+              @if (fullName?.errors?.['maxlength']) { <span>{{ 'newCitizen.errors.maxLength' | transloco }}</span> }
+            </div>
+          }
+          <div class="text-xs text-on-surface-variant ml-auto">
+            {{ fullName?.value?.length || 0 }}/200
+          </div>
         </div>
-        <button
-          (click)="cancel()"
-          class="text-gray-500 hover:text-gray-700"
-        >
-          <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
-          </svg>
+      </div>
+
+      <!-- National ID -->
+      <div class="mb-5">
+        <label class="font-label-md text-label-md text-on-surface mb-2 block">
+          {{ 'newCitizen.nationalId' | transloco }} <span class="text-error">*</span>
+        </label>
+        <input type="text" formControlName="nationalId" maxlength="16"
+          oninput="this.value = this.value.replace(/[^0-9]/g, '')"
+          class="w-full px-3 py-2 border border-outline-variant rounded bg-surface text-on-surface text-body-md focus:outline-none focus:border-primary transition-colors"
+          [class.border-error]="nationalId?.invalid && nationalId?.touched"
+          [placeholder]="'newCitizen.nationalIdPlaceholder' | transloco"
+          (keypress)="onlyNumbers($event)">
+        <div class="flex justify-between items-center mt-1">
+          @if (nationalId?.invalid && nationalId?.touched) {
+            <div class="text-xs text-error">
+              @if (nationalId?.errors?.['required']) { <span>{{ 'common.required' | transloco }}</span> }
+              @if (nationalId?.errors?.['pattern']) { <span>{{ 'newCitizen.errors.nationalIdPattern' | transloco }}</span> }
+            </div>
+          }
+          <div class="text-xs text-on-surface-variant ml-auto">
+            {{ nationalId?.value?.length || 0 }}/16
+          </div>
+        </div>
+      </div>
+
+      <!-- Phone -->
+      <div class="mb-5">
+        <label class="font-label-md text-label-md text-on-surface mb-2 block">
+          {{ 'newCitizen.phone' | transloco }} <span class="text-error">*</span>
+        </label>
+        <input type="tel" formControlName="phone" maxlength="11"
+          oninput="this.value = this.value.replace(/[^0-9]/g, '')"
+          class="w-full px-3 py-2 border border-outline-variant rounded bg-surface text-on-surface text-body-md focus:outline-none focus:border-primary transition-colors"
+          [class.border-error]="phone?.invalid && phone?.touched"
+          [placeholder]="'newCitizen.phonePlaceholder' | transloco"
+          (keypress)="onlyNumbers($event)">
+        <div class="flex justify-between items-center mt-1">
+          @if (phone?.invalid && phone?.touched) {
+            <div class="text-xs text-error">
+              @if (phone?.errors?.['required']) { <span>{{ 'common.required' | transloco }}</span> }
+              @if (phone?.errors?.['pattern']) { <span>{{ 'newCitizen.errors.phonePattern' | transloco }}</span> }
+            </div>
+          }
+          <div class="text-xs text-on-surface-variant ml-auto">
+            {{ phone?.value?.length || 0 }}/11
+          </div>
+        </div>
+      </div>
+
+      <!-- Email -->
+      <div class="mb-5">
+        <label class="font-label-md text-label-md text-on-surface mb-2 block">
+          {{ 'newCitizen.email' | transloco }} <span class="text-on-surface-variant text-xs">({{ 'common.optional' | transloco }})</span>
+        </label>
+        <input type="email" formControlName="email" maxlength="255"
+          class="w-full px-3 py-2 border border-outline-variant rounded bg-surface text-on-surface text-body-md focus:outline-none focus:border-primary transition-colors"
+          [class.border-error]="email?.invalid && email?.touched"
+          [placeholder]="'newCitizen.emailPlaceholder' | transloco">
+        <div class="flex justify-between items-center mt-1">
+          @if (email?.invalid && email?.touched) {
+            <div class="text-xs text-error">
+              <span>{{ 'newCitizen.errors.emailPattern' | transloco }}</span>
+            </div>
+          }
+          <div class="text-xs text-on-surface-variant ml-auto">
+            {{ email?.value?.length || 0 }}/255
+          </div>
+        </div>
+      </div>
+
+      <!-- Preferred Language -->
+      <div class="mb-6">
+        <label class="font-label-md text-label-md text-on-surface mb-2 block">
+          {{ 'newCitizen.preferredLanguage' | transloco }}
+        </label>
+        <select formControlName="preferredLanguage"
+          class="w-full px-3 py-2 border border-outline-variant rounded bg-surface text-on-surface text-body-md focus:outline-none focus:border-primary transition-colors">
+          <option value="en">{{ 'newCitizen.english' | transloco }}</option>
+          <option value="ar">{{ 'newCitizen.arabic' | transloco }}</option>
+        </select>
+      </div>
+
+      <!-- Buttons -->
+      <div class="flex gap-3">
+        <button type="submit" [disabled]="citizenForm.invalid || isLoading()"
+          class="flex-1 bg-primary text-on-primary py-2 px-4 rounded-lg font-label-md text-label-md hover:opacity-90 transition disabled:opacity-50 disabled:cursor-not-allowed">
+          @if (isLoading()) {
+            <span class="flex items-center justify-center gap-2">
+              <svg class="animate-spin h-4 w-4 text-on-primary" fill="none" viewBox="0 0 24 24">
+                <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"/>
+                <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"/>
+              </svg>
+              {{ 'newCitizen.creating' | transloco }}
+            </span>
+          } @else {
+            <span>{{ 'newCitizen.create' | transloco }}</span>
+          }
+        </button>
+        <button type="button" (click)="cancel()"
+          class="px-6 py-2 border-2 border-primary text-primary rounded-lg font-label-md text-label-md hover:bg-surface-container transition">
+          {{ 'newCitizen.cancel' | transloco }}
         </button>
       </div>
-    </div>
-  </div>
-
-  <!-- Form -->
-  <div class="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-    <div class="bg-white rounded-lg shadow p-6">
-      <!-- Success Message -->
-      @if (successMessage()) {
-        <div class="mb-6 p-4 bg-green-50 border-l-4 border-green-500 rounded">
-          <div class="flex items-center">
-            <svg class="w-5 h-5 text-green-500 mr-2" fill="currentColor" viewBox="0 0 20 20">
-              <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/>
-            </svg>
-            <span class="text-green-700">{{ successMessage() }}</span>
-          </div>
-        </div>
-      }
-
-      <!-- Error Message -->
-      @if (errorMessage()) {
-        <div class="mb-6 p-4 bg-red-50 border-l-4 border-red-500 rounded">
-          <div class="flex items-center">
-            <svg class="w-5 h-5 text-red-500 mr-2" fill="currentColor" viewBox="0 0 20 20">
-              <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clip-rule="evenodd"/>
-            </svg>
-            <span class="text-red-700">{{ errorMessage() }}</span>
-          </div>
-        </div>
-      }
-
-      <form [formGroup]="citizenForm" (ngSubmit)="onSubmit()">
-        <!-- Full Name -->
-        <div class="mb-5">
-          <label class="block text-sm font-medium text-gray-700 mb-2">
-            {{ 'newCitizen.fullName' | transloco }} <span class="text-red-500">*</span>
-          </label>
-          <input
-            type="text"
-            formControlName="fullName"
-            maxlength="200"
-            class="w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-            [class.border-red-500]="fullName?.invalid && fullName?.touched"
-            [placeholder]="'newCitizen.fullNamePlaceholder' | transloco"
-          >
-          <div class="flex justify-between items-center mt-1">
-            @if (fullName?.invalid && fullName?.touched) {
-              <div class="text-xs text-red-600">
-                @if (fullName?.errors?.['required']) { <span>{{ 'common.required' | transloco }}</span> }
-                @if (fullName?.errors?.['minlength']) { <span>{{ 'newCitizen.errors.minLength' | transloco }}</span> }
-                @if (fullName?.errors?.['maxlength']) { <span>{{ 'newCitizen.errors.maxLength' | transloco }}</span> }
-              </div>
-            }
-            <div class="text-xs text-gray-400 ml-auto">
-              {{ fullName?.value?.length || 0 }}/200
-            </div>
-          </div>
-        </div>
-
-        <!-- National ID -->
-        <div class="mb-5">
-          <label class="block text-sm font-medium text-gray-700 mb-2">
-            {{ 'newCitizen.nationalId' | transloco }} <span class="text-red-500">*</span>
-          </label>
-          <input
-            type="text"
-            formControlName="nationalId"
-            maxlength="16"
-            oninput="this.value = this.value.replace(/[^0-9]/g, '')"
-            class="w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-            [class.border-red-500]="nationalId?.invalid && nationalId?.touched"
-            [placeholder]="'newCitizen.nationalIdPlaceholder' | transloco"
-            (keypress)="onlyNumbers($event)"
-          >
-          <div class="flex justify-between items-center mt-1">
-            @if (nationalId?.invalid && nationalId?.touched) {
-              <div class="text-xs text-red-600">
-                @if (nationalId?.errors?.['required']) { <span>{{ 'common.required' | transloco }}</span> }
-                @if (nationalId?.errors?.['pattern']) { <span>{{ 'newCitizen.errors.nationalIdPattern' | transloco }}</span> }
-              </div>
-            }
-            <div class="text-xs text-gray-400 ml-auto">
-              {{ nationalId?.value?.length || 0 }}/16
-            </div>
-          </div>
-        </div>
-
-        <!-- Phone -->
-        <div class="mb-5">
-          <label class="block text-sm font-medium text-gray-700 mb-2">
-            {{ 'newCitizen.phone' | transloco }} <span class="text-red-500">*</span>
-          </label>
-          <input
-            type="tel"
-            formControlName="phone"
-            maxlength="11"
-            oninput="this.value = this.value.replace(/[^0-9]/g, '')"
-            class="w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-            [class.border-red-500]="phone?.invalid && phone?.touched"
-            [placeholder]="'newCitizen.phonePlaceholder' | transloco"
-            (keypress)="onlyNumbers($event)"
-          >
-          <div class="flex justify-between items-center mt-1">
-            @if (phone?.invalid && phone?.touched) {
-              <div class="text-xs text-red-600">
-                @if (phone?.errors?.['required']) { <span>{{ 'common.required' | transloco }}</span> }
-                @if (phone?.errors?.['pattern']) { <span>{{ 'newCitizen.errors.phonePattern' | transloco }}</span> }
-              </div>
-            }
-            <div class="text-xs text-gray-400 ml-auto">
-              {{ phone?.value?.length || 0 }}/11
-            </div>
-          </div>
-        </div>
-
-        <!-- Email (Optional) -->
-        <div class="mb-5">
-          <label class="block text-sm font-medium text-gray-700 mb-2">
-            {{ 'newCitizen.email' | transloco }} <span class="text-gray-400 text-xs">({{ 'common.optional' | transloco }})</span>
-          </label>
-          <input
-            type="email"
-            formControlName="email"
-            maxlength="255"
-            class="w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-            [class.border-red-500]="email?.invalid && email?.touched"
-            [placeholder]="'newCitizen.emailPlaceholder' | transloco"
-          >
-          <div class="flex justify-between items-center mt-1">
-            @if (email?.invalid && email?.touched) {
-              <div class="text-xs text-red-600">
-                <span>{{ 'newCitizen.errors.emailPattern' | transloco }}</span>
-              </div>
-            }
-            <div class="text-xs text-gray-400 ml-auto">
-              {{ email?.value?.length || 0 }}/255
-            </div>
-          </div>
-        </div>
-
-        <!-- Preferred Language -->
-        <div class="mb-6">
-          <label class="block text-sm font-medium text-gray-700 mb-2">
-            {{ 'newCitizen.preferredLanguage' | transloco }}
-          </label>
-          <select
-            formControlName="preferredLanguage"
-            class="w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-          >
-            <option value="en">{{ 'newCitizen.english' | transloco }}</option>
-            <option value="ar">{{ 'newCitizen.arabic' | transloco }}</option>
-          </select>
-        </div>
-
-        <!-- Buttons -->
-        <div class="flex gap-3">
-          <button
-            type="submit"
-            [disabled]="citizenForm.invalid || isLoading()"
-            class="flex-1 bg-blue-600 text-white py-2 px-4 rounded-lg font-medium hover:bg-blue-700 transition disabled:opacity-50 disabled:cursor-not-allowed"
-          >
-            @if (isLoading()) {
-              <span class="flex items-center justify-center">
-                <svg class="animate-spin -ml-1 mr-2 h-4 w-4 text-white" fill="none" viewBox="0 0 24 24">
-                  <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
-                  <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-                </svg>
-                {{ 'newCitizen.creating' | transloco }}
-              </span>
-            } @else {
-              <span>{{ 'newCitizen.create' | transloco }}</span>
-            }
-          </button>
-          <button
-            type="button"
-            (click)="cancel()"
-            class="px-6 py-2 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50 transition"
-          >
-            {{ 'newCitizen.cancel' | transloco }}
-          </button>
-        </div>
-      </form>
-    </div>
+    </form>
   </div>
 </div>

@@ -1,132 +1,177 @@
 <ng-container *transloco="let t">
-<app-topbar [pageTitle]="pageTitle"></app-topbar>
 
-<main class="flex-1 overflow-auto p-6">
+  <div class="max-w-[1280px] mx-auto px-6 py-6 space-y-6">
 
-  <div class="mb-5">
-    <h1 class="text-lg font-semibold text-slate-900">{{ t('dashboard.title') }}</h1>
-    <p class="text-slate-500 text-xs mt-0.5">{{ t('dashboard.subtitle') }}</p>
-    <div class="mt-1.5 h-0.5 w-8 bg-amber-500 rounded-full"></div>
-  </div>
-
-  <!-- Error state -->
-  @if (loadError()) {
-    <div class="mb-5 p-3 bg-red-50 border-l-4 border-red-500 rounded-md flex items-center gap-2">
-      <svg class="w-4 h-4 text-red-500 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clip-rule="evenodd"/></svg>
-      <span class="text-red-700 text-xs">{{ t('dashboard.errors.loadFailed') }}</span>
-    </div>
-  }
-
-  <!-- Loading state -->
-  @if (isLoading()) {
-    <div class="flex items-center justify-center py-16 text-slate-400 text-xs gap-2">
-      <svg class="animate-spin w-4 h-4" fill="none" viewBox="0 0 24 24">
-        <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"/>
-        <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"/>
-      </svg>
-      {{ t('dashboard.loading') }}
-    </div>
-  }
-
-  @if (!isLoading() && summary()) {
-
-    <!-- US-04: KPI Cards -->
-    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 mb-5">
-      <div class="bg-white rounded-xl border border-slate-200 px-4 py-3">
-        <p class="text-xs text-slate-500 mb-1">{{ t('dashboard.kpis.openCases') }}</p>
-        <p class="text-2xl font-medium text-slate-900">{{ summary()!.kpis.openCases }}</p>
+    <!-- Welcome Header -->
+    <section class="flex justify-between items-end">
+      <div>
+        <h2 class="font-headline-lg text-headline-lg text-primary">{{ t('dashboard.title') }}</h2>
+        <p class="text-body-md text-secondary mt-1">{{ t('dashboard.subtitle') }}</p>
       </div>
-      <div class="bg-white rounded-xl border border-slate-200 px-4 py-3">
-        <p class="text-xs text-slate-500 mb-1">{{ t('dashboard.kpis.resolvedThisMonth') }}</p>
-        <p class="text-2xl font-medium text-emerald-600">{{ summary()!.kpis.resolvedThisMonth }}</p>
-      </div>
-      <div class="bg-white rounded-xl border border-slate-200 px-4 py-3">
-        <p class="text-xs text-slate-500 mb-1">{{ t('dashboard.kpis.overdueCases') }}</p>
-        <p class="text-2xl font-medium text-red-600">{{ summary()!.kpis.overdueCases }}</p>
-      </div>
-      <div class="bg-white rounded-xl border border-slate-200 px-4 py-3">
-        <p class="text-xs text-slate-500 mb-1">{{ t('dashboard.kpis.newToday') }}</p>
-        <p class="text-2xl font-medium text-amber-600">{{ summary()!.kpis.newToday }}</p>
-      </div>
-    </div>
+    </section>
 
-    <!-- US-05: Cases By Status Chart -->
-    <div class="bg-white rounded-2xl border border-slate-200 p-5 mb-5">
-      <div class="flex items-center gap-2 mb-4">
-        <svg class="w-4 h-4 text-amber-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"/></svg>
-        <span class="text-sm font-medium text-slate-900">{{ t('dashboard.chart.title') }}</span>
-      </div>
-
-      <div class="space-y-2.5">
-        @for (item of statusChartData(); track item.status) {
-          <div class="flex items-center gap-3">
-            <span class="text-xs text-slate-600 w-28 flex-shrink-0">{{ t('cases.statuses.' + item.status) }}</span>
-            <div class="flex-1 h-5 bg-slate-100 rounded-full overflow-hidden">
-              <div class="h-full bg-slate-900 rounded-full transition-all duration-500"
-                   [style.width.%]="item.percent"></div>
-            </div>
-            <span class="text-xs font-medium text-slate-700 w-8 text-right flex-shrink-0">{{ item.count }}</span>
-          </div>
-        }
-      </div>
-    </div>
-
-    <!-- US-06: My Open Cases (HANDLER only) -->
-    @if (isHandler()) {
-      <div class="bg-white rounded-2xl border border-slate-200 overflow-hidden">
-        <div class="px-5 py-3.5 border-b border-slate-100 flex items-center gap-2">
-          <svg class="w-4 h-4 text-amber-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"/></svg>
-          <span class="text-sm font-medium text-slate-900">{{ t('dashboard.myOpenCases.title') }}</span>
-        </div>
-
-        @if (isLoadingCases()) {
-          <div class="flex items-center justify-center py-10 text-slate-400 text-xs gap-2">
-            <svg class="animate-spin w-4 h-4" fill="none" viewBox="0 0 24 24">
-              <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"/>
-              <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"/>
-            </svg>
-            {{ t('dashboard.loading') }}
-          </div>
-        } @else if (myOpenCases().length === 0) {
-          <div class="flex flex-col items-center justify-center py-10 text-slate-400">
-            <svg class="w-8 h-8 mb-2 text-slate-300" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M3 7v10a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-6l-2-2H5a2 2 0 00-2 2z"/></svg>
-            <p class="text-xs">{{ t('dashboard.myOpenCases.empty') }}</p>
-          </div>
-        } @else {
-          <table class="w-full text-xs">
-            <thead>
-              <tr class="border-b border-slate-100">
-                <th class="px-5 py-2.5 text-left font-medium text-slate-400">{{ t('cases.table.caseNumber') }}</th>
-                <th class="px-5 py-2.5 text-left font-medium text-slate-400">{{ t('cases.table.subject') }}</th>
-                <th class="px-5 py-2.5 text-left font-medium text-slate-400">{{ t('cases.table.status') }}</th>
-                <th class="px-5 py-2.5 text-left font-medium text-slate-400">{{ t('dashboard.myOpenCases.dueDate') }}</th>
-              </tr>
-            </thead>
-            <tbody>
-              @for (c of myOpenCases(); track c.id) {
-                <tr (click)="onRowClick(c.id)"
-                    class="border-b border-slate-50 hover:bg-slate-50/60 transition-colors cursor-pointer">
-                  <td class="px-5 py-3 font-medium text-slate-900 whitespace-nowrap">{{ c.caseNumber }}</td>
-                  <td class="px-5 py-3 text-slate-700 max-w-48 truncate">{{ c.subject }}</td>
-                  <td class="px-5 py-3">
-                    <span [class]="'inline-flex px-2 py-0.5 rounded text-[11px] font-medium ' + statusBadgeClass(c.status)">
-                      {{ t('cases.statuses.' + c.status) }}
-                    </span>
-                  </td>
-                  <td class="px-5 py-3 whitespace-nowrap"
-                      [class.text-red-600]="isOverdue(c.dueAt)"
-                      [class.font-medium]="isOverdue(c.dueAt)"
-                      [class.text-slate-400]="!isOverdue(c.dueAt)">
-                    {{ formatDate(c.dueAt) }}
-                  </td>
-                </tr>
-              }
-            </tbody>
-          </table>
-        }
+    <!-- Error state -->
+    @if (loadError()) {
+      <div class="bg-error-container border border-error p-4 rounded-xl flex items-center gap-3">
+        <span class="material-symbols-outlined text-error text-[20px]">error_outline</span>
+        <span class="text-label-md text-error">{{ t('dashboard.errors.loadFailed') }}</span>
       </div>
     }
 
-  }
-</main>
+    <!-- Loading state -->
+    @if (isLoading()) {
+      <div class="flex items-center justify-center py-16 text-on-surface-variant gap-3">
+        <svg class="animate-spin w-5 h-5" fill="none" viewBox="0 0 24 24">
+          <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"/>
+          <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"/>
+        </svg>
+        <span class="text-label-md">{{ t('dashboard.loading') }}</span>
+      </div>
+    }
+
+    @if (!isLoading() && summary()) {
+
+      <!-- KPI Cards -->
+      <section class="grid grid-cols-1 md:grid-cols-4 gap-6">
+
+        <!-- Open Cases -->
+        <div class="bg-surface border border-outline-variant p-6 flex flex-col justify-between hover:border-primary transition-colors duration-300 rounded-xl">
+          <div class="flex justify-between items-start">
+            <span class="text-label-md text-secondary uppercase tracking-tight">{{ t('dashboard.kpis.openCases') }}</span>
+            <div class="w-8 h-8 bg-surface-container flex items-center justify-center rounded">
+              <span class="material-symbols-outlined text-primary text-[20px]">folder_open</span>
+            </div>
+          </div>
+          <div class="mt-4">
+            <span class="text-display-lg font-bold text-primary">{{ summary()?.kpis?.openCases ?? '—' }}</span>
+          </div>
+        </div>
+
+        <!-- Resolved -->
+        <div class="bg-surface border border-outline-variant p-6 flex flex-col justify-between hover:border-primary transition-colors duration-300 rounded-xl">
+          <div class="flex justify-between items-start">
+            <span class="text-label-md text-secondary uppercase tracking-tight">{{ t('dashboard.kpis.resolvedThisMonth') }}</span>
+            <div class="w-8 h-8 bg-tertiary-fixed flex items-center justify-center rounded">
+              <span class="material-symbols-outlined text-on-tertiary-fixed-variant text-[20px]">task_alt</span>
+            </div>
+          </div>
+          <div class="mt-4">
+            <span class="text-display-lg font-bold text-primary">{{ summary()?.kpis?.resolvedThisMonth ?? '—' }}</span>
+            <p class="text-label-sm text-secondary mt-1">Lifetime resolution count</p>
+          </div>
+        </div>
+
+        <!-- Overdue -->
+        <div class="bg-surface border border-outline-variant p-6 flex flex-col justify-between hover:border-primary transition-colors duration-300 rounded-xl">
+          <div class="flex justify-between items-start">
+            <span class="text-label-md text-secondary uppercase tracking-tight">{{ t('dashboard.kpis.overdueCases') }}</span>
+            <div class="w-8 h-8 bg-error-container flex items-center justify-center rounded">
+              <span class="material-symbols-outlined text-on-error-container text-[20px]">warning</span>
+            </div>
+          </div>
+          <div class="mt-4">
+            <span class="text-display-lg font-bold text-error">{{ summary()?.kpis?.overdueCases ?? '—' }}</span>
+            <div class="flex items-center gap-1 text-error mt-1 font-bold">
+              <span class="material-symbols-outlined text-[14px]">priority_high</span>
+              <span class="text-label-sm">Requires Attention</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- New Today -->
+        <div class="bg-surface border border-outline-variant p-6 flex flex-col justify-between hover:border-primary transition-colors duration-300 rounded-xl">
+          <div class="flex justify-between items-start">
+            <span class="text-label-md text-secondary uppercase tracking-tight">{{ t('dashboard.kpis.newToday') }}</span>
+            <div class="w-8 h-8 bg-primary-fixed flex items-center justify-center rounded">
+              <span class="material-symbols-outlined text-primary text-[20px]">fiber_new</span>
+            </div>
+          </div>
+          <div class="mt-4">
+            <span class="text-display-lg font-bold text-primary">{{ summary()?.kpis?.newToday ?? '—' }}</span>
+            <p class="text-label-sm text-secondary mt-1">Incoming citizen requests</p>
+          </div>
+        </div>
+
+      </section>
+
+      <!-- Cases By Status Chart -->
+      <section class="bg-surface border border-outline-variant rounded-xl p-6">
+        <div class="flex items-center gap-2 mb-4">
+          <span class="material-symbols-outlined text-primary text-[20px]">bar_chart</span>
+          <h3 class="font-headline-md text-headline-md text-primary">{{ t('dashboard.chart.title') }}</h3>
+        </div>
+
+        <div class="space-y-3">
+          @for (item of statusChartData(); track item.status) {
+            <div class="flex items-center gap-3">
+              <span class="text-label-sm text-on-surface-variant w-28 flex-shrink-0">{{ t('cases.statuses.' + item.status) }}</span>
+              <div class="flex-1 h-2 bg-surface-container-low rounded-full overflow-hidden">
+                <div class="h-full bg-primary rounded-full transition-all duration-500"
+                     [style.width.%]="item.percent"></div>
+              </div>
+              <span class="text-label-sm font-medium text-primary w-8 text-right flex-shrink-0">{{ item.count }}</span>
+            </div>
+          }
+        </div>
+      </section>
+
+      <!-- My Open Cases (HANDLER only) -->
+      @if (isHandler()) {
+        <section class="bg-surface border border-outline-variant rounded-xl overflow-hidden">
+          <div class="px-6 py-4 border-b border-outline-variant flex items-center gap-2">
+            <span class="material-symbols-outlined text-primary text-[20px]">assignment</span>
+            <h3 class="font-headline-md text-headline-md text-primary">{{ t('dashboard.myOpenCases.title') }}</h3>
+          </div>
+
+          @if (isLoadingCases()) {
+            <div class="flex items-center justify-center py-10 text-on-surface-variant gap-2">
+              <svg class="animate-spin w-4 h-4" fill="none" viewBox="0 0 24 24">
+                <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"/>
+                <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"/>
+              </svg>
+              <span class="text-label-md">{{ t('dashboard.loading') }}</span>
+            </div>
+          } @else if (myOpenCases().length === 0) {
+            <div class="flex flex-col items-center justify-center py-10 text-on-surface-variant">
+              <span class="material-symbols-outlined text-[32px] mb-2 text-on-surface-variant">inbox</span>
+              <p class="text-label-md">{{ t('dashboard.myOpenCases.empty') }}</p>
+            </div>
+          } @else {
+            <table class="w-full text-label-sm">
+              <thead>
+                <tr class="border-b border-outline-variant">
+                  <th class="px-6 py-3 text-left font-label-md text-on-surface-variant">{{ t('cases.table.caseNumber') }}</th>
+                  <th class="px-6 py-3 text-left font-label-md text-on-surface-variant">{{ t('cases.table.subject') }}</th>
+                  <th class="px-6 py-3 text-left font-label-md text-on-surface-variant">{{ t('cases.table.status') }}</th>
+                  <th class="px-6 py-3 text-left font-label-md text-on-surface-variant">{{ t('dashboard.myOpenCases.dueDate') }}</th>
+                </tr>
+              </thead>
+              <tbody>
+                @for (c of myOpenCases(); track c.id) {
+                  <tr (click)="onRowClick(c.id)"
+                      class="border-b border-outline-variant hover:bg-surface-container-low transition-colors cursor-pointer">
+                    <td class="px-6 py-3 font-medium text-primary whitespace-nowrap">{{ c.caseNumber }}</td>
+                    <td class="px-6 py-3 text-on-surface-variant max-w-48 truncate">{{ c.subject }}</td>
+                    <td class="px-6 py-3">
+                      <span [class]="'inline-flex px-2 py-0.5 rounded text-[11px] font-medium ' + statusBadgeClass(c.status)">
+                        {{ t('cases.statuses.' + c.status) }}
+                      </span>
+                    </td>
+                    <td class="px-6 py-3 whitespace-nowrap"
+                        [class.text-error]="isOverdue(c.dueAt)"
+                        [class.font-medium]="isOverdue(c.dueAt)"
+                        [class.text-on-surface-variant]="!isOverdue(c.dueAt)">
+                      {{ formatDate(c.dueAt) }}
+                    </td>
+                  </tr>
+                }
+              </tbody>
+            </table>
+          }
+        </section>
+      }
+
+    }
+
+  </div>
 </ng-container>

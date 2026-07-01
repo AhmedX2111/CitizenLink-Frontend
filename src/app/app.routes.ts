@@ -6,6 +6,7 @@ export const routes: Routes = [
   // Landing page - PUBLIC (no auth guard, no shared shell)
   {
     path: '',
+    pathMatch: 'full',
     loadComponent: () =>
       import('./feature/landing/landing').then(m => m.LandingComponent)
   },
