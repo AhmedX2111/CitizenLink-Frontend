@@ -36,6 +36,7 @@
     "dashboard": "Dashboard",
     "cases": "Cases",
     "callCenter": "Call Center",
+    "reports": "Reports",
     "management": "Management",
     "citizens": "Citizens",
     "departments": "Departments"
@@ -236,6 +237,42 @@
       "endpointNotFound": "API endpoint not found. Please check if the backend is correctly configured.",
       "serverError": "Server error. Please try again later or contact support.",
       "unknown": "An unexpected error occurred"
+    }
+  },
+  "reports": {
+   "kpi": {
+     "totalCases": "Total Cases",
+     "totalCasesHint": "Created in selected period",
+     "resolved": "Resolved This Period",
+     "resolvedHint": "Period resolution count",
+     "period": "Period Length",
+     "topCategory": "Top Category",
+     "ofTotal": "of total"
+    },
+    "title": "Reports & Analytics",
+    "subtitle": "System performance and case resolution metrics",
+    "loading": "Loading report…",
+    "filter": {
+      "from": "From",
+      "to": "To",
+      "apply": "Apply"
+    },
+    "table": {
+      "title": "Daily Case Volume",
+      "date": "Date",
+      "created": "Created",
+      "resolved": "Resolved",
+      "total": "Total"
+    },
+    "chart": {
+      "title": "Top Categories",
+      "total": "Total",
+      "empty": "No category data for this period."
+    },
+    "errors": {
+      "forbidden": "You do not have permission to view reports.",
+      "loadFailed": "Failed to load report data. Please try again.",
+      "invalidRange": "From date must be before To date."
     }
   },
   "cases": {

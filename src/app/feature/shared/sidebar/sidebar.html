@@ -28,6 +28,15 @@
       <span class="material-symbols-outlined">call</span>
       <span class="font-body-md">{{ 'nav.callCenter' | transloco }}</span>
     </a>
+
+    <!-- Reports — visible only to SUPERVISOR and ADMIN -->
+    @if (currentUser()?.role === 'SUPERVISOR' || currentUser()?.role === 'ADMIN') {
+      <a routerLink="/reports" routerLinkActive="text-primary font-bold border-r-4 border-primary bg-surface-container-high"
+         class="flex items-center gap-3 px-4 py-3 rounded-lg text-on-surface-variant hover:bg-surface-container transition-colors duration-200">
+        <span class="material-symbols-outlined">bar_chart</span>
+        <span class="font-body-md">{{ 'nav.reports' | transloco }}</span>
+      </a>
+    }
   </nav>
 
   <div class="px-3 mt-auto pb-6">
