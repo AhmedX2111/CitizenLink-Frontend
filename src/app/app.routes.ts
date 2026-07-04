@@ -32,6 +32,11 @@ export const routes: Routes = [
         loadComponent: () =>
           import('./feature/dashboard/dashboard').then(m => m.DashboardComponent)
       },
+     {
+        path: 'reports',
+        loadComponent: () =>
+          import('./feature/volume-report/volume-report').then(m => m.VolumeReportComponent)
+      },
       {
         path: 'cases',
         loadComponent: () =>
