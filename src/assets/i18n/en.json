@@ -269,6 +269,11 @@
       "total": "Total",
       "empty": "No category data for this period."
     },
+    "export": {
+      "csv": "Export CSV",
+      "exporting": "Exporting...",
+      "error": "Failed to export report data. Please try again."
+    },
     "errors": {
       "forbidden": "You do not have permission to view reports.",
       "loadFailed": "Failed to load report data. Please try again.",
