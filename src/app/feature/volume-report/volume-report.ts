@@ -32,9 +32,10 @@ export class VolumeReportComponent implements OnInit, AfterViewInit {
   fromDate = this.formatDate(this.daysAgo(6));
 
   // ── State ─────────────────────────────────────────────────────
-  isLoading = signal(false);
-  loadError = signal<string | null>(null);
-  report    = signal<VolumeReportResponse | null>(null);
+  isLoading   = signal(false);
+  isExporting = signal(false);
+  loadError   = signal<string | null>(null);
+  report      = signal<VolumeReportResponse | null>(null);
 
   // ── Chart ─────────────────────────────────────────────────────
   private chartInstance: Chart | null = null;
@@ -85,6 +86,35 @@ export class VolumeReportComponent implements OnInit, AfterViewInit {
       return;
     }
     this.load();
+  }
+
+  // ── Export CSV ────────────────────────────────────────────────
+  exportToCsv(): void {
+    if (this.isExporting()) return;
+    this.isExporting.set(true);
+    this.loadError.set(null);
+
+    this.reportService.exportCsv(this.fromDate, this.toDate).pipe(
+      takeUntilDestroyed(this.destroyRef)
+    ).subscribe({
+      next: (blob) => {
+        const blobUrl = window.URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = blobUrl;
+        a.download = `citizenlink-cases-${new Date().toISOString().slice(0, 10)}.csv`;
+        a.click();
+        window.URL.revokeObjectURL(blobUrl);
+        this.isExporting.set(false);
+      },
+      error: (err) => {
+        this.isExporting.set(false);
+        this.loadError.set(
+          err.status === 403
+            ? this.transloco.translate('reports.errors.forbidden')
+            : this.transloco.translate('reports.export.error')
+        );
+      }
+    });
   }
 
   private renderChart(): void {
