@@ -37,6 +37,11 @@ export const routes: Routes = [
         loadComponent: () =>
           import('./feature/volume-report/volume-report').then(m => m.VolumeReportComponent)
       },
+     {
+       path: 'app/users',
+       loadComponent: () =>
+         import('./feature/user-list/user-list').then(m => m.UserListComponent)
+     },
       {
         path: 'cases',
         loadComponent: () =>
