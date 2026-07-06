@@ -1,7 +1,7 @@
 import { Injectable } from '@angular/core';
 import { HttpClient, HttpParams } from '@angular/common/http';
 import { Observable } from 'rxjs';
-import { UserResponse } from '../models/user.models';
+import { UserResponse, CreateUserRequest, UpdateUserRequest } from '../models/user.models';
 import { PagedResponse } from '../models/case.models';
 
 @Injectable({ providedIn: 'root' })
@@ -25,5 +25,21 @@ export class UserAdminService {
     if (active !== '') params = params.set('active', active);
 
     return this.http.get<PagedResponse<UserResponse>>(this.baseUrl, { params });
+  }
+
+  getUserById(id: string): Observable<UserResponse> {
+    return this.http.get<UserResponse>(`${this.baseUrl}/${id}`);
+  }
+
+  createUser(data: CreateUserRequest): Observable<UserResponse> {
+    return this.http.post<UserResponse>(this.baseUrl, data);
+  }
+
+  updateUser(id: string, data: UpdateUserRequest): Observable<UserResponse> {
+    return this.http.put<UserResponse>(`${this.baseUrl}/${id}`, data);
+  }
+
+  deactivateUser(id: string): Observable<UserResponse> {
+    return this.http.put<UserResponse>(`${this.baseUrl}/${id}/deactivate`, {});
   }
 }

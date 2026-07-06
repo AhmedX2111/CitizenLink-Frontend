@@ -11,6 +11,20 @@ export interface UserResponse {
   createdAt:   string;
 }
 
+export interface CreateUserRequest {
+  username:    string;
+  displayName: string;
+  email:       string;
+  role:        'ADMIN' | 'SUPERVISOR' | 'HANDLER' | 'AGENT';
+  password:    string;
+}
+
+export interface UpdateUserRequest {
+  displayName: string;
+  email:       string;
+  role:        'ADMIN' | 'SUPERVISOR' | 'HANDLER' | 'AGENT';
+}
+
 export interface UserSearchRequest {
   role?:   'ADMIN' | 'SUPERVISOR' | 'HANDLER' | 'AGENT' | '';
   active?: boolean | '';
