@@ -1,0 +1,200 @@
+<main class="flex-1 overflow-y-auto p-6 bg-background">
+  <div class="max-w-7xl mx-auto">
+
+    <!-- Page header -->
+    <div class="flex items-start justify-between mb-6">
+      <div>
+        <h1 class="text-3xl font-bold text-primary" style="font-family: var(--font-headline-lg)">
+          {{ 'admin.users.title' | transloco }}
+        </h1>
+        <p class="text-sm text-on-surface-variant mt-1">
+          {{ 'admin.users.subtitle' | transloco }}
+        </p>
+      </div>
+      <button class="flex items-center gap-2 px-4 py-2.5 rounded-lg bg-primary text-on-primary text-sm font-medium hover:opacity-90 transition-opacity">
+        <span class="material-symbols-outlined text-sm">person_add</span>
+        {{ 'admin.users.createUser' | transloco }}
+      </button>
+    </div>
+
+    <!-- Filter bar + export -->
+    <div class="card p-4 mb-5 flex flex-wrap items-end justify-between gap-3">
+      <div class="flex flex-wrap gap-3">
+        <!-- Role filter -->
+        <div>
+          <label class="block text-xs font-medium text-on-surface-variant mb-1">
+            {{ 'admin.users.filter.role' | transloco }}
+          </label>
+          <div class="relative">
+            <select [(ngModel)]="filterRole" (change)="applyFilter()"
+                    class="appearance-none pl-3 pr-8 py-2 text-sm border border-outline-variant rounded-lg bg-surface focus:outline-none focus:ring-2 text-on-surface min-w-36">
+              <option value="">{{ 'admin.users.filter.allRoles' | transloco }}</option>
+              @for (r of roles; track r) {
+                <option [value]="r">{{ r }}</option>
+              }
+            </select>
+            <span class="material-symbols-outlined absolute right-2 top-1/2 -translate-y-1/2 text-on-surface-variant pointer-events-none text-sm">expand_more</span>
+          </div>
+        </div>
+
+        <!-- Status filter -->
+        <div>
+          <label class="block text-xs font-medium text-on-surface-variant mb-1">
+            {{ 'admin.users.filter.status' | transloco }}
+          </label>
+          <div class="relative">
+            <select [(ngModel)]="filterActive" (change)="applyFilter()"
+                    class="appearance-none pl-3 pr-8 py-2 text-sm border border-outline-variant rounded-lg bg-surface focus:outline-none focus:ring-2 text-on-surface min-w-36">
+              @for (s of statuses; track s.value) {
+                <option [value]="s.value">{{ s.label }}</option>
+              }
+            </select>
+            <span class="material-symbols-outlined absolute right-2 top-1/2 -translate-y-1/2 text-on-surface-variant pointer-events-none text-sm">expand_more</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Export button -->
+      <button class="flex items-center gap-2 px-4 py-2 text-sm font-medium border border-outline-variant rounded-lg text-on-surface hover:bg-surface-container transition-colors">
+        <span class="material-symbols-outlined text-sm">download</span>
+        {{ 'admin.users.exportList' | transloco }}
+      </button>
+    </div>
+
+    <!-- Error -->
+    @if (loadError()) {
+      <div class="mb-4 p-3 bg-error-container border border-error rounded-lg flex items-center gap-2">
+        <span class="material-symbols-outlined text-error text-base">error</span>
+        <span class="text-sm text-on-error-container">{{ loadError() }}</span>
+      </div>
+    }
+
+    <!-- Table card -->
+    <div class="card overflow-hidden">
+
+      <!-- Table header row (dark, matching screenshot) -->
+      <div class="grid grid-cols-[40px_40px_1fr_160px_160px_140px] gap-4 px-5 py-3 bg-primary items-center">
+        <div></div>
+        <div></div>
+        <span class="text-xs font-semibold text-on-primary uppercase tracking-wide flex items-center gap-1">
+          {{ 'admin.users.table.userInfo' | transloco }}
+          <span class="material-symbols-outlined text-sm">unfold_more</span>
+        </span>
+        <span class="text-xs font-semibold text-on-primary uppercase tracking-wide">
+          {{ 'admin.users.table.role' | transloco }}
+        </span>
+        <span class="text-xs font-semibold text-on-primary uppercase tracking-wide">
+          {{ 'admin.users.table.status' | transloco }}
+        </span>
+        <span class="text-xs font-semibold text-on-primary uppercase tracking-wide text-right">
+          {{ 'admin.users.table.actions' | transloco }}
+        </span>
+      </div>
+
+      <!-- Loading -->
+      @if (isLoading()) {
+        <div class="flex items-center justify-center py-16 text-on-surface-variant gap-2 text-sm">
+          <span class="material-symbols-outlined animate-spin text-lg">progress_activity</span>
+          {{ 'admin.users.loading' | transloco }}
+        </div>
+      }
+
+      <!-- Empty -->
+      @if (!isLoading() && users().length === 0 && !loadError()) {
+        <div class="flex flex-col items-center justify-center py-16 text-on-surface-variant gap-2">
+          <span class="material-symbols-outlined text-4xl">group</span>
+          <p class="text-sm">{{ 'admin.users.empty' | transloco }}</p>
+        </div>
+      }
+
+      <!-- Rows -->
+      @if (!isLoading()) {
+        @for (user of users(); track user.id) {
+          <div class="grid grid-cols-[40px_40px_1fr_160px_160px_140px] gap-4 px-5 py-4 border-b border-outline-variant items-center hover:bg-surface-container-low transition-colors">
+
+            <!-- Checkbox -->
+            <input type="checkbox" class="w-4 h-4 rounded border-outline-variant accent-primary cursor-pointer">
+
+            <!-- Avatar -->
+            <div class="w-9 h-9 rounded-full bg-surface-container flex items-center justify-center text-xs font-semibold text-on-surface-variant flex-shrink-0">
+              {{ initials(user.displayName) }}
+            </div>
+
+            <!-- User info -->
+            <div class="min-w-0">
+              <p class="text-sm font-semibold text-on-surface">{{ user.displayName }}</p>
+              <p class="text-xs text-on-surface-variant truncate">{{ user.email }}</p>
+              <p class="text-xs text-on-surface-variant font-mono mt-0.5">{{ user.displayRef }}</p>
+            </div>
+
+            <!-- Role badge -->
+            <div>
+              <span [class]="'inline-flex px-3 py-1 rounded text-xs font-bold tracking-wide ' + roleBadgeClass(user.role)">
+                {{ user.role }}
+              </span>
+            </div>
+
+            <!-- Active toggle -->
+            <div class="flex items-center gap-2">
+              <div [class]="'relative w-11 h-6 rounded-full transition-colors ' + (user.active ? 'bg-tertiary' : 'bg-outline-variant')">
+                <div [class]="'absolute top-1 w-4 h-4 rounded-full bg-white shadow transition-all ' + (user.active ? 'left-6' : 'left-1')"></div>
+              </div>
+              <span class="text-sm text-on-surface-variant">
+                {{ user.active
+                    ? ('admin.users.status.active' | transloco)
+                    : ('admin.users.status.inactive' | transloco) }}
+              </span>
+            </div>
+
+            <!-- Actions placeholder -->
+            <div class="flex justify-end">
+              <button class="text-on-surface-variant hover:text-primary transition-colors p-1 rounded-lg hover:bg-surface-container">
+                <span class="material-symbols-outlined text-base">more_horiz</span>
+              </button>
+            </div>
+
+          </div>
+        }
+      }
+
+      <!-- Pagination -->
+      @if (!isLoading() && users().length > 0) {
+        <div class="px-5 py-4 flex items-center justify-between border-t border-outline-variant">
+          <p class="text-sm text-on-surface-variant">
+            {{ 'admin.users.showing' | transloco }}
+            {{ currentPage() * pageSize + 1 }} to
+            {{ currentPage() * pageSize + users().length }} of
+            {{ totalElements() }} {{ 'admin.users.users' | transloco }}
+          </p>
+          <div class="flex items-center gap-1">
+            <button (click)="goToPage(currentPage() - 1)" [disabled]="currentPage() === 0"
+                    class="w-8 h-8 flex items-center justify-center rounded-lg border border-outline-variant text-on-surface hover:bg-surface-container disabled:opacity-40 disabled:cursor-not-allowed transition-colors">
+              <span class="material-symbols-outlined text-sm">chevron_left</span>
+            </button>
+
+            @for (p of pages; track p) {
+              @if (p === 0 || p === totalPages() - 1 || (p >= currentPage() - 1 && p <= currentPage() + 1)) {
+                <button (click)="goToPage(p)"
+                        [class]="'w-8 h-8 flex items-center justify-center rounded-lg text-sm transition-colors ' +
+                          (p === currentPage()
+                            ? 'bg-primary text-on-primary font-semibold'
+                            : 'border border-outline-variant text-on-surface hover:bg-surface-container')">
+                  {{ p + 1 }}
+                </button>
+              }
+              @if (p === currentPage() - 2 || p === currentPage() + 2) {
+                <span class="w-8 h-8 flex items-center justify-center text-sm text-on-surface-variant">…</span>
+              }
+            }
+
+            <button (click)="goToPage(currentPage() + 1)" [disabled]="currentPage() >= totalPages() - 1"
+                    class="w-8 h-8 flex items-center justify-center rounded-lg border border-outline-variant text-on-surface hover:bg-surface-container disabled:opacity-40 disabled:cursor-not-allowed transition-colors">
+              <span class="material-symbols-outlined text-sm">chevron_right</span>
+            </button>
+          </div>
+        </div>
+      }
+
+    </div>
+  </div>
+</main>

@@ -37,10 +37,43 @@
     "cases": "Cases",
     "callCenter": "Call Center",
     "reports": "Reports",
+    "admin": "Admin",
     "management": "Management",
     "citizens": "Citizens",
     "departments": "Departments"
   },
+  "admin": {
+   "users": {
+   "title": "User Administration",
+   "subtitle": "Manage staff access, roles, and system permissions.",
+   "createUser": "Create New User",
+   "exportList": "Export List",
+   "loading": "Loading users…",
+   "empty": "No users found matching your filters.",
+   "showing": "Showing",
+   "users": "users",
+   "filter": {
+     "role": "Filter by Role",
+     "status": "Filter by Status",
+     "allRoles": "All Roles",
+     "allStatuses": "All Statuses"
+   },
+   "table": {
+     "userInfo": "User Info",
+     "role": "Role",
+     "status": "Status",
+     "actions": "Actions"
+   },
+    "status": {
+     "active": "Active",
+     "inactive": "Inactive"
+   },
+    "errors": {
+     "forbidden": "You do not have permission to view users.",
+     "loadFailed": "Failed to load users. Please try again."
+    }
+  }
+},
   "callCenter": {
     "title": "Call Center",
     "subtitle": "Search for citizens to view profile or create a case",
