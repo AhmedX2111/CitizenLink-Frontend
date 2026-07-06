@@ -252,7 +252,7 @@ export class CaseDetailPageComponent implements OnInit {
     const caseId = this.caseDetail()?.id;
     if (!action || !caseId) return;
 
-    if (action.requiresComment && !this.transitionComment.trim()) {
+    if ((action.requiresComment || action.action === 'AWAIT_INFO') && !this.transitionComment.trim()) {
       this.transitionError.set(this.transloco.translate('cases.detail.commentRequired'));
       return;
     }

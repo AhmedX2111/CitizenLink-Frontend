@@ -12,7 +12,7 @@
             <input type="file" id="fileInput" class="hidden" (change)="onFileSelected($event)" 
                    [accept]="'.pdf,.png,.jpg,.jpeg,.docx'">
             <button (click)="triggerFileUpload()" [disabled]="isUploading()"
-                    class="text-xs bg-blue-600 hover:bg-blue-700 text-white px-3 py-1.5 rounded-lg transition flex items-center gap-1">
+                    class="text-xs text-blue-600 hover:text-blue-800 font-medium flex items-center gap-1">
                 @if (isUploading()) {
                     <svg class="animate-spin w-3.5 h-3.5" fill="none" viewBox="0 0 24 24">
                         <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"/>

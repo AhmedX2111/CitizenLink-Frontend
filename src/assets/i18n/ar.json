@@ -333,6 +333,8 @@
       "handlersLoadError": "فشل تحميل قائمة المعالجين.",
       "reasonLabel": "السبب",
       "reasonPlaceholder": "قدم سببًا موجزًا لهذا الإجراء",
+      "infoRequestLabel": "المعلومات المطلوبة",
+      "infoRequestPlaceholder": "صف المعلومات المطلوبة من المواطن",
       "resolutionLabel": "ملخص الحل",
       "resolutionPlaceholder": "قدم ملخصًا موجزًا لكيفية حل الحالة",
       "events": {
