@@ -69,11 +69,39 @@
      "inactive": "Inactive"
    },
     "errors": {
-     "forbidden": "You do not have permission to view users.",
-     "loadFailed": "Failed to load users. Please try again."
+      "forbidden": "You do not have permission to view users.",
+      "loadFailed": "Failed to load users. Please try again."
+    },
+    "actions": {
+      "edit": "Edit",
+      "deactivate": "Deactivate",
+      "activate": "Activate"
+    },
+    "modal": {
+      "createTitle": "Create New User",
+      "editTitle": "Edit User",
+      "username": "Username",
+      "usernameReadonly": "Username (cannot be changed)",
+      "displayName": "Display Name",
+      "email": "Email",
+      "role": "Role",
+      "password": "Password",
+      "showPassword": "Show",
+      "hidePassword": "Hide",
+      "creating": "Creating...",
+      "saving": "Saving...",
+      "createSuccess": "User created successfully!",
+      "updateSuccess": "User updated successfully!",
+      "deactivateSuccess": "User deactivated successfully!",
+      "activateSuccess": "User activated successfully!",
+      "duplicateUsername": "Username already taken",
+      "duplicateEmail": "Email already in use",
+      "userNotFound": "User not found",
+      "updateFailed": "Failed to update user. Please try again.",
+      "deactivateFailed": "Failed to update user status. Please try again."
     }
-  }
-},
+   }
+  },
   "callCenter": {
     "title": "Call Center",
     "subtitle": "Search for citizens to view profile or create a case",

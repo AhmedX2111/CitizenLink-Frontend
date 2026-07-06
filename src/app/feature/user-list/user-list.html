@@ -1,4 +1,4 @@
-<main class="flex-1 overflow-y-auto p-6 bg-background">
+<main (click)="closeActionMenu()" class="flex-1 overflow-y-auto p-6 bg-background">
   <div class="max-w-7xl mx-auto">
 
     <!-- Page header -->
@@ -11,7 +11,7 @@
           {{ 'admin.users.subtitle' | transloco }}
         </p>
       </div>
-      <button class="flex items-center gap-2 px-4 py-2.5 rounded-lg bg-primary text-on-primary text-sm font-medium hover:opacity-90 transition-opacity">
+      <button (click)="openCreateModal()" class="flex items-center gap-2 px-4 py-2.5 rounded-lg bg-primary text-on-primary text-sm font-medium hover:opacity-90 transition-opacity">
         <span class="material-symbols-outlined text-sm">person_add</span>
         {{ 'admin.users.createUser' | transloco }}
       </button>
@@ -53,12 +53,6 @@
           </div>
         </div>
       </div>
-
-      <!-- Export button -->
-      <button class="flex items-center gap-2 px-4 py-2 text-sm font-medium border border-outline-variant rounded-lg text-on-surface hover:bg-surface-container transition-colors">
-        <span class="material-symbols-outlined text-sm">download</span>
-        {{ 'admin.users.exportList' | transloco }}
-      </button>
     </div>
 
     <!-- Error -->
@@ -66,6 +60,17 @@
       <div class="mb-4 p-3 bg-error-container border border-error rounded-lg flex items-center gap-2">
         <span class="material-symbols-outlined text-error text-base">error</span>
         <span class="text-sm text-on-error-container">{{ loadError() }}</span>
+      </div>
+    }
+
+    <!-- Success toast -->
+    @if (successMessage()) {
+      <div class="mb-4 p-3 bg-tertiary-container border border-tertiary rounded-lg flex items-center gap-2">
+        <span class="material-symbols-outlined text-tertiary text-base">check_circle</span>
+        <span class="text-sm text-on-tertiary-container flex-1">{{ successMessage() }}</span>
+        <button (click)="dismissToast()" class="text-on-tertiary-container hover:opacity-70 transition-opacity">
+          <span class="material-symbols-outlined text-base">close</span>
+        </button>
       </div>
     }
 
@@ -135,7 +140,7 @@
             </div>
 
             <!-- Active toggle -->
-            <div class="flex items-center gap-2">
+            <div (click)="$event.stopPropagation(); deactivateUser(user)" class="flex items-center gap-2 cursor-pointer">
               <div [class]="'relative w-11 h-6 rounded-full transition-colors ' + (user.active ? 'bg-tertiary' : 'bg-outline-variant')">
                 <div [class]="'absolute top-1 w-4 h-4 rounded-full bg-white shadow transition-all ' + (user.active ? 'left-6' : 'left-1')"></div>
               </div>
@@ -146,11 +151,29 @@
               </span>
             </div>
 
-            <!-- Actions placeholder -->
-            <div class="flex justify-end">
-              <button class="text-on-surface-variant hover:text-primary transition-colors p-1 rounded-lg hover:bg-surface-container">
+            <!-- Actions dropdown -->
+            <div class="flex justify-end relative">
+              <button (click)="$event.stopPropagation(); toggleActionMenu(user.id)"
+                      class="text-on-surface-variant hover:text-primary transition-colors p-1 rounded-lg hover:bg-surface-container">
                 <span class="material-symbols-outlined text-base">more_horiz</span>
               </button>
+              @if (actionMenuUserId() === user.id) {
+                <div (click)="$event.stopPropagation()"
+                     class="absolute right-0 top-full mt-1 z-20 min-w-36 bg-surface-container-lowest border border-outline-variant rounded-xl shadow-xl overflow-hidden">
+                  <button (click)="openEditModal(user)"
+                          class="w-full flex items-center gap-2 px-4 py-2.5 text-sm text-on-surface hover:bg-surface-container transition-colors text-left">
+                    <span class="material-symbols-outlined text-sm">edit</span>
+                    {{ 'admin.users.actions.edit' | transloco }}
+                  </button>
+                  <button (click)="deactivateUser(user)"
+                          class="w-full flex items-center gap-2 px-4 py-2.5 text-sm text-on-surface hover:bg-surface-container transition-colors text-left">
+                    <span class="material-symbols-outlined text-sm">{{ user.active ? 'block' : 'check_circle' }}</span>
+                    {{ user.active
+                        ? ('admin.users.actions.deactivate' | transloco)
+                        : ('admin.users.actions.activate' | transloco) }}
+                  </button>
+                </div>
+              }
             </div>
 
           </div>
@@ -198,3 +221,150 @@
     </div>
   </div>
 </main>
+
+<!-- ── Create / Edit User Modal ──────────────────────────────────── -->
+@if (isModalOpen()) {
+  <div (click)="onBackdropClick($event)"
+       class="fixed inset-0 bg-surface-container-low/80 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+    <div (click)="$event.stopPropagation()"
+         class="bg-surface-container-lowest border border-outline-variant rounded-xl shadow-xl w-full max-w-lg overflow-hidden">
+
+      <!-- Header -->
+      <div class="bg-surface-container px-5 py-3.5 border-b border-outline-variant flex items-center justify-between">
+        <h3 class="font-bold text-primary flex items-center gap-2">
+          <span class="material-symbols-outlined">person_add</span>
+          {{ modalMode() === 'create'
+              ? ('admin.users.modal.createTitle' | transloco)
+              : ('admin.users.modal.editTitle' | transloco) }}
+        </h3>
+        <button (click)="closeModal()" class="text-outline hover:text-primary transition-colors">
+          <span class="material-symbols-outlined text-[20px]">close</span>
+        </button>
+      </div>
+
+      <!-- Body -->
+      <div class="p-5 space-y-4">
+
+        <!-- Global error -->
+        @if (submitError()) {
+          <div class="p-3 bg-error-container border-l-4 border-error rounded-md flex items-center gap-2">
+            <span class="material-symbols-outlined text-[18px] text-error flex-shrink-0">error</span>
+            <span class="text-error text-xs">{{ submitError() }}</span>
+          </div>
+        }
+
+        <!-- Username -->
+        <div>
+          <label class="block text-xs font-medium text-on-surface mb-1">
+            @if (modalMode() === 'edit') {
+              {{ 'admin.users.modal.usernameReadonly' | transloco }}
+            } @else {
+              {{ 'admin.users.modal.username' | transloco }} <span class="text-error">*</span>
+            }
+          </label>
+          @if (modalMode() === 'edit') {
+            <input [value]="formUsername" readonly
+                   class="w-full px-3 py-2 text-xs bg-surface-container border border-outline-variant rounded-lg text-on-surface-variant cursor-not-allowed">
+          } @else {
+            <input [(ngModel)]="formUsername" (input)="fieldErrors.set({...fieldErrors(), username: ''})"
+                   class="w-full px-3 py-2 text-xs bg-surface-container border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary transition-all"
+                   [class.border-error]="fieldErrors()['username']"
+                   [class.border-outline-variant]="!fieldErrors()['username']"
+                   placeholder="jdoe" maxlength="100">
+            @if (fieldErrors()['username']) {
+              <p class="mt-1 text-[11px] text-error">{{ fieldErrors()['username'] }}</p>
+            }
+          }
+        </div>
+
+        <!-- Display Name -->
+        <div>
+          <label class="block text-xs font-medium text-on-surface mb-1">
+            {{ 'admin.users.modal.displayName' | transloco }} <span class="text-error">*</span>
+          </label>
+          <input [(ngModel)]="formDisplayName" (input)="fieldErrors.set({...fieldErrors(), displayName: ''})"
+                 class="w-full px-3 py-2 text-xs bg-surface-container border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary transition-all"
+                 [class.border-error]="fieldErrors()['displayName']"
+                 [class.border-outline-variant]="!fieldErrors()['displayName']"
+                 placeholder="John Doe" maxlength="150">
+          @if (fieldErrors()['displayName']) {
+            <p class="mt-1 text-[11px] text-error">{{ fieldErrors()['displayName'] }}</p>
+          }
+        </div>
+
+        <!-- Email -->
+        <div>
+          <label class="block text-xs font-medium text-on-surface mb-1">
+            {{ 'admin.users.modal.email' | transloco }} <span class="text-error">*</span>
+          </label>
+          <input [(ngModel)]="formEmail" (input)="fieldErrors.set({...fieldErrors(), email: ''})"
+                 class="w-full px-3 py-2 text-xs bg-surface-container border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary transition-all"
+                 [class.border-error]="fieldErrors()['email']"
+                 [class.border-outline-variant]="!fieldErrors()['email']"
+                 type="email" placeholder="jdoe@example.com" maxlength="255">
+          @if (fieldErrors()['email']) {
+            <p class="mt-1 text-[11px] text-error">{{ fieldErrors()['email'] }}</p>
+          }
+        </div>
+
+        <!-- Role -->
+        <div>
+          <label class="block text-xs font-medium text-on-surface mb-1">
+            {{ 'admin.users.modal.role' | transloco }} <span class="text-error">*</span>
+          </label>
+          <div class="relative">
+            <select [(ngModel)]="formRole"
+                    class="appearance-none w-full pl-3 pr-8 py-2 text-xs bg-surface-container border border-outline-variant rounded-lg focus:outline-none focus:ring-2 focus:ring-primary transition-all text-on-surface">
+              @for (r of roles; track r) {
+                <option [value]="r">{{ r }}</option>
+              }
+            </select>
+            <span class="material-symbols-outlined absolute right-2 top-1/2 -translate-y-1/2 text-on-surface-variant pointer-events-none text-sm">expand_more</span>
+          </div>
+        </div>
+
+        <!-- Password (create only) -->
+        @if (modalMode() === 'create') {
+          <div>
+            <label class="block text-xs font-medium text-on-surface mb-1">
+              {{ 'admin.users.modal.password' | transloco }} <span class="text-error">*</span>
+            </label>
+            <div class="relative">
+              <input [(ngModel)]="formPassword" (input)="fieldErrors.set({...fieldErrors(), password: ''})"
+                     class="w-full px-3 py-2 text-xs bg-surface-container border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary transition-all pr-9"
+                     [class.border-error]="fieldErrors()['password']"
+                     [class.border-outline-variant]="!fieldErrors()['password']"
+                     [type]="showPassword ? 'text' : 'password'" placeholder="Min 8 characters" maxlength="128">
+              <button type="button" (click)="togglePasswordVisibility()"
+                      class="absolute right-2 top-1/2 -translate-y-1/2 text-on-surface-variant hover:text-primary transition-colors">
+                <span class="material-symbols-outlined text-sm">{{ showPassword ? 'visibility_off' : 'visibility' }}</span>
+              </button>
+            </div>
+            @if (fieldErrors()['password']) {
+              <p class="mt-1 text-[11px] text-error">{{ fieldErrors()['password'] }}</p>
+            }
+          </div>
+        }
+      </div>
+
+      <!-- Footer -->
+      <div class="px-5 py-3 border-t border-outline-variant flex justify-end gap-2">
+        <button (click)="closeModal()" class="px-4 py-2 text-xs border border-outline-variant rounded-lg text-on-surface hover:bg-surface-container transition-colors">
+          {{ 'common.cancel' | transloco }}
+        </button>
+        <button (click)="submitModal()" [disabled]="isSubmitting()"
+                class="bg-primary text-on-primary disabled:opacity-50 disabled:cursor-not-allowed text-xs font-bold px-5 py-2 rounded-lg transition-all flex items-center gap-1.5 hover:brightness-110">
+          @if (isSubmitting()) {
+            <svg class="animate-spin w-3.5 h-3.5" fill="none" viewBox="0 0 24 24">
+              <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"/>
+              <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"/>
+            </svg>
+            {{ modalMode() === 'create' ? ('admin.users.modal.creating' | transloco) : ('admin.users.modal.saving' | transloco) }}
+          } @else {
+            {{ 'common.confirm' | transloco }}
+          }
+        </button>
+      </div>
+    </div>
+  </div>
+}

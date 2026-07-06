@@ -68,11 +68,39 @@
         "active": "نشط",
         "inactive": "غير نشط"
       },
-      "errors": {
-        "forbidden": "ليس لديك صلاحية لعرض المستخدمين.",
-        "loadFailed": "فشل تحميل المستخدمين. يرجى المحاولة مرة أخرى."
-      }
+    "errors": {
+      "forbidden": "ليس لديك صلاحية لعرض المستخدمين.",
+      "loadFailed": "فشل تحميل المستخدمين. يرجى المحاولة مرة أخرى."
+    },
+    "actions": {
+      "edit": "تعديل",
+      "deactivate": "إلغاء التنشيط",
+      "activate": "تنشيط"
+    },
+    "modal": {
+      "createTitle": "إنشاء مستخدم جديد",
+      "editTitle": "تعديل المستخدم",
+      "username": "اسم المستخدم",
+      "usernameReadonly": "اسم المستخدم (لا يمكن تغييره)",
+      "displayName": "الاسم المعروض",
+      "email": "البريد الإلكتروني",
+      "role": "الدور",
+      "password": "كلمة المرور",
+      "showPassword": "إظهار",
+      "hidePassword": "إخفاء",
+      "creating": "جارٍ الإنشاء...",
+      "saving": "جارٍ الحفظ...",
+      "createSuccess": "تم إنشاء المستخدم بنجاح!",
+      "updateSuccess": "تم تحديث المستخدم بنجاح!",
+      "deactivateSuccess": "تم إلغاء تنشيط المستخدم بنجاح!",
+      "activateSuccess": "تم تنشيط المستخدم بنجاح!",
+      "duplicateUsername": "اسم المستخدم موجود بالفعل",
+      "duplicateEmail": "البريد الإلكتروني مستخدم بالفعل",
+      "userNotFound": "المستخدم غير موجود",
+      "updateFailed": "فشل تحديث المستخدم. يرجى المحاولة مرة أخرى.",
+      "deactivateFailed": "فشل تحديث حالة المستخدم. يرجى المحاولة مرة أخرى."
     }
+   }
   },
   "callCenter": {
     "title": "مركز الاتصال",

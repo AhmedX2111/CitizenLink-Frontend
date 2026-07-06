@@ -1,13 +1,12 @@
 import {
-  Component, OnInit, signal, computed, inject, DestroyRef
+  Component, OnInit, signal, inject, DestroyRef
 } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { Router } from '@angular/router';
 import { TranslocoModule, TranslocoService } from '@jsverse/transloco';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { UserAdminService } from '../../../core/services/user-admin.service';
-import { UserResponse } from '../../../core/models/user.models';
+import { UserResponse, CreateUserRequest, UpdateUserRequest } from '../../../core/models/user.models';
 import { PagedResponse } from '../../../core/models/case.models';
 
 @Component({
@@ -42,6 +41,28 @@ export class UserListComponent implements OnInit {
   totalPages    = signal(0);
   currentPage   = signal(0);
   pageSize      = 20;
+
+  // ── Action dropdown ──────────────────────────────────────────
+  actionMenuUserId = signal<string | null>(null);
+
+  // ── Modal state ──────────────────────────────────────────────
+  isModalOpen  = signal(false);
+  modalMode    = signal<'create' | 'edit'>('create');
+  editingUser  = signal<UserResponse | null>(null);
+  isSubmitting = signal(false);
+  submitError  = signal<string | null>(null);
+  fieldErrors  = signal<Record<string, string>>({});
+
+  // ── Form model ───────────────────────────────────────────────
+  formUsername     = '';
+  formDisplayName  = '';
+  formEmail        = '';
+  formRole: 'ADMIN' | 'SUPERVISOR' | 'HANDLER' | 'AGENT' = 'AGENT';
+  formPassword     = '';
+  showPassword     = false;
+
+  // ── Success toast ────────────────────────────────────────────
+  successMessage = signal<string | null>(null);
 
   get pages(): number[] {
     return Array.from({ length: this.totalPages() }, (_, i) => i);
@@ -91,7 +112,188 @@ export class UserListComponent implements OnInit {
     this.load();
   }
 
-  // ── Helpers ───────────────────────────────────────────────────
+  // ── Action dropdown ─────────────────────────────────────────
+  closeActionMenu(): void {
+    this.actionMenuUserId.set(null);
+  }
+
+  toggleActionMenu(userId: string): void {
+    this.actionMenuUserId.set(userId === this.actionMenuUserId() ? null : userId);
+  }
+
+  // ── Create / Edit modal ─────────────────────────────────────
+  openCreateModal(): void {
+    this.resetForm();
+    this.modalMode.set('create');
+    this.editingUser.set(null);
+    this.submitError.set(null);
+    this.fieldErrors.set({});
+    this.isModalOpen.set(true);
+    this.closeActionMenu();
+  }
+
+  openEditModal(user: UserResponse): void {
+    this.resetForm();
+    this.modalMode.set('edit');
+    this.editingUser.set(user);
+    this.formUsername = user.username;
+    this.formDisplayName = user.displayName;
+    this.formEmail = user.email;
+    this.formRole = user.role;
+    this.submitError.set(null);
+    this.fieldErrors.set({});
+    this.isModalOpen.set(true);
+    this.closeActionMenu();
+  }
+
+  closeModal(): void {
+    this.isModalOpen.set(false);
+  }
+
+  onBackdropClick(event: MouseEvent): void {
+    if (event.target === event.currentTarget) {
+      this.closeModal();
+    }
+  }
+
+  private resetForm(): void {
+    this.formUsername = '';
+    this.formDisplayName = '';
+    this.formEmail = '';
+    this.formRole = 'AGENT';
+    this.formPassword = '';
+    this.showPassword = false;
+  }
+
+  togglePasswordVisibility(): void {
+    this.showPassword = !this.showPassword;
+  }
+
+  // ── Submit modal ─────────────────────────────────────────────
+  submitModal(): void {
+    this.submitError.set(null);
+    this.fieldErrors.set({});
+
+    if (this.modalMode() === 'create') {
+      this.createUser();
+    } else {
+      this.updateUser();
+    }
+  }
+
+  private createUser(): void {
+    const payload: CreateUserRequest = {
+      username: this.formUsername.trim(),
+      displayName: this.formDisplayName.trim(),
+      email: this.formEmail.trim(),
+      role: this.formRole,
+      password: this.formPassword,
+    };
+
+    this.isSubmitting.set(true);
+    this.userService.createUser(payload).pipe(
+      takeUntilDestroyed(this.destroyRef)
+    ).subscribe({
+      next: () => {
+        this.isSubmitting.set(false);
+        this.closeModal();
+        this.load();
+        this.showToast(this.transloco.translate('admin.users.modal.createSuccess'));
+      },
+      error: (err) => this.handleSubmitError(err)
+    });
+  }
+
+  private updateUser(): void {
+    const user = this.editingUser();
+    if (!user) return;
+
+    const payload: UpdateUserRequest = {
+      displayName: this.formDisplayName.trim(),
+      email: this.formEmail.trim(),
+      role: this.formRole,
+    };
+
+    this.isSubmitting.set(true);
+    this.userService.updateUser(user.id, payload).pipe(
+      takeUntilDestroyed(this.destroyRef)
+    ).subscribe({
+      next: (updated) => {
+        this.isSubmitting.set(false);
+        this.closeModal();
+        this.replaceUserInList(updated);
+        this.showToast(this.transloco.translate('admin.users.modal.updateSuccess'));
+      },
+      error: (err) => this.handleSubmitError(err)
+    });
+  }
+
+  private replaceUserInList(updated: UserResponse): void {
+    this.users.update(list =>
+      list.map(u => u.id === updated.id ? updated : u)
+    );
+  }
+
+  private handleSubmitError(err: any): void {
+    this.isSubmitting.set(false);
+
+    if (err.status === 409) {
+      const msg: string = err.error?.message ?? '';
+      if (msg.toLowerCase().includes('username')) {
+        this.fieldErrors.set({ username: this.transloco.translate('admin.users.modal.duplicateUsername') });
+      } else if (msg.toLowerCase().includes('email')) {
+        this.fieldErrors.set({ email: this.transloco.translate('admin.users.modal.duplicateEmail') });
+      } else {
+        this.submitError.set(msg || this.transloco.translate('admin.users.modal.updateFailed'));
+      }
+    } else if (err.status === 400) {
+      const violations = err.error?.violations;
+      if (violations && Array.isArray(violations)) {
+        const map: Record<string, string> = {};
+        for (const v of violations) {
+          map[v.field] = v.message;
+        }
+        this.fieldErrors.set(map);
+      } else {
+        this.submitError.set(err.error?.message || this.transloco.translate('admin.users.modal.updateFailed'));
+      }
+    } else if (err.status === 404) {
+      this.submitError.set(this.transloco.translate('admin.users.modal.userNotFound'));
+    } else {
+      this.submitError.set(err.error?.message || this.transloco.translate('admin.users.modal.updateFailed'));
+    }
+  }
+
+  // ── Deactivate / Activate toggle ────────────────────────────
+  deactivateUser(user: UserResponse): void {
+    this.closeActionMenu();
+    this.userService.deactivateUser(user.id).pipe(
+      takeUntilDestroyed(this.destroyRef)
+    ).subscribe({
+      next: (updated) => {
+        this.replaceUserInList(updated);
+        const key = updated.active ? 'admin.users.modal.activateSuccess' : 'admin.users.modal.deactivateSuccess';
+        this.showToast(this.transloco.translate(key));
+      },
+      error: (err) => {
+        if (err.status === 404) {
+          this.load();
+        }
+      }
+    });
+  }
+
+  // ── Toast ────────────────────────────────────────────────────
+  private showToast(msg: string): void {
+    this.successMessage.set(msg);
+    setTimeout(() => this.successMessage.set(null), 4000);
+  }
+
+  dismissToast(): void {
+    this.successMessage.set(null);
+  }
+
+  // ── Helpers ──────────────────────────────────────────────────
   initials(name: string): string {
     return name.split(' ').map(w => w[0]).join('').slice(0, 2).toUpperCase();
   }
