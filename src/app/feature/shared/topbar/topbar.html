@@ -1,10 +1,7 @@
-<header class="fixed top-0 right-0 left-64 h-16 bg-surface border-b border-outline-variant flex justify-between items-center px-6 z-40">
-  <div class="flex items-center flex-1 max-w-md">
-    <div class="relative w-full">
-      <span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-outline">search</span>
-      <input class="w-full pl-10 pr-4 py-2 bg-surface-container-low border border-outline-variant rounded focus:outline-none focus:border-primary text-sm"
-             placeholder="Search cases, citizens, or IDs..." type="text">
-    </div>
+<header class="fixed top-0 ltr:left-64 rtl:right-64 ltr:right-0 rtl:left-0 h-16 bg-surface border-b border-outline-variant flex justify-between items-center px-6 z-40">
+  <div class="flex items-center gap-2 text-sm text-on-surface-variant">
+    <span class="material-symbols-outlined text-base">calendar_today</span>
+    <span class="font-label-md">{{ today() }}</span>
   </div>
   <div class="flex items-center gap-6">
     <button (click)="toggleLanguage()"

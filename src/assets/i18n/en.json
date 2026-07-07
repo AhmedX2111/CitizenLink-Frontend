@@ -19,6 +19,10 @@
     "yes": "Yes",
     "no": "No",
     "required": "This field is required",
+    "filter": "Filter",
+    "optional": "optional",
+    "ar": "AR",
+    "en": "EN",
     "contactSupport": "Contact Support",
     "retry": "Retry",
     "privacyPolicy": "Privacy Policy",
@@ -44,9 +48,15 @@
   },
   "admin": {
    "users": {
-   "title": "User Administration",
-   "subtitle": "Manage staff access, roles, and system permissions.",
-   "createUser": "Create New User",
+    "title": "User Administration",
+    "subtitle": "Manage staff access, roles, and system permissions.",
+    "roles": {
+      "ADMIN": "Admin",
+      "SUPERVISOR": "Supervisor",
+      "HANDLER": "Handler",
+      "AGENT": "Agent"
+    },
+    "createUser": "Create New User",
    "exportList": "Export List",
    "loading": "Loading users…",
    "empty": "No users found matching your filters.",
@@ -86,6 +96,7 @@
       "email": "Email",
       "role": "Role",
       "password": "Password",
+      "passwordPlaceholder": "Min 8 characters",
       "showPassword": "Show",
       "hidePassword": "Hide",
       "creating": "Creating...",
@@ -294,11 +305,21 @@
       "connectionFailed": "Cannot connect to server. Please make sure the backend is running on port 8080.",
       "invalidCredentials": "Invalid username or password. Please try again.",
       "badRequest": "Please check your credentials and try again.",
-      "accountInactive": "Your account is inactive. Please contact support.",
+      "accountInactive": "Your account is disabled. Please contact support.",
       "endpointNotFound": "API endpoint not found. Please check if the backend is correctly configured.",
       "serverError": "Server error. Please try again later or contact support.",
       "unknown": "An unexpected error occurred"
     }
+  },
+  "logout": {
+    "title": "Logging out...",
+    "subtitle": "Please wait"
+  },
+  "sidebar": {
+    "signOut": "Sign out"
+  },
+  "topbar": {
+    "searchPlaceholder": "Search cases, citizens, or IDs..."
   },
   "reports": {
    "kpi": {
@@ -555,7 +576,10 @@
       "openCases": "Open Cases",
       "resolvedThisMonth": "Resolved This Month",
       "overdueCases": "Overdue Cases",
-      "newToday": "New Today"
+      "newToday": "New Today",
+      "resolvedDesc": "Lifetime resolution count",
+      "overdueDesc": "Requires Attention",
+      "newTodayDesc": "Incoming citizen requests"
     },
     "chart": {
       "title": "Cases by Status"

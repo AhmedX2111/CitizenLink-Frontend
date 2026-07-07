@@ -76,7 +76,7 @@
           </div>
           <div>
             <label class="font-label-sm text-label-sm text-on-surface-variant block">{{ 'citizenProfile.fields.preferredLanguage' | transloco }}</label>
-            <p class="font-body-md text-body-md text-on-surface mt-0.5">{{ c.preferredLanguage === 'ar' ? 'العربية' : 'English' }}</p>
+            <p class="font-body-md text-body-md text-on-surface mt-0.5">{{ c.preferredLanguage === 'ar' ? ('newCitizen.arabic' | transloco) : ('newCitizen.english' | transloco) }}</p>
           </div>
           <div>
             <label class="font-label-sm text-label-sm text-on-surface-variant block">{{ 'citizenProfile.fields.createdBy' | transloco }}</label>
@@ -161,12 +161,12 @@
                   </td>
                   <td class="px-6 py-4 whitespace-nowrap">
                     <span class="status-chip {{ getStatusBadgeClass(case.status) }}">
-                      {{ case.status }}
+                      {{ 'cases.statuses.' + case.status | transloco }}
                     </span>
                   </td>
                   <td class="px-6 py-4 whitespace-nowrap">
                     <span class="status-chip {{ getPriorityBadgeClass(case.priority) }}">
-                      {{ case.priority }}
+                      {{ 'cases.priorities.' + case.priority | transloco }}
                     </span>
                   </td>
                   <td class="px-6 py-4 whitespace-nowrap font-body-md text-body-md text-on-surface-variant">

@@ -57,7 +57,7 @@
           </div>
           <div class="mt-4">
             <span class="text-display-lg font-bold text-primary">{{ summary()?.kpis?.resolvedThisMonth ?? '—' }}</span>
-            <p class="text-label-sm text-secondary mt-1">Lifetime resolution count</p>
+            <p class="text-label-sm text-secondary mt-1">{{ t('dashboard.kpis.resolvedDesc') }}</p>
           </div>
         </div>
 
@@ -73,7 +73,7 @@
             <span class="text-display-lg font-bold text-error">{{ summary()?.kpis?.overdueCases ?? '—' }}</span>
             <div class="flex items-center gap-1 text-error mt-1 font-bold">
               <span class="material-symbols-outlined text-[14px]">priority_high</span>
-              <span class="text-label-sm">Requires Attention</span>
+              <span class="text-label-sm">{{ t('dashboard.kpis.overdueDesc') }}</span>
             </div>
           </div>
         </div>
@@ -88,7 +88,7 @@
           </div>
           <div class="mt-4">
             <span class="text-display-lg font-bold text-primary">{{ summary()?.kpis?.newToday ?? '—' }}</span>
-            <p class="text-label-sm text-secondary mt-1">Incoming citizen requests</p>
+            <p class="text-label-sm text-secondary mt-1">{{ t('dashboard.kpis.newTodayDesc') }}</p>
           </div>
         </div>
 

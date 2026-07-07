@@ -1,4 +1,4 @@
-<aside class="h-screen w-64 fixed left-0 top-0 flex flex-col bg-surface border-r border-outline-variant z-50">
+<aside class="h-screen w-64 fixed ltr:left-0 rtl:right-0 top-0 flex flex-col bg-surface ltr:border-r rtl:border-l border-outline-variant z-50">
   <a routerLink="/dashboard" class="px-6 pt-6 pb-8 flex items-center gap-3 hover:opacity-80 transition-opacity cursor-pointer">
     <div class="w-10 h-10 rounded bg-primary flex items-center justify-center text-on-primary">
       <span class="material-symbols-outlined text-headline-md" style="font-variation-settings: 'FILL' 1;">account_balance</span>
@@ -10,20 +10,20 @@
   </a>
 
   <nav class="flex-1 px-3 space-y-1">
-    <a routerLink="/dashboard" routerLinkActive="text-primary font-bold border-r-4 border-primary bg-surface-container-high"
+    <a routerLink="/dashboard" routerLinkActive="text-primary font-bold ltr:border-r-4 rtl:border-l-4 border-primary bg-surface-container-high"
        [routerLinkActiveOptions]="{ exact: true }"
        class="flex items-center gap-3 px-4 py-3 rounded-lg text-on-surface-variant hover:bg-surface-container transition-colors duration-200">
       <span class="material-symbols-outlined">dashboard</span>
       <span class="font-body-md">{{ 'nav.dashboard' | transloco }}</span>
     </a>
 
-    <a routerLink="/cases" routerLinkActive="text-primary font-bold border-r-4 border-primary bg-surface-container-high"
+    <a routerLink="/cases" routerLinkActive="text-primary font-bold ltr:border-r-4 rtl:border-l-4 border-primary bg-surface-container-high"
        class="flex items-center gap-3 px-4 py-3 rounded-lg text-on-surface-variant hover:bg-surface-container transition-colors duration-200">
       <span class="material-symbols-outlined" [class.fill]="true">work</span>
       <span class="font-body-md">{{ 'cases.title' | transloco }}</span>
     </a>
 
-    <a routerLink="/app/call-center" routerLinkActive="text-primary font-bold border-r-4 border-primary bg-surface-container-high"
+    <a routerLink="/app/call-center" routerLinkActive="text-primary font-bold ltr:border-r-4 rtl:border-l-4 border-primary bg-surface-container-high"
        class="flex items-center gap-3 px-4 py-3 rounded-lg text-on-surface-variant hover:bg-surface-container transition-colors duration-200">
       <span class="material-symbols-outlined">call</span>
       <span class="font-body-md">{{ 'nav.callCenter' | transloco }}</span>
@@ -31,14 +31,14 @@
 
     <!-- Reports — visible only to SUPERVISOR and ADMIN -->
     @if (currentUser()?.role === 'SUPERVISOR' || currentUser()?.role === 'ADMIN') {
-      <a routerLink="/reports" routerLinkActive="text-primary font-bold border-r-4 border-primary bg-surface-container-high"
+      <a routerLink="/reports" routerLinkActive="text-primary font-bold ltr:border-r-4 rtl:border-l-4 border-primary bg-surface-container-high"
          class="flex items-center gap-3 px-4 py-3 rounded-lg text-on-surface-variant hover:bg-surface-container transition-colors duration-200">
         <span class="material-symbols-outlined">bar_chart</span>
         <span class="font-body-md">{{ 'nav.reports' | transloco }}</span>
       </a>
     }
     @if (currentUser()?.role === 'ADMIN') {
-      <a routerLink="/app/users" routerLinkActive="text-primary font-bold border-r-4 border-primary bg-surface-container-high"
+      <a routerLink="/app/users" routerLinkActive="text-primary font-bold ltr:border-r-4 rtl:border-l-4 border-primary bg-surface-container-high"
          class="flex items-center gap-3 px-4 py-3 rounded-lg text-on-surface-variant hover:bg-surface-container transition-colors duration-200">
        <span class="material-symbols-outlined">settings</span>
        <span class="font-body-md">{{ 'nav.admin' | transloco }}</span>
@@ -63,7 +63,7 @@
         <p class="text-sm font-medium text-on-surface truncate">{{ currentUser()?.displayName }}</p>
         <p class="text-xs text-on-surface-variant">{{ currentUser()?.role }}</p>
       </div>
-      <button (click)="logout()" class="text-on-surface-variant hover:text-primary transition-colors" title="Sign out">
+      <button (click)="logout()" class="text-on-surface-variant hover:text-primary transition-colors" [title]="'sidebar.signOut' | transloco">
         <span class="material-symbols-outlined text-sm">logout</span>
       </button>
     </div>
