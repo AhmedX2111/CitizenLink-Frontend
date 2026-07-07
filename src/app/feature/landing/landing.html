@@ -4,7 +4,7 @@
     <!-- ── Top Navigation Header ────────────────────────────────── -->
     <header class="fixed top-0 right-0 left-0 h-16 bg-surface z-50 border-b border-outline-variant flex justify-between items-center px-6 w-full">
       <div class="flex items-center gap-6">
-        <span class="font-headline-md text-headline-md text-primary font-bold tracking-tight">CitizenLink</span>
+        <span class="font-headline-md text-headline-md text-primary font-bold tracking-tight">{{ 'common.appName' | transloco }}</span>
         <nav class="hidden md:flex gap-6 items-center">
           <a class="font-label-md text-label-md text-on-surface-variant hover:text-primary transition-colors" href="#services">{{ 'landing.nav.publicServices' | transloco }}</a>
           <a class="font-label-md text-label-md text-on-surface-variant hover:text-primary transition-colors" href="#features">{{ 'landing.nav.howItWorks' | transloco }}</a>
@@ -16,7 +16,7 @@
         <button routerLink="/login" class="font-label-md text-label-md bg-primary text-on-primary px-4 py-2 rounded-lg hover:opacity-90 transition-colors">{{ 'landing.openCase' | transloco }}</button>
         <button (click)="toggleLanguage()" class="flex items-center gap-2 text-primary hover:text-primary/80 transition-colors">
           <span class="material-symbols-outlined text-[20px]">language</span>
-          <span class="font-label-md text-label-md">{{ currentLang() === 'en' ? 'AR' : 'EN' }}</span>
+          <span class="font-label-md text-label-md">{{ currentLang() === 'en' ? ('common.ar' | transloco) : ('common.en' | transloco) }}</span>
         </button>
       </div>
     </header>
@@ -142,7 +142,7 @@
       <div class="container mx-auto max-w-[1280px] px-6">
         <div class="grid grid-cols-1 md:grid-cols-4 gap-8">
           <div class="space-y-4">
-            <span class="font-headline-md text-headline-md text-primary font-bold">CitizenLink</span>
+            <span class="font-headline-md text-headline-md text-primary font-bold">{{ 'common.appName' | transloco }}</span>
             <p class="font-body-md text-body-md text-on-surface-variant">{{ 'landing.footer.description' | transloco }}</p>
           </div>
           <div>

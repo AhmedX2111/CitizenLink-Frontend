@@ -28,9 +28,9 @@ export class UserListComponent implements OnInit {
 
   readonly roles   = ['ADMIN', 'SUPERVISOR', 'HANDLER', 'AGENT'];
   readonly statuses = [
-    { label: 'All Statuses', value: '' },
-    { label: 'Active',       value: 'true' },
-    { label: 'Inactive',     value: 'false' }
+    { labelKey: 'admin.users.filter.allStatuses', value: '' },
+    { labelKey: 'admin.users.status.active',       value: 'true' },
+    { labelKey: 'admin.users.status.inactive',     value: 'false' }
   ];
 
   // ── List state ────────────────────────────────────────────────

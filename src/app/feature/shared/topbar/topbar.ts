@@ -1,4 +1,4 @@
-import { Component, computed, inject } from '@angular/core';
+import { Component, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { TranslocoModule, TranslocoService } from '@jsverse/transloco';
 
@@ -11,24 +11,21 @@ import { TranslocoModule, TranslocoService } from '@jsverse/transloco';
 export class TopbarComponent {
   private transloco = inject(TranslocoService);
 
-  isArabic = computed(() => this.transloco.getActiveLang() === 'ar');
-
-  toggleLanguage(): void {
-    const current = this.transloco.getActiveLang();
-    const next = current === 'en' ? 'ar' : 'en';
-    this.transloco.setActiveLang(next);
-    localStorage.setItem('preferredLanguage', next);
-    this.applyDirection(next);
+  isArabic(): boolean {
+    return this.transloco.getActiveLang() === 'ar';
   }
 
-  private applyDirection(lang: string): void {
-    const html = document.documentElement;
-    if (lang === 'ar') {
-      html.setAttribute('dir', 'rtl');
-      html.setAttribute('lang', 'ar');
-    } else {
-      html.removeAttribute('dir');
-      html.setAttribute('lang', 'en');
-    }
+  today(): string {
+    return new Date().toLocaleDateString(this.isArabic() ? 'ar-EG' : 'en-GB', {
+      weekday: 'long', day: 'numeric', month: 'long', year: 'numeric'
+    });
+  }
+
+  toggleLanguage(): void {
+    const next = this.isArabic() ? 'en' : 'ar';
+    this.transloco.setActiveLang(next);
+    document.documentElement.setAttribute('dir', next === 'ar' ? 'rtl' : 'ltr');
+    document.documentElement.setAttribute('lang', next);
+    localStorage.setItem('preferredLanguage', next);
   }
 }

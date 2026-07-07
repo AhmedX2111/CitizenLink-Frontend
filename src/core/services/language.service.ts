@@ -31,6 +31,7 @@ export class LanguageService {
   setLanguage(lang: string): void {
     if (this.languages.includes(lang as 'en' | 'ar')) {
       this.currentLang.set(lang);
+      this.applyLanguage(lang);
       localStorage.setItem('preferredLanguage', lang);
     }
   }

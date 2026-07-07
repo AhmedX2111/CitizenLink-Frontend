@@ -80,10 +80,15 @@ export class Login implements OnInit, OnDestroy {
   }
 
   private handleLoginError(error: any): void {
+    const t = (key: string) => this.transloco.translate(key);
     if (error.status === 401) {
-      this.errorMessage.set('Invalid username or password. Please try again.');
+      const body = typeof error.error === 'string' ? error.error : error.error?.message ?? '';
+      if (/disabled|inactive|deactivated/i.test(body)) {
+        this.errorMessage.set(t('login.errors.accountInactive'));
+      } else {
+        this.errorMessage.set(t('login.errors.invalidCredentials'));
+      }
     } else {
-      const t = (key: string) => this.transloco.translate(key);
       const keyMap: Record<number, string> = {
         0:   'login.errors.connectionFailed',
         400: 'login.errors.badRequest',
