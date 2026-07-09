@@ -52,7 +52,7 @@
         @if (caseDetail()!.dueAt) {
           <div class="text-right flex-shrink-0">
             <p class="text-[10px] uppercase font-bold text-outline tracking-wider">{{ 'cases.create.fields.dueDate' | transloco }}</p>
-            <p class="text-sm font-medium mt-0.5" [class.text-error]="isOverdue(caseDetail()!.dueAt)"
+            <p class="text-sm font-medium mt-0.5" [class.text-blue-600]="isOverdue(caseDetail()!.dueAt)"
               [class.text-on-surface]="!isOverdue(caseDetail()!.dueAt)">
               {{ formatDateTime(caseDetail()!.dueAt) }}
             </p>

@@ -38,10 +38,15 @@ export const routes: Routes = [
           import('./feature/volume-report/volume-report').then(m => m.VolumeReportComponent)
       },
      {
-       path: 'app/users',
-       loadComponent: () =>
-         import('./feature/user-list/user-list').then(m => m.UserListComponent)
-     },
+        path: 'admin/reference-data',
+        loadComponent: () =>
+          import('./feature/admin/reference-data/reference-data').then(m => m.ReferenceDataComponent)
+      },
+     {
+        path: 'app/users',
+        loadComponent: () =>
+          import('./feature/user-list/user-list').then(m => m.UserListComponent)
+      },
       {
         path: 'cases',
         loadComponent: () =>
