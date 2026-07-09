@@ -4,7 +4,18 @@ export interface Category {
   nameEn: string;
   nameAr: string;
   active: boolean;
-  sortOrder: number;
+}
+
+export interface CreateCategoryPayload {
+  nameEn: string;
+  nameAr: string;
+  active?: boolean;
+}
+
+export interface UpdateCategoryPayload {
+  nameEn: string;
+  nameAr: string;
+  active?: boolean;
 }
 
 export interface CategoryResponse {

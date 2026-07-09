@@ -66,7 +66,7 @@ export class CasesComponent implements OnInit {
   totalElements = signal(0);
   totalPages    = signal(0);
   currentPage   = signal(0);
-  pageSize      = 5;
+  pageSize      = 20;
 
   // Every reload of the case list goes through this single subject.
   // switchMap (wired up in ngOnInit) guarantees that triggering a reload

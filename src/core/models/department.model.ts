@@ -6,6 +6,18 @@ export interface Department {
   active: boolean;
 }
 
+export interface CreateDepartmentPayload {
+  nameEn: string;
+  nameAr: string;
+  active?: boolean;
+}
+
+export interface UpdateDepartmentPayload {
+  nameEn: string;
+  nameAr: string;
+  active?: boolean;
+}
+
 export interface DepartmentResponse {
   content: Department[];
   page: number;
