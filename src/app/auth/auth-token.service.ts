@@ -5,6 +5,7 @@ import { LoggerService } from '../../core/services/logger.service';
 @Injectable({ providedIn: 'root' })
 export class AuthTokenService {
   private readonly TOKEN_KEY = 'auth_token';
+  private readonly REFRESH_TOKEN_KEY = 'auth_refresh_token';
   private readonly USER_KEY = 'auth_user';
   private readonly REMEMBER_ME_KEY = 'remember_me';
   private logger = inject(LoggerService);
@@ -15,6 +16,14 @@ export class AuthTokenService {
       return localStorage.getItem(this.TOKEN_KEY);
     }
     return sessionStorage.getItem(this.TOKEN_KEY);
+  }
+
+  getRefreshToken(): string | null {
+    const rememberMe = localStorage.getItem(this.REMEMBER_ME_KEY) === 'true';
+    if (rememberMe) {
+      return localStorage.getItem(this.REFRESH_TOKEN_KEY);
+    }
+    return sessionStorage.getItem(this.REFRESH_TOKEN_KEY);
   }
 
   getUserData(): AuthResponse | null {
@@ -32,16 +41,27 @@ export class AuthTokenService {
       storage.setItem(this.TOKEN_KEY, response.token);
       storage.setItem(this.USER_KEY, JSON.stringify(response));
       storage.setItem(this.REMEMBER_ME_KEY, String(rememberMe));
+      if (response.refreshToken) {
+        storage.setItem(this.REFRESH_TOKEN_KEY, response.refreshToken);
+      }
       this.logger.info('AuthTokenService', `Auth data saved to ${rememberMe ? 'localStorage' : 'sessionStorage'}`);
     }
+  }
+
+  saveTokens(token: string, refreshToken: string, rememberMe: boolean): void {
+    const storage = rememberMe ? localStorage : sessionStorage;
+    storage.setItem(this.TOKEN_KEY, token);
+    storage.setItem(this.REFRESH_TOKEN_KEY, refreshToken);
   }
 
   clearAuthData(): void {
     this.logger.info('AuthTokenService', 'Clearing all auth data from storage');
     localStorage.removeItem(this.TOKEN_KEY);
+    localStorage.removeItem(this.REFRESH_TOKEN_KEY);
     localStorage.removeItem(this.USER_KEY);
     localStorage.removeItem(this.REMEMBER_ME_KEY);
     sessionStorage.removeItem(this.TOKEN_KEY);
+    sessionStorage.removeItem(this.REFRESH_TOKEN_KEY);
     sessionStorage.removeItem(this.USER_KEY);
     sessionStorage.removeItem(this.REMEMBER_ME_KEY);
   }

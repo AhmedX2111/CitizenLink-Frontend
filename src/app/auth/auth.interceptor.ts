@@ -1,36 +1,94 @@
-import { HttpInterceptorFn, HttpErrorResponse } from '@angular/common/http';
+import { HttpInterceptorFn, HttpRequest, HttpErrorResponse } from '@angular/common/http';
 import { inject } from '@angular/core';
 import { Router } from '@angular/router';
-import { throwError } from 'rxjs';
-import { catchError } from 'rxjs/operators';
+import { throwError, Subject } from 'rxjs';
+import { catchError, switchMap, take } from 'rxjs/operators';
 import { AuthTokenService } from './auth-token.service';
-import { LoggerService } from '../../core/services/logger.service';
+import { HttpClient } from '@angular/common/http';
+import { AuthResponse } from './models/auth.models';
+import { environment } from '../../environments/environment';
+
+let isRefreshing = false;
+let refreshSubject: Subject<AuthResponse | null> | null = null;
+
+function addAuthHeader(req: HttpRequest<unknown>, token: string): HttpRequest<unknown> {
+  return req.clone({ setHeaders: { Authorization: `Bearer ${token}` } });
+}
+
+function isPublicAuthRoute(url: string): boolean {
+  return /\/auth\/(login|refresh)$/i.test(url);
+}
+
+function isLogoutRoute(url: string): boolean {
+  return /\/auth\/logout$/i.test(url);
+}
 
 export const authInterceptor: HttpInterceptorFn = (req, next) => {
   const tokenService = inject(AuthTokenService);
-  const logger = inject(LoggerService);
   const router = inject(Router);
+  const http = inject(HttpClient);
 
-  const token = tokenService.getToken();
+  if (isPublicAuthRoute(req.url)) {
+    return next(req);
+  }
+
+  const accessToken = tokenService.getToken();
   let authReq = req;
 
-  if (token && !req.url.includes('/auth/login')) {
-    authReq = req.clone({
-      setHeaders: { Authorization: `Bearer ${token}` }
-    });
+  if (accessToken) {
+    authReq = addAuthHeader(req, accessToken);
   }
 
   return next(authReq).pipe(
     catchError((error: HttpErrorResponse) => {
-      const isLoginRequest = req.url.includes('/auth/login');
-
-      if (error.status === 401 && !isLoginRequest) {
-        logger.info('AuthInterceptor', 'Unauthorized request, redirecting to login');
-        tokenService.clearAuthData();
-        router.navigate(['/login']);
+      if (error.status !== 401 || isLogoutRoute(req.url)) {
+        return throwError(() => error);
       }
 
-      return throwError(() => error);
+      const refreshToken = tokenService.getRefreshToken();
+      if (!refreshToken) {
+        tokenService.clearAuthData();
+        router.navigate(['/login']);
+        return throwError(() => error);
+      }
+
+      if (!isRefreshing) {
+        isRefreshing = true;
+        refreshSubject = new Subject<AuthResponse | null>();
+
+        http.post<AuthResponse>(`${environment.apiUrl}/api/v1/auth/refresh`, { refreshToken })
+          .subscribe({
+            next: (res) => {
+              const rememberMe = localStorage.getItem('remember_me') === 'true';
+              if (res.token && res.refreshToken) {
+                tokenService.saveTokens(res.token, res.refreshToken, rememberMe);
+              }
+              refreshSubject?.next(res);
+              refreshSubject?.complete();
+              refreshSubject = null;
+              isRefreshing = false;
+            },
+            error: () => {
+              refreshSubject?.next(null);
+              refreshSubject?.complete();
+              refreshSubject = null;
+              isRefreshing = false;
+              tokenService.clearAuthData();
+              router.navigate(['/login']);
+            }
+          });
+      }
+
+      return (refreshSubject ?? new Subject<AuthResponse | null>()).pipe(
+        take(1),
+        switchMap(res => {
+          if (!res) {
+            return throwError(() => error);
+          }
+          const newToken = tokenService.getToken();
+          return next(addAuthHeader(req, newToken ?? ''));
+        })
+      );
     })
   );
 };
