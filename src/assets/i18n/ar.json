@@ -404,6 +404,7 @@
     },
     "actions": {
       "assign": "إسناد",
+      "reassign": "إعادة إسناد",
       "start": "بدء العمل",
       "requestInfo": "طلب معلومات",
       "resume": "استئناف",
