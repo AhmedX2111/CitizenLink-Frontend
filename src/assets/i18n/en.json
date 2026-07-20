@@ -404,6 +404,7 @@
     },
     "actions": {
       "assign": "Assign",
+      "reassign": "Reassign",
       "start": "Start Work",
       "requestInfo": "Request Info",
       "resume": "Resume",

@@ -53,13 +53,15 @@ export class CaseDetailPageComponent implements OnInit {
   isSubmittingAction   = signal(false);
   transitionError      = signal<string | null>(null);
 
-  // ── Handler picker (ASSIGN) state ───────────────────────────────
+  // ── Handler picker (ASSIGN / REASSIGN) state ────────────────────
   isHandlerPickerOpen = signal(false);
+  handlerPickerAction  = signal<CaseActionResponse | null>(null);
   isLoadingHandlers    = signal(false);
   handlersLoadError    = signal<string | null>(null);
   handlers             = signal<HandlerResponse[]>([]);
   handlerSearchQuery   = signal('');
   selectedHandlerId    = signal<string | null>(null);
+  assignComment        = '';
   assignError          = signal<string | null>(null);
   isSubmittingAssign   = signal(false);
 
@@ -156,7 +158,8 @@ export class CaseDetailPageComponent implements OnInit {
 
   // ── Transition handling ──────────────────────────────────────────
   openActionModal(action: CaseActionResponse): void {
-    if (action.action === 'ASSIGN') {
+    if (action.action === 'ASSIGN' || action.action === 'REASSIGN') {
+      this.handlerPickerAction.set(action);
       this.openHandlerPicker();
       return;
     }
@@ -170,13 +173,14 @@ export class CaseDetailPageComponent implements OnInit {
     this.pendingAction.set(null);
   }
 
-  // ── Handler picker (ASSIGN) ──────────────────────────────────────
+  // ── Handler picker (ASSIGN / REASSIGN) ───────────────────────────
   openHandlerPicker(): void {
     this.isHandlerPickerOpen.set(true);
     this.isLoadingHandlers.set(true);
     this.handlersLoadError.set(null);
     this.handlerSearchQuery.set('');
     this.selectedHandlerId.set(null);
+    this.assignComment = '';
     this.assignError.set(null);
 
     this.caseService.getHandlers().pipe(
@@ -197,9 +201,11 @@ export class CaseDetailPageComponent implements OnInit {
 
   closeHandlerPicker(): void {
     this.isHandlerPickerOpen.set(false);
+    this.handlerPickerAction.set(null);
     this.handlers.set([]);
     this.handlersLoadError.set(null);
     this.selectedHandlerId.set(null);
+    this.assignComment = '';
     this.assignError.set(null);
     this.isSubmittingAssign.set(false);
   }
@@ -217,15 +223,22 @@ export class CaseDetailPageComponent implements OnInit {
   confirmAssign(): void {
     const caseId = this.caseDetail()?.id;
     const handlerId = this.selectedHandlerId();
+    const action = this.handlerPickerAction();
 
-    if (!caseId || !handlerId) return;
+    if (!caseId || !handlerId || !action) return;
+
+    if (action.action === 'REASSIGN' && !this.assignComment.trim()) {
+      this.assignError.set(this.transloco.translate('cases.detail.commentRequired'));
+      return;
+    }
 
     this.isSubmittingAssign.set(true);
     this.assignError.set(null);
 
     this.caseService.transitionCase(caseId, {
-      action: 'ASSIGN',
-      assignedToUserId: handlerId
+      action: action.action,
+      assignedToUserId: handlerId,
+      ...(action.action === 'REASSIGN' && { comment: this.assignComment.trim() })
     }).pipe(
       takeUntilDestroyed(this.destroyRef)
     ).subscribe({

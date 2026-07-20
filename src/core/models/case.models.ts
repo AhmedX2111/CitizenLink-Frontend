@@ -88,7 +88,7 @@ export interface PagedResponse<T> {
 }
 
 export type WorkflowAction =
-  | 'CREATE' | 'ASSIGN' | 'START' | 'AWAIT_INFO' | 'INFO_RECEIVED'
+  | 'CREATE' | 'ASSIGN' | 'REASSIGN' | 'START' | 'AWAIT_INFO' | 'INFO_RECEIVED'
   | 'SUSPEND' | 'RESUME' | 'RESOLVE' | 'CLOSE' | 'CANCEL' | 'REOPEN';
 
 export interface StatusHistoryResponse {
