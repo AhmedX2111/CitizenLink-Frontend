@@ -16,6 +16,11 @@ export class AuthUserService {
     return user?.role === role;
   }
 
+  hasRoleAny(roles: string[]): boolean {
+    const user = this.tokenService.getUserData();
+    return !!user && roles.includes(user.role);
+  }
+
   getRoleFromToken(): string | null {
     const token = this.tokenService.getToken();
     if (!token) return null;
