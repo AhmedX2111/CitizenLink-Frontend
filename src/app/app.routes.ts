@@ -1,5 +1,6 @@
 import { Routes } from '@angular/router';
 import { AuthGuard } from './auth/auth.guard';
+import { RoleGuard } from './auth/role.guard';
 import { LayoutComponent } from './feature/shared/layout/layout';
 
 export const routes: Routes = [
@@ -34,16 +35,22 @@ export const routes: Routes = [
       },
      {
         path: 'reports',
+        data: { roles: ['ADMIN', 'SUPERVISOR'] },
+        canActivate: [RoleGuard],
         loadComponent: () =>
           import('./feature/volume-report/volume-report').then(m => m.VolumeReportComponent)
       },
      {
         path: 'admin/reference-data',
+        data: { roles: ['ADMIN', 'SUPERVISOR'] },
+        canActivate: [RoleGuard],
         loadComponent: () =>
           import('./feature/admin/reference-data/reference-data').then(m => m.ReferenceDataComponent)
       },
      {
         path: 'app/users',
+        data: { roles: ['ADMIN'] },
+        canActivate: [RoleGuard],
         loadComponent: () =>
           import('./feature/user-list/user-list').then(m => m.UserListComponent)
       },
