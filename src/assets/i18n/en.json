@@ -603,7 +603,8 @@
     "subtitle": "Real-time overview of case activity",
     "loading": "Loading dashboard…",
     "errors": {
-      "loadFailed": "Failed to load dashboard data. Please try again."
+      "loadFailed": "Failed to load dashboard data. Please try again.",
+      "noPermission": "You do not have permission to view dashboard data."
     },
     "kpis": {
       "openCases": "Open Cases",
@@ -620,7 +621,8 @@
     "myOpenCases": {
       "title": "My Open Cases",
       "dueDate": "Due Date",
-      "empty": "You have no open cases assigned."
+      "empty": "You have no open cases assigned.",
+      "loadError": "Failed to load your open cases."
     },
     "attachments": {
     "loadError": "Failed to load attachments. Please try again.",

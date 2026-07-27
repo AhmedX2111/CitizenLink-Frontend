@@ -33,11 +33,12 @@ export class DashboardComponent {
 
   pageTitle = () => this.transloco.translate('dashboard.title');
 
-  isLoading      = signal(true);
-  loadError      = signal<string | null>(null);
-  summary        = signal<DashboardSummaryResponse | null>(null);
-  myOpenCases    = signal<MyOpenCaseResponse[]>([]);
-  isLoadingCases = signal(false);
+  isLoading       = signal(true);
+  summaryError    = signal<string | null>(null);
+  summary         = signal<DashboardSummaryResponse | null>(null);
+  myOpenCases     = signal<MyOpenCaseResponse[]>([]);
+  isLoadingCases  = signal(false);
+  myOpenCasesError = signal<string | null>(null);
 
   isHandler = computed(() => this.authUserService.hasRole('HANDLER'));
 
@@ -73,7 +74,7 @@ export class DashboardComponent {
 
   private loadSummary(): void {
     this.isLoading.set(true);
-    this.loadError.set(null);
+    this.summaryError.set(null);
 
     this.dashboardService.getSummary().pipe(
       takeUntilDestroyed(this.destroyRef)
@@ -82,9 +83,13 @@ export class DashboardComponent {
         this.summary.set(res);
         this.isLoading.set(false);
       },
-      error: () => {
-        this.loadError.set('error');
+      error: (err) => {
         this.isLoading.set(false);
+        this.summaryError.set(
+          err.status === 403
+            ? this.transloco.translate('dashboard.errors.noPermission')
+            : this.transloco.translate('dashboard.errors.loadFailed')
+        );
       }
     });
   }
@@ -98,8 +103,9 @@ export class DashboardComponent {
         this.myOpenCases.set(res);
         this.isLoadingCases.set(false);
       },
-      error: () => {
+      error: (err) => {
         this.isLoadingCases.set(false);
+        this.myOpenCasesError.set(this.transloco.translate('dashboard.myOpenCases.loadError'));
       }
     });
   }

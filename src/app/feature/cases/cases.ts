@@ -6,8 +6,8 @@ import {
   ReactiveFormsModule, FormBuilder, FormGroup, Validators
 } from '@angular/forms';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
-import { debounceTime, distinctUntilChanged, switchMap } from 'rxjs/operators';
-import { Subject } from 'rxjs';
+import { debounceTime, distinctUntilChanged, switchMap, catchError } from 'rxjs/operators';
+import { Subject, of } from 'rxjs';
 import { TranslocoModule, TranslocoService } from '@jsverse/transloco';
 import { CaseService } from '../../../core/services/case.service';
 import { LoggerService } from '../../../core/services/logger.service';
@@ -140,7 +140,18 @@ export class CasesComponent implements OnInit {
           ...(v.priority         && { priority: v.priority as Priority }),
         };
 
-        return this.caseService.searchCases(filter);
+        return this.caseService.searchCases(filter).pipe(
+          catchError((err) => {
+            this.isLoading.set(false);
+            this.listError.set(
+              err.status === 403
+                ? this.transloco.translate('cases.errors.forbidden')
+                : this.transloco.translate('cases.errors.loadFailed')
+            );
+            return of({ content: [], totalElements: 0, totalPages: 0,
+                        page: 0, size: 0, first: true, last: true });
+          })
+        );
       }),
       takeUntilDestroyed(this.destroyRef)
     ).subscribe({
@@ -149,14 +160,6 @@ export class CasesComponent implements OnInit {
         this.totalElements.set(res.totalElements);
         this.totalPages.set(res.totalPages);
         this.isLoading.set(false);
-      },
-      error: (err) => {
-        this.isLoading.set(false);
-        this.listError.set(
-          err.status === 403
-            ? this.transloco.translate('cases.errors.forbidden')
-            : this.transloco.translate('cases.errors.loadFailed')
-        );
       }
     });
 

@@ -11,10 +11,10 @@
     </section>
 
     <!-- Error state -->
-    @if (loadError()) {
-      <div class="bg-error-container border border-error p-4 rounded-xl flex items-center gap-3">
-        <span class="material-symbols-outlined text-error text-[20px]">error_outline</span>
-        <span class="text-label-md text-error">{{ t('dashboard.errors.loadFailed') }}</span>
+    @if (summaryError()) {
+      <div class="p-3 bg-error-container border border-error rounded-lg flex items-center gap-2 mb-4">
+        <span class="material-symbols-outlined text-error">error</span>
+        <span class="text-sm text-on-error-container">{{ summaryError() }}</span>
       </div>
     }
 
@@ -122,6 +122,13 @@
             <span class="material-symbols-outlined text-primary text-[20px]">assignment</span>
             <h3 class="font-headline-md text-headline-md text-primary">{{ t('dashboard.myOpenCases.title') }}</h3>
           </div>
+
+          @if (myOpenCasesError()) {
+            <div class="p-3 bg-error-container border border-error rounded-lg flex items-center gap-2 m-4">
+              <span class="material-symbols-outlined text-error">error</span>
+              <span class="text-sm text-on-error-container">{{ myOpenCasesError() }}</span>
+            </div>
+          }
 
           @if (isLoadingCases()) {
             <div class="flex items-center justify-center py-10 text-on-surface-variant gap-2">

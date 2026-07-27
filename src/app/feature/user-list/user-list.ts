@@ -5,6 +5,8 @@ import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { TranslocoModule, TranslocoService } from '@jsverse/transloco';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
+import { Subject, of } from 'rxjs';
+import { switchMap, catchError } from 'rxjs/operators';
 import { UserAdminService } from '../../../core/services/user-admin.service';
 import { UserResponse, CreateUserRequest, UpdateUserRequest } from '../../../core/models/user.models';
 import { PagedResponse } from '../../../core/models/case.models';
@@ -21,6 +23,7 @@ export class UserListComponent implements OnInit {
   private userService = inject(UserAdminService);
   private destroyRef  = inject(DestroyRef);
   private transloco   = inject(TranslocoService);
+  private reload$     = new Subject<void>();
 
   // ── Filter state ──────────────────────────────────────────────
   filterRole   = '';
@@ -69,47 +72,49 @@ export class UserListComponent implements OnInit {
   }
 
   ngOnInit(): void {
-    this.load();
-  }
-
-  load(): void {
-    this.isLoading.set(true);
-    this.loadError.set(null);
-
-    this.userService.getUsers(
-      this.filterRole,
-      this.filterActive,
-      this.currentPage(),
-      this.pageSize
-    ).pipe(
+    this.reload$.pipe(
+      switchMap(() => {
+        this.isLoading.set(true);
+        this.loadError.set(null);
+        return this.userService.getUsers(
+          this.filterRole,
+          this.filterActive,
+          this.currentPage(),
+          this.pageSize
+        ).pipe(
+          catchError((err) => {
+            this.isLoading.set(false);
+            this.loadError.set(
+              err.status === 403
+                ? this.transloco.translate('admin.users.errors.forbidden')
+                : this.transloco.translate('admin.users.errors.loadFailed')
+            );
+            return of(null);
+          })
+        );
+      }),
       takeUntilDestroyed(this.destroyRef)
-    ).subscribe({
-      next: (res: PagedResponse<UserResponse>) => {
+    ).subscribe((res) => {
+      if (res) {
         this.users.set(res.content);
         this.totalElements.set(res.totalElements);
         this.totalPages.set(res.totalPages);
         this.isLoading.set(false);
-      },
-      error: (err) => {
-        this.isLoading.set(false);
-        this.loadError.set(
-          err.status === 403
-            ? this.transloco.translate('admin.users.errors.forbidden')
-            : this.transloco.translate('admin.users.errors.loadFailed')
-        );
       }
     });
+
+    this.reload$.next();
   }
 
   applyFilter(): void {
     this.currentPage.set(0);
-    this.load();
+    this.reload$.next();
   }
 
   goToPage(page: number): void {
     if (page < 0 || page >= this.totalPages()) return;
     this.currentPage.set(page);
-    this.load();
+    this.reload$.next();
   }
 
   // ── Action dropdown ─────────────────────────────────────────
@@ -197,7 +202,7 @@ export class UserListComponent implements OnInit {
       next: () => {
         this.isSubmitting.set(false);
         this.closeModal();
-        this.load();
+        this.reload$.next();
         this.showToast(this.transloco.translate('admin.users.modal.createSuccess'));
       },
       error: (err) => this.handleSubmitError(err)
@@ -277,7 +282,7 @@ export class UserListComponent implements OnInit {
       },
       error: (err) => {
         if (err.status === 404) {
-          this.load();
+          this.reload$.next();
         }
       }
     });
