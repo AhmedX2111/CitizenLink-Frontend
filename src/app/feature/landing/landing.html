@@ -64,17 +64,17 @@
                   <p class="text-3xl font-bold text-on-surface">12.5M+</p>
                   <p class="text-xs text-on-surface-variant mt-1">{{ 'landing.stats.casesResolved' | transloco }}</p>
                 </div>
-                <div class="bg-surface-container-lowest border border-outline-variant rounded-xl p-6 backdrop-blur-sm mt-8">
+                <div class="bg-surface-container-lowest border border-outline-variant rounded-xl p-6 backdrop-blur-sm">
                   <span class="material-symbols-outlined text-3xl text-tertiary mb-3">timer</span>
                   <p class="text-3xl font-bold text-on-surface">48h</p>
                   <p class="text-xs text-on-surface-variant mt-1">{{ 'landing.stats.averageSla' | transloco }}</p>
                 </div>
-                <div class="bg-surface-container-lowest border border-outline-variant rounded-xl p-6 backdrop-blur-sm -mt-4">
-                  <span class="material-symbols-outlined text-3xl text-secondary mb-3">security</span>
-                  <p class="text-3xl font-bold text-on-surface">100%</p>
-                  <p class="text-xs text-on-surface-variant mt-1">{{ 'landing.stats.dataEncryption' | transloco }}</p>
+                <div class="bg-surface-container-lowest border border-outline-variant rounded-xl p-6 backdrop-blur-sm">
+                  <span class="material-symbols-outlined text-3xl text-secondary mb-3">manage_accounts</span>
+                  <p class="text-3xl font-bold text-on-surface">4</p>
+                  <p class="text-xs text-on-surface-variant mt-1">{{ 'landing.stats.roles' | transloco }}</p>
                 </div>
-                <div class="bg-surface-container-lowest border border-outline-variant rounded-xl p-6 backdrop-blur-sm mt-4">
+                <div class="bg-surface-container-lowest border border-outline-variant rounded-xl p-6 backdrop-blur-sm">
                   <span class="material-symbols-outlined text-3xl text-on-tertiary-container mb-3">star</span>
                   <p class="text-3xl font-bold text-on-surface">94%</p>
                   <p class="text-xs text-on-surface-variant mt-1">{{ 'landing.stats.satisfactionRate' | transloco }}</p>
@@ -101,6 +101,17 @@
                   <span class="material-symbols-outlined text-primary text-2xl">{{ f.icon }}</span>
                 </div>
                 <h3 class="text-lg font-semibold text-on-surface mb-2">{{ f.titleKey | transloco }}</h3>
+                <span class="inline-block text-[10px] px-2 py-0.5 rounded-full font-medium mb-2"
+                  [class.bg-blue-50]="f.groupKey.includes('staff')"
+                  [class.text-blue-700]="f.groupKey.includes('staff')"
+                  [class.bg-purple-50]="f.groupKey.includes('supervisor')"
+                  [class.text-purple-700]="f.groupKey.includes('supervisor')"
+                  [class.bg-amber-50]="f.groupKey.includes('admin')"
+                  [class.text-amber-700]="f.groupKey.includes('admin')"
+                  [class.bg-teal-50]="f.groupKey.includes('platform')"
+                  [class.text-teal-700]="f.groupKey.includes('platform')">
+                  {{ f.groupKey | transloco }}
+                </span>
                 <p class="text-sm text-on-surface-variant leading-relaxed">{{ f.descKey | transloco }}</p>
               </div>
             }
@@ -118,9 +129,9 @@
           </p>
           <div class="grid grid-cols-1 md:grid-cols-3 gap-6 max-w-5xl mx-auto">
             <div class="bg-white/10 backdrop-blur-sm rounded-xl p-8 text-left hover:bg-white/15 transition-colors">
-              <span class="material-symbols-outlined text-4xl mb-4">gavel</span>
-              <h4 class="text-lg font-semibold mb-2">{{ 'landing.cta.legalCompliance' | transloco }}</h4>
-              <p class="text-sm opacity-70">{{ 'landing.cta.legalComplianceDesc' | transloco }}</p>
+              <span class="material-symbols-outlined text-4xl mb-4">alt_route</span>
+              <h4 class="text-lg font-semibold mb-2">{{ 'landing.cta.workflowEngine' | transloco }}</h4>
+              <p class="text-sm opacity-70">{{ 'landing.cta.workflowEngineDesc' | transloco }}</p>
             </div>
             <div class="bg-white/10 backdrop-blur-sm rounded-xl p-8 text-left hover:bg-white/15 transition-colors">
               <span class="material-symbols-outlined text-4xl mb-4">shield</span>
