@@ -259,7 +259,7 @@
     "stats": {
       "casesResolved": "Cases Resolved",
       "averageSla": "Avg. SLA",
-      "dataEncryption": "Data Encryption",
+      "roles": "Hierarchical Permission Roles",
       "satisfactionRate": "Satisfaction Rate"
     },
     "dashboard": {
@@ -271,33 +271,54 @@
       "badge": "Platform Capabilities",
       "sectionTitle": "Everything you need to manage citizen services",
       "sectionDescription": "Powerful features designed to streamline case management and improve citizen satisfaction.",
-      "sla": {
-        "title": "SLA Tracking",
-        "description": "Automated tracking of service level agreements with real-time alerts",
-        "complianceTarget": "Compliance Target"
+      "dashboard": {
+        "title": "Intake Dashboard",
+        "description": "Real-time KPIs, case status distribution, and personalized open-case list for frontline staff."
       },
-      "channels": {
-        "title": "Multi-Channel Intake",
-        "description": "Receive cases via Phone, Web, Walk-in, and Email"
+      "caseManagement": {
+        "title": "Case Management",
+        "description": "Create, search, filter, and track citizen service requests through their full lifecycle."
+      },
+      "callCenter": {
+        "title": "Call Center",
+        "description": "Look up citizens by ID or phone, register new citizens, and access complete case histories."
       },
       "workflow": {
-        "title": "Smart Workflow",
-        "description": "Automated case routing and status management"
+        "title": "Case Workflow",
+        "description": "Dynamic status transitions with assign, reassign, suspend, resolve, notes, and file attachments."
       },
       "reports": {
-        "title": "Analytics & Reports",
-        "description": "Real-time dashboards and performance metrics"
+        "title": "Reports & Analytics",
+        "description": "Performance KPIs, daily volume trends, category breakdowns, and CSV data export."
+      },
+      "referenceData": {
+        "title": "Reference Data",
+        "description": "Manage bilingual categories and departments used across the system."
+      },
+      "userManagement": {
+        "title": "User Administration",
+        "description": "Role-based user management with hierarchical permissions from Agent to Admin."
+      },
+      "security": {
+        "title": "Secure & Bilingual",
+        "description": "JWT + HttpOnly cookie auth, role-based guards, and full Arabic/English RTL support."
+      },
+      "groups": {
+        "staff": "For Staff",
+        "supervisor": "For Supervisors & Admins",
+        "admin": "For Admins",
+        "platform": "Platform"
       }
     },
     "cta": {
       "title": "Ready to get started?",
       "description": "Join thousands of government employees using CitizenLink to serve citizens better.",
-      "legalCompliance": "Legal Compliance",
-      "legalComplianceDesc": "All processes adhere to government regulations and data protection laws.",
+      "workflowEngine": "Workflow Engine",
+      "workflowEngineDesc": "Dynamic case transitions across 8 states with 10 workflow actions.",
       "secureAccess": "Secure Access",
-      "secureAccessDesc": "Role-based access control with multi-factor authentication.",
+      "secureAccessDesc": "Role-based access control with hierarchical permissions.",
       "auditTrails": "Audit Trails",
-      "auditTrailsDesc": "Complete audit logs for every action taken in the system."
+      "auditTrailsDesc": "Complete status history timeline for every case action."
     },
     "footer": {
       "description": "A comprehensive case management system connecting citizens with government services.",

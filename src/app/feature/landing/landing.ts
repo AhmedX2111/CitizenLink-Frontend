@@ -18,28 +18,60 @@ export class LandingComponent {
 
   features = signal([
     {
-      key: 'sla',
-      icon: 'timer',
-      titleKey: 'landing.features.sla.title',
-      descKey:  'landing.features.sla.description'
+      key: 'dashboard',
+      icon: 'dashboard',
+      groupKey: 'landing.features.groups.staff',
+      titleKey: 'landing.features.dashboard.title',
+      descKey:  'landing.features.dashboard.description'
     },
     {
-      key: 'channels',
-      icon: 'dynamic_feed',
-      titleKey: 'landing.features.channels.title',
-      descKey:  'landing.features.channels.description'
+      key: 'caseManagement',
+      icon: 'work',
+      groupKey: 'landing.features.groups.staff',
+      titleKey: 'landing.features.caseManagement.title',
+      descKey:  'landing.features.caseManagement.description'
+    },
+    {
+      key: 'callCenter',
+      icon: 'call',
+      groupKey: 'landing.features.groups.staff',
+      titleKey: 'landing.features.callCenter.title',
+      descKey:  'landing.features.callCenter.description'
     },
     {
       key: 'workflow',
       icon: 'rule_settings',
+      groupKey: 'landing.features.groups.staff',
       titleKey: 'landing.features.workflow.title',
       descKey:  'landing.features.workflow.description'
     },
     {
       key: 'reports',
-      icon: 'analytics',
+      icon: 'bar_chart',
+      groupKey: 'landing.features.groups.supervisor',
       titleKey: 'landing.features.reports.title',
       descKey:  'landing.features.reports.description'
+    },
+    {
+      key: 'referenceData',
+      icon: 'settings',
+      groupKey: 'landing.features.groups.supervisor',
+      titleKey: 'landing.features.referenceData.title',
+      descKey:  'landing.features.referenceData.description'
+    },
+    {
+      key: 'userManagement',
+      icon: 'group',
+      groupKey: 'landing.features.groups.admin',
+      titleKey: 'landing.features.userManagement.title',
+      descKey:  'landing.features.userManagement.description'
+    },
+    {
+      key: 'security',
+      icon: 'security',
+      groupKey: 'landing.features.groups.platform',
+      titleKey: 'landing.features.security.title',
+      descKey:  'landing.features.security.description'
     }
   ]);
 
