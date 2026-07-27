@@ -45,38 +45,33 @@ export const authInterceptor: HttpInterceptorFn = (req, next) => {
         return throwError(() => error);
       }
 
-      const refreshToken = tokenService.getRefreshToken();
-      if (!refreshToken) {
-        tokenService.clearAuthData();
-        router.navigate(['/login']);
-        return throwError(() => error);
-      }
-
       if (!isRefreshing) {
         isRefreshing = true;
         refreshSubject = new Subject<AuthResponse | null>();
 
-        http.post<AuthResponse>(`${environment.apiUrl}/api/v1/auth/refresh`, { refreshToken })
-          .subscribe({
-            next: (res) => {
-              const rememberMe = localStorage.getItem('remember_me') === 'true';
-              if (res.token && res.refreshToken) {
-                tokenService.saveTokens(res.token, res.refreshToken, rememberMe);
-              }
-              refreshSubject?.next(res);
-              refreshSubject?.complete();
-              refreshSubject = null;
-              isRefreshing = false;
-            },
-            error: () => {
-              refreshSubject?.next(null);
-              refreshSubject?.complete();
-              refreshSubject = null;
-              isRefreshing = false;
-              tokenService.clearAuthData();
-              router.navigate(['/login']);
+        http.post<AuthResponse>(
+          `${environment.apiUrl}/api/v1/auth/refresh`,
+          {},
+          { withCredentials: true }
+        ).subscribe({
+          next: (res) => {
+            if (res.token) {
+              tokenService.saveToken(res.token);
             }
-          });
+            refreshSubject?.next(res);
+            refreshSubject?.complete();
+            refreshSubject = null;
+            isRefreshing = false;
+          },
+          error: () => {
+            refreshSubject?.next(null);
+            refreshSubject?.complete();
+            refreshSubject = null;
+            isRefreshing = false;
+            tokenService.clearAuthData();
+            router.navigate(['/login']);
+          }
+        });
       }
 
       return (refreshSubject ?? new Subject<AuthResponse | null>()).pipe(

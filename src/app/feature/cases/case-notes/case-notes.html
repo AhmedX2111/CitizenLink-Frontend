@@ -130,7 +130,7 @@
                             <p class="text-xs text-slate-700 whitespace-pre-wrap">{{ note.body }}</p>
                             <p class="text-[10px] text-slate-400 mt-1">{{ formatDate(note.createdAt) }}</p>
                         </div>
-                        @if (canDelete) {
+                        @if (canDeleteNote(note)) {
                             @if (confirmDeleteId() === note.id) {
                                 <div class="flex items-center gap-1 bg-red-50 rounded-lg p-1">
                                     <span class="text-[10px] text-red-700 whitespace-nowrap">{{ 'cases.detail.notes.confirmDelete' | transloco }}</span>
