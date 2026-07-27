@@ -6,6 +6,8 @@ import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { TranslocoModule, TranslocoService } from '@jsverse/transloco';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
+import { Subject, of } from 'rxjs';
+import { switchMap, catchError } from 'rxjs/operators';
 import { ReportService } from '../../../core/services/report.service';
 import { VolumeReportResponse } from '../../../core/models/report.models';
 import { Chart, registerables } from 'chart.js';
@@ -26,6 +28,7 @@ export class VolumeReportComponent implements OnInit, AfterViewInit {
   private reportService = inject(ReportService);
   private destroyRef    = inject(DestroyRef);
   private transloco     = inject(TranslocoService);
+  private reload$       = new Subject<void>();
 
   // ── Date range ────────────────────────────────────────────────
   toDate   = this.formatDate(new Date());
@@ -48,35 +51,37 @@ export class VolumeReportComponent implements OnInit, AfterViewInit {
     this.report()?.dailyVolume.reduce((s, r) => s + r.resolved, 0) ?? 0);
 
   ngOnInit(): void {
-    this.load();
+    this.reload$.pipe(
+      switchMap(() => {
+        this.isLoading.set(true);
+        this.loadError.set(null);
+        return this.reportService.getVolumeReport(this.fromDate, this.toDate).pipe(
+          catchError((err) => {
+            this.isLoading.set(false);
+            this.loadError.set(
+              err.status === 403
+                ? this.transloco.translate('reports.errors.forbidden')
+                : this.transloco.translate('reports.errors.loadFailed')
+            );
+            return of(null);
+          })
+        );
+      }),
+      takeUntilDestroyed(this.destroyRef)
+    ).subscribe((res) => {
+      if (res) {
+        this.report.set(res);
+        this.isLoading.set(false);
+        if (this.chartReady) this.renderChart();
+      }
+    });
+
+    this.reload$.next();
   }
 
   ngAfterViewInit(): void {
     this.chartReady = true;
     if (this.report()) this.renderChart();
-  }
-
-  load(): void {
-    this.isLoading.set(true);
-    this.loadError.set(null);
-
-    this.reportService.getVolumeReport(this.fromDate, this.toDate).pipe(
-      takeUntilDestroyed(this.destroyRef)
-    ).subscribe({
-      next: (res) => {
-        this.report.set(res);
-        this.isLoading.set(false);
-        if (this.chartReady) this.renderChart();
-      },
-      error: (err) => {
-        this.isLoading.set(false);
-        this.loadError.set(
-          err.status === 403
-            ? this.transloco.translate('reports.errors.forbidden')
-            : this.transloco.translate('reports.errors.loadFailed')
-        );
-      }
-    });
   }
 
   applyFilter(): void {
@@ -85,7 +90,7 @@ export class VolumeReportComponent implements OnInit, AfterViewInit {
       this.loadError.set(this.transloco.translate('reports.errors.invalidRange'));
       return;
     }
-    this.load();
+    this.reload$.next();
   }
 
   // ── Export CSV ────────────────────────────────────────────────

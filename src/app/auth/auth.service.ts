@@ -62,7 +62,7 @@ export class AuthService {
       finalize(() => {
         this.tokenService.clearAuthData();
         this.authState.next(null);
-        this.router.navigate(['/Landing']);
+        this.router.navigate(['/']);
       })
     ).subscribe({
       next: () => this.logger.info('AuthService', 'Logout successful'),

@@ -43,7 +43,8 @@ export class Login implements OnInit, OnDestroy {
   ngOnInit(): void {
     this.returnUrl = this.route.snapshot.queryParams['returnUrl'] || null;
     if (this.tokenService.isAuthenticated()) {
-      this.router.navigateByUrl(this.returnUrl || '/dashboard');
+      const safeReturn = this.isSafeReturnUrl(this.returnUrl) ? this.returnUrl! : '/dashboard';
+      this.router.navigateByUrl(safeReturn);
       return;
     }
   }
@@ -64,7 +65,7 @@ export class Login implements OnInit, OnDestroy {
       this.authService.login({ username, password, rememberMe }).subscribe({
         next: () => {
           this.isLoading.set(false);
-          const target = this.returnUrl || '/dashboard';
+          const target = this.isSafeReturnUrl(this.returnUrl) ? this.returnUrl! : '/dashboard';
           this.router.navigateByUrl(target);
         },
         error: (error) => {
@@ -104,6 +105,14 @@ export class Login implements OnInit, OnDestroy {
     }
     this.loginForm.patchValue({ password: '' });
     this.loginForm.get('password')?.markAsUntouched();
+  }
+
+  private isSafeReturnUrl(url: string | null): boolean {
+    if (!url || url.trim() === '') return false;
+    if (/^(https?:)?\/\//i.test(url)) return false;
+    if (url.includes(':')) return false;
+    if (!url.startsWith('/')) return false;
+    return true;
   }
 
   private getRoleRoute(): string {
