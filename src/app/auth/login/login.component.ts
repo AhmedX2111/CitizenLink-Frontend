@@ -61,7 +61,7 @@ export class Login implements OnInit, OnDestroy {
     this.errorMessage.set(null);
     const { username, password, rememberMe } = this.loginForm.value;
     this.subscriptions.add(
-      this.authService.login({ username, password }, rememberMe).subscribe({
+      this.authService.login({ username, password, rememberMe }).subscribe({
         next: () => {
           this.isLoading.set(false);
           const target = this.returnUrl || '/dashboard';

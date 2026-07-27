@@ -1,84 +1,34 @@
-import { Injectable, inject } from '@angular/core';
+import { Injectable } from '@angular/core';
 import { AuthResponse } from './models/auth.models';
-import { LoggerService } from '../../core/services/logger.service';
 
 @Injectable({ providedIn: 'root' })
 export class AuthTokenService {
-  private readonly TOKEN_KEY = 'auth_token';
-  private readonly REFRESH_TOKEN_KEY = 'auth_refresh_token';
-  private readonly USER_KEY = 'auth_user';
-  private readonly REMEMBER_ME_KEY = 'remember_me';
-  private logger = inject(LoggerService);
+  private _token: string | null = null;
+  private _user: AuthResponse | null = null;
 
   getToken(): string | null {
-    const rememberMe = localStorage.getItem(this.REMEMBER_ME_KEY) === 'true';
-    if (rememberMe) {
-      return localStorage.getItem(this.TOKEN_KEY);
-    }
-    return sessionStorage.getItem(this.TOKEN_KEY);
-  }
-
-  getRefreshToken(): string | null {
-    const rememberMe = localStorage.getItem(this.REMEMBER_ME_KEY) === 'true';
-    if (rememberMe) {
-      return localStorage.getItem(this.REFRESH_TOKEN_KEY);
-    }
-    return sessionStorage.getItem(this.REFRESH_TOKEN_KEY);
+    return this._token;
   }
 
   getUserData(): AuthResponse | null {
-    const userData = localStorage.getItem(this.USER_KEY) || sessionStorage.getItem(this.USER_KEY);
-    if (userData) {
-      return JSON.parse(userData);
-    }
-    return null;
+    return this._user;
   }
 
-  saveAuthData(response: AuthResponse, rememberMe: boolean): void {
-    this.clearAuthData();
-    const storage = rememberMe ? localStorage : sessionStorage;
-    if (response.token) {
-      storage.setItem(this.TOKEN_KEY, response.token);
-      storage.setItem(this.USER_KEY, JSON.stringify(response));
-      storage.setItem(this.REMEMBER_ME_KEY, String(rememberMe));
-      if (response.refreshToken) {
-        storage.setItem(this.REFRESH_TOKEN_KEY, response.refreshToken);
-      }
-      this.logger.info('AuthTokenService', `Auth data saved to ${rememberMe ? 'localStorage' : 'sessionStorage'}`);
-    }
+  saveAuthData(response: AuthResponse): void {
+    this._token = response.token;
+    this._user = response;
   }
 
-  saveTokens(token: string, refreshToken: string, rememberMe: boolean): void {
-    const storage = rememberMe ? localStorage : sessionStorage;
-    storage.setItem(this.TOKEN_KEY, token);
-    storage.setItem(this.REFRESH_TOKEN_KEY, refreshToken);
+  saveToken(token: string): void {
+    this._token = token;
   }
 
   clearAuthData(): void {
-    this.logger.info('AuthTokenService', 'Clearing all auth data from storage');
-    localStorage.removeItem(this.TOKEN_KEY);
-    localStorage.removeItem(this.REFRESH_TOKEN_KEY);
-    localStorage.removeItem(this.USER_KEY);
-    localStorage.removeItem(this.REMEMBER_ME_KEY);
-    sessionStorage.removeItem(this.TOKEN_KEY);
-    sessionStorage.removeItem(this.REFRESH_TOKEN_KEY);
-    sessionStorage.removeItem(this.USER_KEY);
-    sessionStorage.removeItem(this.REMEMBER_ME_KEY);
+    this._token = null;
+    this._user = null;
   }
 
   isAuthenticated(): boolean {
-    const token = this.getToken();
-    if (!token) return false;
-    try {
-      const payload = JSON.parse(atob(token.split('.')[1]));
-      const expiryDate = new Date(payload.exp * 1000);
-      const isValid = expiryDate > new Date();
-      if (!isValid) {
-        this.clearAuthData();
-      }
-      return isValid;
-    } catch {
-      return false;
-    }
+    return !!this._token;
   }
 }

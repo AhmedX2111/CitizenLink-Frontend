@@ -5,6 +5,7 @@ import { TranslocoModule, TranslocoService } from '@jsverse/transloco';
 import { Note } from '../../../../core/models/note.models';
 import { NoteService } from '../../../../core/services/note.service';
 import { LoggerService } from '../../../../core/services/logger.service';
+import { AuthTokenService } from '../../../auth/auth-token.service';
 
 @Component({
     selector: 'app-case-notes',
@@ -20,6 +21,7 @@ export class CaseNotesComponent implements OnInit {
     private fb = inject(FormBuilder);
     private logger = inject(LoggerService);
     private transloco = inject(TranslocoService);
+    private tokenService = inject(AuthTokenService);
 
     notes = signal<Note[]>([]);
     isLoading = signal(true);
@@ -124,9 +126,14 @@ export class CaseNotesComponent implements OnInit {
     }
 
     isAuthor(note: Note): boolean {
-        // Compare with current user ID from auth service
-        // This is a placeholder - implement with actual auth
-        return true;
+        const user = this.tokenService.getUserData();
+        return !!user && user.id === note.authorId;
+    }
+
+    canDeleteNote(note: Note): boolean {
+        const user = this.tokenService.getUserData();
+        if (!user) return false;
+        return user.role === 'ADMIN' || user.id === note.authorId;
     }
 
     formatDate(date: string): string {
@@ -134,17 +141,5 @@ export class CaseNotesComponent implements OnInit {
             day: '2-digit', month: 'short', year: 'numeric',
             hour: '2-digit', minute: '2-digit'
         });
-    }
-
-    get canEdit(): boolean {
-        // Check if user has permission to edit notes
-        // Return true for AGENT, HANDLER, SUPERVISOR, ADMIN
-        return true;
-    }
-
-    get canDelete(): boolean {
-        // Check if user has permission to delete notes
-        // Return true for ADMIN or author
-        return true;
     }
 }
