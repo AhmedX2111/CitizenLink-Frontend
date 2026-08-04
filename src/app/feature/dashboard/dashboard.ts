@@ -96,6 +96,7 @@ export class DashboardComponent {
 
   private loadMyOpenCases(): void {
     this.isLoadingCases.set(true);
+    this.myOpenCasesError.set(null);
     this.dashboardService.getMyOpenCases().pipe(
       takeUntilDestroyed(this.destroyRef)
     ).subscribe({
@@ -105,7 +106,11 @@ export class DashboardComponent {
       },
       error: (err) => {
         this.isLoadingCases.set(false);
-        this.myOpenCasesError.set(this.transloco.translate('dashboard.myOpenCases.loadError'));
+        this.myOpenCasesError.set(
+          err.status === 403
+            ? this.transloco.translate('dashboard.myOpenCases.noPermission')
+            : this.transloco.translate('dashboard.myOpenCases.loadError')
+        );
       }
     });
   }

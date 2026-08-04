@@ -643,7 +643,8 @@
       "title": "My Open Cases",
       "dueDate": "Due Date",
       "empty": "You have no open cases assigned.",
-      "loadError": "Failed to load your open cases."
+      "loadError": "Failed to load your open cases.",
+      "noPermission": "You do not have permission to view your cases."
     },
     "attachments": {
     "loadError": "Failed to load attachments. Please try again.",
