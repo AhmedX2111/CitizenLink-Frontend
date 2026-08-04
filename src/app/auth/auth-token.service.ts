@@ -28,7 +28,27 @@ export class AuthTokenService {
     this._user = null;
   }
 
+  private getTokenExpiry(): number | null {
+    if (!this._token) return null;
+    try {
+      const payload = JSON.parse(atob(this._token.split('.')[1]));
+      return payload.exp ? payload.exp * 1000 : null;
+    } catch {
+      return null;
+    }
+  }
+
   isAuthenticated(): boolean {
-    return !!this._token;
+    if (!this._token) return false;
+    const expiry = this.getTokenExpiry();
+    if (expiry === null) return true;
+    return Date.now() < expiry;
+  }
+
+  isTokenExpired(): boolean {
+    if (!this._token) return true;
+    const expiry = this.getTokenExpiry();
+    if (expiry === null) return false;
+    return Date.now() >= expiry;
   }
 }
