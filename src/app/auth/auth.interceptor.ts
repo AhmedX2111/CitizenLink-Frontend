@@ -56,7 +56,11 @@ export const authInterceptor: HttpInterceptorFn = (req, next) => {
         ).subscribe({
           next: (res) => {
             if (res.token) {
-              tokenService.saveToken(res.token);
+              if (res.role) {
+                tokenService.saveAuthData(res);
+              } else {
+                tokenService.saveToken(res.token);
+              }
             }
             refreshSubject?.next(res);
             refreshSubject?.complete();
