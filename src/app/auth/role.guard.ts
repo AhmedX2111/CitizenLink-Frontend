@@ -13,7 +13,7 @@ export class RoleGuard {
 
     if (this.authUser.hasRoleAny(allowedRoles)) return true;
 
-    this.router.navigate(['/dashboard']);
+    this.router.navigate(['/forbidden']);
     return false;
   }
 }

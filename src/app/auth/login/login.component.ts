@@ -84,7 +84,7 @@ export class Login implements OnInit, OnDestroy {
     const t = (key: string) => this.transloco.translate(key);
     if (error.status === 401) {
       const body = typeof error.error === 'string' ? error.error : error.error?.message ?? '';
-      if (/disabled|inactive|deactivated/i.test(body)) {
+      if (/disabled|inactive|deactivated|locked/i.test(body)) {
         this.errorMessage.set(t('login.errors.accountInactive'));
       } else {
         this.errorMessage.set(t('login.errors.invalidCredentials'));

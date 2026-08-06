@@ -4,11 +4,15 @@
  * COVERED:
  *   - allows navigation when no roles are configured on the route
  *   - allows navigation when the user holds one of the allowed roles
- *   - redirects to /dashboard and blocks navigation otherwise
+ *   - ADMIN users can access admin-only routes (/app/users)
+ *   - ADMIN/SUPERVISOR can access supervisor routes (/reports)
+ *   - regular (non-admin) users are blocked from admin routes
+ *   - blocked users are redirected to the /forbidden (403) page
  *
  * SKIPPED (with reason):
  *   - JWT role fallback: RoleGuard delegates role checks to AuthUserService.hasRoleAny,
  *     which is covered in auth-user.service.spec.ts.
+ *   - Reactive role display in the UI: covered by sidebar.spec.ts (authState$ signal).
  */
 
 import { vi } from 'vitest';
@@ -63,10 +67,42 @@ describe('RoleGuard', () => {
     expect(router.navigate).not.toHaveBeenCalled();
   });
 
-  it('redirects to /dashboard and blocks navigation for an unauthorized user', () => {
+  it('allows an ADMIN user to access an admin-only route', () => {
+    authUser.hasRoleAny.mockReturnValue(true);
+    const route = { data: { roles: ['ADMIN'] } } as unknown as ActivatedRouteSnapshot;
+
+    expect(guard.canActivate(route)).toBe(true);
+    expect(router.navigate).not.toHaveBeenCalled();
+  });
+
+  it('allows an ADMIN or SUPERVISOR user to access a supervisor route', () => {
+    authUser.hasRoleAny.mockImplementation(roles => roles.includes('ADMIN') || roles.includes('SUPERVISOR'));
+    const route = { data: { roles: ['ADMIN', 'SUPERVISOR'] } } as unknown as ActivatedRouteSnapshot;
+
+    expect(guard.canActivate(route)).toBe(true);
+  });
+
+  it('blocks a regular user from an admin route and redirects to /forbidden', () => {
     const route = { data: { roles: ['ADMIN'] } } as unknown as ActivatedRouteSnapshot;
 
     expect(guard.canActivate(route)).toBe(false);
-    expect(router.navigate).toHaveBeenCalledWith(['/dashboard']);
+    expect(authUser.hasRoleAny).toHaveBeenCalledWith(['ADMIN']);
+    expect(router.navigate).toHaveBeenCalledWith(['/forbidden']);
+  });
+
+  it('blocks a HANDLER from a supervisor route and redirects to /forbidden', () => {
+    const route = { data: { roles: ['ADMIN', 'SUPERVISOR'] } } as unknown as ActivatedRouteSnapshot;
+
+    expect(guard.canActivate(route)).toBe(false);
+    expect(router.navigate).toHaveBeenCalledWith(['/forbidden']);
+  });
+
+  it('redirects to /forbidden on every denial', () => {
+    const route = { data: { roles: ['ADMIN'] } } as unknown as ActivatedRouteSnapshot;
+
+    expect(guard.canActivate(route)).toBe(false);
+    expect(guard.canActivate(route)).toBe(false);
+    expect(router.navigate).toHaveBeenCalledTimes(2);
+    expect(router.navigate).toHaveBeenCalledWith(['/forbidden']);
   });
 });
