@@ -3,6 +3,7 @@ export interface Note {
     caseId: string;
     authorId: string;
     authorName: string;
+    authorUsername: string;
     authorRole: string;
     body: string;
     internal: boolean;
@@ -20,6 +21,7 @@ export interface NoteResponse {
     caseId: string;
     authorId: string;
     authorName: string;
+    authorUsername: string;
     authorRole: string;
     body: string;
     internal: boolean;

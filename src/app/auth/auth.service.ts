@@ -1,7 +1,7 @@
 import { Injectable, inject } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable, BehaviorSubject, of } from 'rxjs';
-import { tap, finalize, catchError } from 'rxjs/operators';
+import { tap, finalize, catchError, share } from 'rxjs/operators';
 import { Router } from '@angular/router';
 import { LoginRequest, AuthResponse } from './models/auth.models';
 import { AuthTokenService } from './auth-token.service';
@@ -20,6 +20,8 @@ export class AuthService {
 
   private authState = new BehaviorSubject<AuthResponse | null>(null);
   authState$ = this.authState.asObservable();
+
+  private refreshInFlight$: Observable<AuthResponse> | null = null;
 
   constructor() {
     this.tryRestoreSession();
@@ -43,18 +45,30 @@ export class AuthService {
   }
 
   refreshSession(): Observable<AuthResponse> {
-    return this.http.post<AuthResponse>(`${this.API_URL}/refresh`, {}, {
+    if (this.refreshInFlight$) {
+      return this.refreshInFlight$;
+    }
+
+    this.refreshInFlight$ = this.http.post<AuthResponse>(`${this.API_URL}/refresh`, {}, {
       withCredentials: true
     }).pipe(
       tap(res => {
         if (res.token) {
-          this.tokenService.saveToken(res.token);
-          if (res.displayName) {
-            this.authState.next(res);
+          if (res.role) {
+            this.tokenService.saveAuthData(res);
+          } else {
+            this.tokenService.saveToken(res.token);
           }
+          this.authState.next(res);
         }
+      }),
+      share(),
+      finalize(() => {
+        this.refreshInFlight$ = null;
       })
     );
+
+    return this.refreshInFlight$;
   }
 
   logout(): void {

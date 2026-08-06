@@ -127,13 +127,13 @@ export class CaseNotesComponent implements OnInit {
 
     isAuthor(note: Note): boolean {
         const user = this.tokenService.getUserData();
-        return !!user && user.id === note.authorId;
+        return !!user && user.username === note.authorUsername;
     }
 
     canDeleteNote(note: Note): boolean {
         const user = this.tokenService.getUserData();
         if (!user) return false;
-        return user.role === 'ADMIN' || user.id === note.authorId;
+        return user.role === 'ADMIN' || user.username === note.authorUsername;
     }
 
     formatDate(date: string): string {

@@ -28,19 +28,22 @@ export class AuthTokenService {
     this._user = null;
   }
 
-  private getTokenExpiry(): number | null {
+  private getTokenExpiry(): number | null | 'malformed' {
     if (!this._token) return null;
     try {
-      const payload = JSON.parse(atob(this._token.split('.')[1]));
+      const parts = this._token.split('.');
+      if (parts.length !== 3) return 'malformed';
+      const payload = JSON.parse(atob(parts[1]));
       return payload.exp ? payload.exp * 1000 : null;
     } catch {
-      return null;
+      return 'malformed';
     }
   }
 
   isAuthenticated(): boolean {
     if (!this._token) return false;
     const expiry = this.getTokenExpiry();
+    if (expiry === 'malformed') return false;
     if (expiry === null) return true;
     return Date.now() < expiry;
   }
@@ -48,6 +51,7 @@ export class AuthTokenService {
   isTokenExpired(): boolean {
     if (!this._token) return true;
     const expiry = this.getTokenExpiry();
+    if (expiry === 'malformed') return true;
     if (expiry === null) return false;
     return Date.now() >= expiry;
   }
