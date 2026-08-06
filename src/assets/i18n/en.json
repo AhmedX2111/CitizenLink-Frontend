@@ -363,6 +363,11 @@
       "unknown": "An unexpected error occurred"
     }
   },
+  "forbidden": {
+    "title": "Access Denied",
+    "message": "You do not have permission to view this page. If you believe this is a mistake, please contact your administrator.",
+    "backToDashboard": "Back to Dashboard"
+  },
   "logout": {
     "title": "Logging out...",
     "subtitle": "Please wait"

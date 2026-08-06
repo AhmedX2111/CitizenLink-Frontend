@@ -47,7 +47,12 @@ export const routes: Routes = [
         loadComponent: () =>
           import('./feature/admin/reference-data/reference-data').then(m => m.ReferenceDataComponent)
       },
-     {
+      {
+        path: 'forbidden',
+        loadComponent: () =>
+          import('./auth/forbidden/forbidden.component').then(m => m.ForbiddenComponent)
+      },
+      {
         path: 'app/users',
         data: { roles: ['ADMIN'] },
         canActivate: [RoleGuard],
