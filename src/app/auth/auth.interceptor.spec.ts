@@ -93,6 +93,49 @@ describe('authInterceptor', () => {
     req.flush([]);
   });
 
+  it('attaches the token to absolute API-base URLs', () => {
+    http.get(`${environment.apiUrl}/api/v1/cases`).subscribe();
+
+    const req = httpMock.expectOne(`${environment.apiUrl}/api/v1/cases`);
+    expect(req.request.headers.get('Authorization')).toBe('Bearer access-token');
+    req.flush([]);
+  });
+
+  it('never attaches the token to third-party absolute URLs', () => {
+    http.get('https://cdn.example.com/analytics').subscribe();
+
+    const req = httpMock.expectOne('https://cdn.example.com/analytics');
+    expect(req.request.headers.has('Authorization')).toBe(false);
+    req.flush({});
+  });
+
+  it('does not trigger a refresh for a third-party 401', () => {
+    let receivedError: unknown;
+    let emitted = false;
+    http.get('https://cdn.example.com/analytics').subscribe({
+      next: () => (emitted = true),
+      error: err => (receivedError = err)
+    });
+
+    const req = httpMock.expectOne('https://cdn.example.com/analytics');
+    req.flush({}, { status: 401, statusText: 'Unauthorized' });
+
+    expect(emitted).toBe(false);
+    expect((receivedError as { status: number }).status).toBe(401);
+    expect(authService.refreshSession).not.toHaveBeenCalled();
+    expect(tokenService.clearAuthData).not.toHaveBeenCalled();
+    httpMock.expectNone({ method: 'POST', url: REFRESH_URL });
+  });
+
+  it('treats only the API base as a public auth route', () => {
+    http.get(`${environment.apiUrl}/api/v1/auth/refresh`).subscribe();
+
+    const req = httpMock.expectOne(`${environment.apiUrl}/api/v1/auth/refresh`);
+    expect(req.request.headers.has('Authorization')).toBe(false);
+    expect(authService.refreshSession).not.toHaveBeenCalled();
+    req.flush({});
+  });
+
   it('delegates to AuthService.refreshSession and retries with the new token', () => {
     let received: unknown;
     authService.refreshSession.mockImplementation(() => {
