@@ -272,7 +272,10 @@ export class UserListComponent implements OnInit {
   // ── Deactivate / Activate toggle ────────────────────────────
   deactivateUser(user: UserResponse): void {
     this.closeActionMenu();
-    this.userService.deactivateUser(user.id).pipe(
+    const request = user.active
+      ? this.userService.deactivateUser(user.id)
+      : this.userService.activateUser(user.id);
+    request.pipe(
       takeUntilDestroyed(this.destroyRef)
     ).subscribe({
       next: (updated) => {
