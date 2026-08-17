@@ -12,7 +12,7 @@ export class AuthGuard {
   private router = inject(Router);
 
   canActivate(route: ActivatedRouteSnapshot, state: RouterStateSnapshot): Observable<boolean> {
-    if (this.tokenService.getToken()) {
+    if (this.tokenService.isAuthenticated()) {
       return of(true);
     }
 
