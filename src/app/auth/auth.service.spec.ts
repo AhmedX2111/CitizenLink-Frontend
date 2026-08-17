@@ -5,6 +5,8 @@
  *   - constructor restores session via refreshSession() on startup
  *   - refreshSession coalesces concurrent calls into a single request (prevents
  *     the backend's refresh-token rotation from rejecting the second call)
+ *   - refreshSession survives subscriber churn: an unsubscribed guard must not
+ *     cancel the in-flight request or null the coalescing guard (M-22)
  *   - a new refresh is allowed after the previous one completes
  *   - login: POSTs credentials with withCredentials, saves auth data, emits authState
  *   - refreshSession with full user payload: restores token + identity (saveAuthData), emits authState
@@ -116,6 +118,22 @@ describe('AuthService', () => {
 
       expect(firstResult).toEqual(tokenOnly);
       expect(secondResult).toEqual(tokenOnly);
+      expect(tokenService.getToken()).toBe('refresh-token-2');
+    });
+
+    it('keeps the refresh in flight when a subscriber unsubscribes and a new one subscribes (M-22)', () => {
+      httpMock.expectOne({ method: 'POST', url: `${AUTH_URL}/refresh` }).flush(tokenOnly);
+
+      const first = service.refreshSession().subscribe(() => undefined);
+      first.unsubscribe();
+
+      let lateResult: unknown;
+      service.refreshSession().subscribe(res => (lateResult = res));
+
+      const req = httpMock.expectOne({ method: 'POST', url: `${AUTH_URL}/refresh` });
+      req.flush(tokenOnly);
+
+      expect(lateResult).toEqual(tokenOnly);
       expect(tokenService.getToken()).toBe('refresh-token-2');
     });
 

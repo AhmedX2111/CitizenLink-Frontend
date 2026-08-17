@@ -1,7 +1,7 @@
 import { Injectable, inject } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable, BehaviorSubject, of } from 'rxjs';
-import { tap, finalize, catchError, share } from 'rxjs/operators';
+import { tap, finalize, catchError, shareReplay } from 'rxjs/operators';
 import { Router } from '@angular/router';
 import { LoginRequest, AuthResponse } from './models/auth.models';
 import { AuthTokenService } from './auth-token.service';
@@ -62,10 +62,10 @@ export class AuthService {
           this.authState.next(res);
         }
       }),
-      share(),
       finalize(() => {
         this.refreshInFlight$ = null;
-      })
+      }),
+      shareReplay({ bufferSize: 1, refCount: false })
     );
 
     return this.refreshInFlight$;
