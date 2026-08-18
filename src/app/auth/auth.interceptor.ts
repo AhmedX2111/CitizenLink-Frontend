@@ -1,6 +1,5 @@
 import { HttpInterceptorFn, HttpRequest, HttpErrorResponse } from '@angular/common/http';
 import { inject } from '@angular/core';
-import { Router } from '@angular/router';
 import { throwError } from 'rxjs';
 import { catchError, switchMap } from 'rxjs/operators';
 import { AuthTokenService } from './auth-token.service';
@@ -47,7 +46,6 @@ function isLogoutRoute(url: string): boolean {
 export const authInterceptor: HttpInterceptorFn = (req, next) => {
   const tokenService = inject(AuthTokenService);
   const authService = inject(AuthService);
-  const router = inject(Router);
 
   if (isPublicAuthRoute(req.url)) {
     return next(req);
@@ -75,8 +73,7 @@ export const authInterceptor: HttpInterceptorFn = (req, next) => {
           return next(addAuthHeader(req, newToken ?? ''));
         }),
         catchError(() => {
-          tokenService.clearAuthData();
-          router.navigate(['/login']);
+          authService.forceLogout();
           return throwError(() => error);
         })
       );

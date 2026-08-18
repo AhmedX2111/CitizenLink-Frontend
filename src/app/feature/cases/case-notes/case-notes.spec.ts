@@ -10,6 +10,7 @@
  *   - delete flow: requestDeleteNote / cancelDeleteNote / confirmDeleteNote
  *   - isAuthor / canDeleteNote: ADMIN, author, non-author, no user
  *   - formatDate produces a human-readable date
+ *   - destroy clears pending message timers so no signal is written after teardown (M-25)
  *
  * SKIPPED (with reason):
  *   - Note update / single fetch endpoints (updateNote, getNoteById) are not exposed
@@ -169,6 +170,19 @@ describe('CaseNotesComponent', () => {
 
       vi.advanceTimersByTime(3000);
       expect(component.successMessage()).toBeNull();
+    });
+
+    it('clears pending message timers when the component is destroyed (M-25)', () => {
+      vi.useFakeTimers();
+      noteService.addNote.mockReturnValue(of(mockNote));
+      component.noteForm.patchValue({ body: 'Valid note' });
+
+      component.onSubmit();
+      expect(component.successMessage()).toBe('Note added successfully!');
+
+      fixture.destroy();
+      vi.advanceTimersByTime(3000);
+      expect(component.successMessage()).toBe('Note added successfully!');
     });
 
     it('sets an error message when adding a note fails', () => {

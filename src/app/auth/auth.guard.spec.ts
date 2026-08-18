@@ -4,7 +4,7 @@
  * COVERED:
  *   - allows navigation when a valid (unexpired) token is present (no refresh call)
  *   - allows navigation after a successful silent refresh
- *   - redirects to /login with returnUrl when the refresh fails
+ *   - delegates forced logout with returnUrl and blocks navigation when the refresh fails
  *   - an expired token falls through to the refresh path instead of being admitted
  *
  * SKIPPED (with reason):
@@ -14,7 +14,7 @@
 
 import { vi } from 'vitest';
 import { TestBed } from '@angular/core/testing';
-import { ActivatedRouteSnapshot, Router, RouterStateSnapshot } from '@angular/router';
+import { ActivatedRouteSnapshot, RouterStateSnapshot } from '@angular/router';
 import { of, throwError } from 'rxjs';
 
 import { AuthGuard } from './auth.guard';
@@ -24,23 +24,20 @@ import { AuthService } from './auth.service';
 describe('AuthGuard', () => {
   let guard: AuthGuard;
   let tokenService: { getToken: ReturnType<typeof vi.fn>; isAuthenticated: ReturnType<typeof vi.fn> };
-  let authService: { refreshSession: ReturnType<typeof vi.fn> };
-  let router: { navigate: ReturnType<typeof vi.fn> };
+  let authService: { refreshSession: ReturnType<typeof vi.fn>; forceLogout: ReturnType<typeof vi.fn> };
 
   const route = {} as ActivatedRouteSnapshot;
   const state = { url: '/app/cases/123' } as RouterStateSnapshot;
 
   beforeEach(() => {
     tokenService = { getToken: vi.fn().mockReturnValue(null), isAuthenticated: vi.fn().mockReturnValue(false) };
-    authService = { refreshSession: vi.fn() };
-    router = { navigate: vi.fn() };
+    authService = { refreshSession: vi.fn(), forceLogout: vi.fn() };
 
     TestBed.configureTestingModule({
       providers: [
         AuthGuard,
         { provide: AuthTokenService, useValue: tokenService },
-        { provide: AuthService, useValue: authService },
-        { provide: Router, useValue: router }
+        { provide: AuthService, useValue: authService }
       ]
     });
 
@@ -72,7 +69,7 @@ describe('AuthGuard', () => {
 
     expect(authService.refreshSession).toHaveBeenCalled();
     expect(result).toBe(true);
-    expect(router.navigate).not.toHaveBeenCalled();
+    expect(authService.forceLogout).not.toHaveBeenCalled();
   });
 
   it('redirects to /login with returnUrl and blocks navigation when the expired token cannot be refreshed', () => {
@@ -84,9 +81,7 @@ describe('AuthGuard', () => {
     guard.canActivate(route, state).subscribe(v => (result = v));
 
     expect(result).toBe(false);
-    expect(router.navigate).toHaveBeenCalledWith(['/login'], {
-      queryParams: { returnUrl: '/app/cases/123' }
-    });
+    expect(authService.forceLogout).toHaveBeenCalledWith('/app/cases/123');
   });
 
   it('allows navigation after a successful silent refresh', () => {
@@ -97,7 +92,7 @@ describe('AuthGuard', () => {
 
     expect(authService.refreshSession).toHaveBeenCalled();
     expect(result).toBe(true);
-    expect(router.navigate).not.toHaveBeenCalled();
+    expect(authService.forceLogout).not.toHaveBeenCalled();
   });
 
   it('redirects to /login with returnUrl and blocks navigation when refresh fails', () => {
@@ -107,8 +102,6 @@ describe('AuthGuard', () => {
     guard.canActivate(route, state).subscribe(v => (result = v));
 
     expect(result).toBe(false);
-    expect(router.navigate).toHaveBeenCalledWith(['/login'], {
-      queryParams: { returnUrl: '/app/cases/123' }
-    });
+    expect(authService.forceLogout).toHaveBeenCalledWith('/app/cases/123');
   });
 });

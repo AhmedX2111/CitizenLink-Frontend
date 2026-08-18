@@ -1,4 +1,4 @@
-import { Component, OnInit, signal, inject, DestroyRef } from '@angular/core';
+import { Component, OnInit, signal, inject, DestroyRef, OnDestroy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { TranslocoModule, TranslocoService } from '@jsverse/transloco';
@@ -15,11 +15,12 @@ type ActiveTab = 'categories' | 'departments';
   imports: [CommonModule, FormsModule, TranslocoModule],
   templateUrl: './reference-data.html'
 })
-export class ReferenceDataComponent implements OnInit {
+export class ReferenceDataComponent implements OnInit, OnDestroy {
 
   private adminService = inject(AdminService);
   private destroyRef = inject(DestroyRef);
   private transloco = inject(TranslocoService);
+  private timers = new Set<ReturnType<typeof setTimeout>>();
 
   activeTab = signal<ActiveTab>('categories');
 
@@ -57,6 +58,19 @@ export class ReferenceDataComponent implements OnInit {
   ngOnInit(): void {
     this.loadCategories();
     this.loadDepartments();
+  }
+
+  private schedule(fn: () => void, ms: number): void {
+    const handle = setTimeout(() => {
+      this.timers.delete(handle);
+      fn();
+    }, ms);
+    this.timers.add(handle);
+  }
+
+  ngOnDestroy(): void {
+    this.timers.forEach(clearTimeout);
+    this.timers.clear();
   }
 
   // ── Tab switching ───────────────────────────────────────────
@@ -278,7 +292,7 @@ export class ReferenceDataComponent implements OnInit {
   // ── Toast ───────────────────────────────────────────────────
   private showToast(msg: string): void {
     this.successMessage.set(msg);
-    setTimeout(() => this.successMessage.set(null), 4000);
+    this.schedule(() => this.successMessage.set(null), 4000);
   }
 
   dismissToast(): void {

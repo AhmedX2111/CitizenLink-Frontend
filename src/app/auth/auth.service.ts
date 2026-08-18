@@ -83,4 +83,12 @@ export class AuthService {
       error: (error) => this.logger.error('AuthService', 'Logout API error:', error)
     });
   }
+
+  forceLogout(returnUrl: string = this.router.url): void {
+    this.tokenService.clearAuthData();
+    this.authState.next(null);
+    this.router.navigate(['/login'], {
+      queryParams: { returnUrl }
+    });
+  }
 }

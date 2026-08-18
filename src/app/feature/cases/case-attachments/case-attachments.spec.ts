@@ -11,6 +11,7 @@
  *   - delete flow: requestDelete with auto-cancel, cancelDelete, confirmDelete success/error
  *   - formatFileSize B / KB / MB
  *   - formatDate respects the active language
+ *   - destroy clears pending timers (auto-cancel, message clears) (M-25)
  *
  * SKIPPED (with reason):
  *   - triggerFileUpload: relies on a DOM element injected by the template; covered
@@ -233,6 +234,16 @@ describe('CaseAttachmentsComponent', () => {
 
       vi.advanceTimersByTime(5000);
       expect(component.confirmDeleteId()).toBeNull();
+    });
+
+    it('clears pending timers when the component is destroyed (M-25)', () => {
+      vi.useFakeTimers();
+      component.requestDelete('att-1');
+      expect(component.confirmDeleteId()).toBe('att-1');
+
+      fixture.destroy();
+      vi.advanceTimersByTime(5000);
+      expect(component.confirmDeleteId()).toBe('att-1');
     });
 
     it('cancelDelete clears the confirmation state', () => {

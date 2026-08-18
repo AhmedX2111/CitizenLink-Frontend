@@ -12,6 +12,8 @@
  *   - refreshSession with full user payload: restores token + identity (saveAuthData), emits authState
  *   - refreshSession with token-only payload: falls back to saveToken, still emits authState
  *   - refreshSession error: propagates error (tryRestoreSession catches it)
+ *   - forceLogout: clears the token store, emits null and redirects to /login
+ *     with the current URL as returnUrl (or an explicit override) (M-23)
  *   - logout: POSTs logout, clears auth data, emits null, navigates to '/'
  *
  * SKIPPED (with reason):
@@ -46,10 +48,10 @@ describe('AuthService', () => {
   let service: AuthService;
   let httpMock: HttpTestingController;
   let tokenService: AuthTokenService;
-  let router: { navigate: ReturnType<typeof vi.fn> };
+  let router: { navigate: ReturnType<typeof vi.fn>; url: string };
 
   beforeEach(() => {
-    router = { navigate: vi.fn() };
+    router = { navigate: vi.fn(), url: '/app/cases/5' };
 
     TestBed.configureTestingModule({
       providers: [
@@ -197,6 +199,36 @@ describe('AuthService', () => {
       req.flush({}, { status: 500, statusText: 'Server Error' });
 
       expect((receivedError as { status: number }).status).toBe(500);
+    });
+  });
+
+  describe('forceLogout', () => {
+    it('clears the token store and emits null, redirecting to /login with the current URL as returnUrl', () => {
+      httpMock.expectOne({ method: 'POST', url: `${AUTH_URL}/refresh` }).flush(tokenOnly);
+
+      tokenService.saveAuthData(fullUser);
+      let emitted: unknown = fullUser;
+      service.authState$.subscribe(v => (emitted = v));
+
+      service.forceLogout();
+
+      expect(tokenService.getToken()).toBeNull();
+      expect(tokenService.getUserData()).toBeNull();
+      expect(emitted).toBeNull();
+      expect(router.navigate).toHaveBeenCalledWith(['/login'], {
+        queryParams: { returnUrl: '/app/cases/5' }
+      });
+    });
+
+    it('honours an explicit returnUrl override', () => {
+      httpMock.expectOne({ method: 'POST', url: `${AUTH_URL}/refresh` }).flush(tokenOnly);
+
+      service.forceLogout('/app/cases/9');
+
+      expect(tokenService.getToken()).toBeNull();
+      expect(router.navigate).toHaveBeenCalledWith(['/login'], {
+        queryParams: { returnUrl: '/app/cases/9' }
+      });
     });
   });
 
