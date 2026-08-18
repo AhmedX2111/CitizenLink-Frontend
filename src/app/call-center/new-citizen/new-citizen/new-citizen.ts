@@ -1,7 +1,8 @@
 import { CommonModule } from '@angular/common';
-import { Component, inject, signal } from '@angular/core';
+import { Component, inject, signal, DestroyRef, OnDestroy } from '@angular/core';
 import { ReactiveFormsModule, FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { RouterModule, Router } from '@angular/router';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { CitizenService } from '../../../../core/services/citizen.service';
 import { LoggerService } from '../../../../core/services/logger.service';
 import { TranslocoModule, TranslocoService } from '@jsverse/transloco';
@@ -12,13 +13,15 @@ import { TranslocoModule, TranslocoService } from '@jsverse/transloco';
   templateUrl: './new-citizen.html',
   styleUrl: './new-citizen.css',
 })
-export class NewCitizen {
+export class NewCitizen implements OnDestroy {
 
   private fb = inject(FormBuilder);
   private citizenService = inject(CitizenService);
   private router = inject(Router);
   private logger = inject(LoggerService);
   private transloco = inject(TranslocoService);
+  private destroyRef = inject(DestroyRef);
+  private timers = new Set<ReturnType<typeof setTimeout>>();
 
   protected citizenForm: FormGroup;
   protected isLoading = signal(false);
@@ -33,6 +36,19 @@ export class NewCitizen {
       email: ['', [Validators.pattern('^[A-Za-z0-9+_.-]+@(.+)$')]],
       preferredLanguage: ['en', Validators.required]
     });
+  }
+
+  private schedule(fn: () => void, ms: number): void {
+    const handle = setTimeout(() => {
+      this.timers.delete(handle);
+      fn();
+    }, ms);
+    this.timers.add(handle);
+  }
+
+  ngOnDestroy(): void {
+    this.timers.forEach(clearTimeout);
+    this.timers.clear();
   }
 
   onSubmit(): void {
@@ -55,14 +71,16 @@ export class NewCitizen {
         preferredLanguage: formValue.preferredLanguage
     };
 
-    this.citizenService.createCitizen(request).subscribe({
+    this.citizenService.createCitizen(request).pipe(
+        takeUntilDestroyed(this.destroyRef)
+    ).subscribe({
         next: (response) => {
             this.isLoading.set(false);
             this.successMessage.set(
                 this.transloco.translate('newCitizen.successMessage', { fullName: response.fullName })
             );
             
-            setTimeout(() => {
+            this.schedule(() => {
                 this.router.navigate(['/app/call-center/citizen', response.id]);
             }, 2000);
         },

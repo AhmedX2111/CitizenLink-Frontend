@@ -1,6 +1,7 @@
-import { Component, Input, signal, inject, OnInit } from '@angular/core';
+import { Component, Input, signal, inject, OnInit, DestroyRef, OnDestroy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { TranslocoModule, TranslocoService } from '@jsverse/transloco';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { AttachmentService } from '../../../../core/services/attachment.service';
 import { LoggerService } from '../../../../core/services/logger.service';
 import { Attachment } from '../../../../core/models/attachment.models';
@@ -12,12 +13,14 @@ import { Attachment } from '../../../../core/models/attachment.models';
     templateUrl: './case-attachments.html',
     styleUrls: ['./case-attachments.css']
 })
-export class CaseAttachmentsComponent implements OnInit {
+export class CaseAttachmentsComponent implements OnInit, OnDestroy {
     @Input() caseId!: string;
 
     private attachmentService = inject(AttachmentService);
     private logger = inject(LoggerService);
     private transloco = inject(TranslocoService);
+    private destroyRef = inject(DestroyRef);
+    private timers = new Set<ReturnType<typeof setTimeout>>();
 
     attachments = signal<Attachment[]>([]);
     isLoading = signal(true);
@@ -33,11 +36,26 @@ export class CaseAttachmentsComponent implements OnInit {
         this.loadAttachments();
     }
 
+    private schedule(fn: () => void, ms: number): void {
+        const handle = setTimeout(() => {
+            this.timers.delete(handle);
+            fn();
+        }, ms);
+        this.timers.add(handle);
+    }
+
+    ngOnDestroy(): void {
+        this.timers.forEach(clearTimeout);
+        this.timers.clear();
+    }
+
     loadAttachments(): void {
         this.isLoading.set(true);
         this.errorMessage.set(null);
 
-        this.attachmentService.getAttachmentsByCaseId(this.caseId).subscribe({
+        this.attachmentService.getAttachmentsByCaseId(this.caseId).pipe(
+            takeUntilDestroyed(this.destroyRef)
+        ).subscribe({
             next: (attachments) => {
                 this.attachments.set(attachments);
                 this.isLoading.set(false);
@@ -62,13 +80,13 @@ export class CaseAttachmentsComponent implements OnInit {
     uploadFile(file: File): void {
         if (!this.allowedTypes.includes(file.type) && !this.isAllowedExtension(file.name)) {
             this.errorMessage.set(this.transloco.translate('cases.detail.attachments.invalidType'));
-            setTimeout(() => this.errorMessage.set(null), 5000);
+            this.schedule(() => this.errorMessage.set(null), 5000);
             return;
         }
 
         if (file.size > this.maxFileSize) {
             this.errorMessage.set(this.transloco.translate('cases.detail.attachments.fileTooLarge'));
-            setTimeout(() => this.errorMessage.set(null), 5000);
+            this.schedule(() => this.errorMessage.set(null), 5000);
             return;
         }
 
@@ -76,12 +94,14 @@ export class CaseAttachmentsComponent implements OnInit {
         this.errorMessage.set(null);
         this.successMessage.set(null);
 
-        this.attachmentService.uploadAttachment(this.caseId, file).subscribe({
+        this.attachmentService.uploadAttachment(this.caseId, file).pipe(
+            takeUntilDestroyed(this.destroyRef)
+        ).subscribe({
             next: (attachment) => {
                 this.isUploading.set(false);
                 this.successMessage.set(this.transloco.translate('cases.detail.attachments.uploadSuccess'));
                 this.attachments.update(list => [attachment, ...list]);
-                setTimeout(() => this.successMessage.set(null), 3000);
+                this.schedule(() => this.successMessage.set(null), 3000);
             },
             error: (error) => {
                 this.isUploading.set(false);
@@ -98,7 +118,9 @@ export class CaseAttachmentsComponent implements OnInit {
     }
 
     downloadAttachment(attachment: Attachment): void {
-        this.attachmentService.downloadAttachment(this.caseId, attachment.id).subscribe({
+        this.attachmentService.downloadAttachment(this.caseId, attachment.id).pipe(
+            takeUntilDestroyed(this.destroyRef)
+        ).subscribe({
             next: (blob) => {
                 const url = window.URL.createObjectURL(blob);
                 const link = document.createElement('a');
@@ -110,12 +132,12 @@ export class CaseAttachmentsComponent implements OnInit {
                 window.URL.revokeObjectURL(url);
 
                 this.successMessage.set(this.transloco.translate('cases.detail.attachments.downloadSuccess'));
-                setTimeout(() => this.successMessage.set(null), 3000);
+                this.schedule(() => this.successMessage.set(null), 3000);
             },
             error: (error) => {
                 this.errorMessage.set(this.transloco.translate('cases.detail.attachments.downloadError'));
                 this.logger.error('CaseAttachmentsComponent', 'Error downloading file:', error);
-                setTimeout(() => this.errorMessage.set(null), 5000);
+                this.schedule(() => this.errorMessage.set(null), 5000);
             }
         });
     }
@@ -123,7 +145,7 @@ export class CaseAttachmentsComponent implements OnInit {
     requestDelete(attachmentId: string): void {
         this.confirmDeleteId.set(attachmentId);
         // Auto-cancel after 5 seconds if user doesn't confirm
-        setTimeout(() => {
+        this.schedule(() => {
             if (this.confirmDeleteId() === attachmentId) {
                 this.confirmDeleteId.set(null);
             }
@@ -135,17 +157,19 @@ export class CaseAttachmentsComponent implements OnInit {
     }
 
     confirmDelete(attachment: Attachment): void {
-        this.attachmentService.deleteAttachment(this.caseId, attachment.id).subscribe({
+        this.attachmentService.deleteAttachment(this.caseId, attachment.id).pipe(
+            takeUntilDestroyed(this.destroyRef)
+        ).subscribe({
             next: () => {
                 this.attachments.update(list => list.filter(a => a.id !== attachment.id));
                 this.successMessage.set(this.transloco.translate('cases.detail.attachments.deleteSuccess'));
                 this.confirmDeleteId.set(null);
-                setTimeout(() => this.successMessage.set(null), 3000);
+                this.schedule(() => this.successMessage.set(null), 3000);
             },
             error: (error) => {
                 this.errorMessage.set(this.transloco.translate('cases.detail.attachments.deleteError'));
                 this.logger.error('CaseAttachmentsComponent', 'Error deleting attachment:', error);
-                setTimeout(() => this.errorMessage.set(null), 5000);
+                this.schedule(() => this.errorMessage.set(null), 5000);
             }
         });
     }

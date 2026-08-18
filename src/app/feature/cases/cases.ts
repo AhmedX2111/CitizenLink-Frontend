@@ -1,5 +1,5 @@
 import {
-  Component, OnInit, signal, computed, inject, DestroyRef
+  Component, OnInit, signal, computed, inject, DestroyRef, OnDestroy
 } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import {
@@ -30,7 +30,7 @@ type ActiveTab = 'list' | 'create';
   templateUrl: './cases.html',
   styleUrl: './cases.css'
 })
-export class CasesComponent implements OnInit {
+export class CasesComponent implements OnInit, OnDestroy {
 
   private fb          = inject(FormBuilder);
   private caseService = inject(CaseService);
@@ -38,6 +38,7 @@ export class CasesComponent implements OnInit {
   private transloco   = inject(TranslocoService);
   private router      = inject(Router);
   private logger      = inject(LoggerService);
+  private timers      = new Set<ReturnType<typeof setTimeout>>();
   // Breadcrumb title passed to shared topbar
   pageTitle = () => this.transloco.translate('cases.title');
 
@@ -115,6 +116,19 @@ export class CasesComponent implements OnInit {
   openCount     = computed(() => this.cases().filter(c => !['RESOLVED','CLOSED','CANCELLED'].includes(c.status)).length);
   urgentCount   = computed(() => this.cases().filter(c => c.priority === 'URGENT').length);
   resolvedCount = computed(() => this.cases().filter(c => c.status === 'RESOLVED').length);
+
+  private schedule(fn: () => void, ms: number): void {
+    const handle = setTimeout(() => {
+      this.timers.delete(handle);
+      fn();
+    }, ms);
+    this.timers.add(handle);
+  }
+
+  ngOnDestroy(): void {
+    this.timers.forEach(clearTimeout);
+    this.timers.clear();
+  }
 
   ngOnInit(): void {
 
@@ -284,7 +298,7 @@ export class CasesComponent implements OnInit {
         this.submitSuccess.set(true);
         this.createForm.reset();
         this.reloadCases$.next();
-        setTimeout(() => this.showTab('list'), 1500);
+        this.schedule(() => this.showTab('list'), 1500);
       },
       error: (err) => {
         this.isSubmitting.set(false);

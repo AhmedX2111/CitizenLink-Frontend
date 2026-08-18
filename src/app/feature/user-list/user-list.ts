@@ -1,5 +1,5 @@
 import {
-  Component, OnInit, signal, inject, DestroyRef
+  Component, OnInit, signal, inject, DestroyRef, OnDestroy
 } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
@@ -18,12 +18,13 @@ import { PagedResponse } from '../../../core/models/case.models';
   templateUrl: './user-list.html',
   styleUrl:    './user-list.css'
 })
-export class UserListComponent implements OnInit {
+export class UserListComponent implements OnInit, OnDestroy {
 
   private userService = inject(UserAdminService);
   private destroyRef  = inject(DestroyRef);
   private transloco   = inject(TranslocoService);
   private reload$     = new Subject<void>();
+  private timers      = new Set<ReturnType<typeof setTimeout>>();
 
   // ── Filter state ──────────────────────────────────────────────
   filterRole   = '';
@@ -69,6 +70,19 @@ export class UserListComponent implements OnInit {
 
   get pages(): number[] {
     return Array.from({ length: this.totalPages() }, (_, i) => i);
+  }
+
+  private schedule(fn: () => void, ms: number): void {
+    const handle = setTimeout(() => {
+      this.timers.delete(handle);
+      fn();
+    }, ms);
+    this.timers.add(handle);
+  }
+
+  ngOnDestroy(): void {
+    this.timers.forEach(clearTimeout);
+    this.timers.clear();
   }
 
   ngOnInit(): void {
@@ -291,7 +305,7 @@ export class UserListComponent implements OnInit {
   // ── Toast ────────────────────────────────────────────────────
   private showToast(msg: string): void {
     this.successMessage.set(msg);
-    setTimeout(() => this.successMessage.set(null), 4000);
+    this.schedule(() => this.successMessage.set(null), 4000);
   }
 
   dismissToast(): void {

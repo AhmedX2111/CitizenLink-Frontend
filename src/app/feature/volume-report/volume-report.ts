@@ -1,6 +1,6 @@
 import {
   Component, OnInit, signal, computed, inject,
-  DestroyRef, AfterViewInit, ElementRef, ViewChild
+  DestroyRef, AfterViewInit, ElementRef, ViewChild, OnDestroy
 } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
@@ -21,7 +21,7 @@ Chart.register(...registerables);
   templateUrl: './volume-report.html',
   styleUrl: './volume-report.css'
 })
-export class VolumeReportComponent implements OnInit, AfterViewInit {
+export class VolumeReportComponent implements OnInit, AfterViewInit, OnDestroy {
 
   @ViewChild('categoryChartCanvas') chartCanvas!: ElementRef<HTMLCanvasElement>;
 
@@ -82,6 +82,10 @@ export class VolumeReportComponent implements OnInit, AfterViewInit {
   ngAfterViewInit(): void {
     this.chartReady = true;
     if (this.report()) this.renderChart();
+  }
+
+  ngOnDestroy(): void {
+    this.chartInstance?.destroy();
   }
 
   applyFilter(): void {

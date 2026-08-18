@@ -1,7 +1,8 @@
-import { Component, Input, signal, inject, OnInit } from '@angular/core';
+import { Component, Input, signal, inject, OnInit, DestroyRef, OnDestroy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { TranslocoModule, TranslocoService } from '@jsverse/transloco';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { Note } from '../../../../core/models/note.models';
 import { NoteService } from '../../../../core/services/note.service';
 import { LoggerService } from '../../../../core/services/logger.service';
@@ -14,7 +15,7 @@ import { AuthTokenService } from '../../../auth/auth-token.service';
     templateUrl: './case-notes.html',
     styleUrls: ['./case-notes.css']
 })
-export class CaseNotesComponent implements OnInit {
+export class CaseNotesComponent implements OnInit, OnDestroy {
     @Input() caseId!: string;
 
     private noteService = inject(NoteService);
@@ -22,6 +23,8 @@ export class CaseNotesComponent implements OnInit {
     private logger = inject(LoggerService);
     private transloco = inject(TranslocoService);
     private tokenService = inject(AuthTokenService);
+    private destroyRef = inject(DestroyRef);
+    private timers = new Set<ReturnType<typeof setTimeout>>();
 
     notes = signal<Note[]>([]);
     isLoading = signal(true);
@@ -41,11 +44,26 @@ export class CaseNotesComponent implements OnInit {
         this.loadNotes();
     }
 
+    private schedule(fn: () => void, ms: number): void {
+        const handle = setTimeout(() => {
+            this.timers.delete(handle);
+            fn();
+        }, ms);
+        this.timers.add(handle);
+    }
+
+    ngOnDestroy(): void {
+        this.timers.forEach(clearTimeout);
+        this.timers.clear();
+    }
+
     loadNotes(): void {
         this.isLoading.set(true);
         this.errorMessage.set(null);
 
-        this.noteService.getNotesByCaseId(this.caseId).subscribe({
+        this.noteService.getNotesByCaseId(this.caseId).pipe(
+            takeUntilDestroyed(this.destroyRef)
+        ).subscribe({
             next: (notes) => {
                 this.notes.set(notes);
                 this.isLoading.set(false);
@@ -79,7 +97,9 @@ export class CaseNotesComponent implements OnInit {
 
         const request = this.noteForm.value;
 
-        this.noteService.addNote(this.caseId, request).subscribe({
+        this.noteService.addNote(this.caseId, request).pipe(
+            takeUntilDestroyed(this.destroyRef)
+        ).subscribe({
             next: (note) => {
                 this.isSubmitting.set(false);
                 this.successMessage.set('Note added successfully!');
@@ -92,7 +112,7 @@ export class CaseNotesComponent implements OnInit {
                 this.showForm.set(false);
                 
                 // Clear success message after 3 seconds
-                setTimeout(() => this.successMessage.set(null), 3000);
+                this.schedule(() => this.successMessage.set(null), 3000);
             },
             error: (error) => {
                 this.isSubmitting.set(false);
@@ -108,11 +128,13 @@ export class CaseNotesComponent implements OnInit {
 
     confirmDeleteNote(noteId: string): void {
         this.confirmDeleteId.set(null);
-        this.noteService.deleteNote(this.caseId, noteId).subscribe({
+        this.noteService.deleteNote(this.caseId, noteId).pipe(
+            takeUntilDestroyed(this.destroyRef)
+        ).subscribe({
             next: () => {
                 this.notes.update(notes => notes.filter(n => n.id !== noteId));
                 this.successMessage.set('Note deleted successfully!');
-                setTimeout(() => this.successMessage.set(null), 3000);
+                this.schedule(() => this.successMessage.set(null), 3000);
             },
             error: (error) => {
                 this.errorMessage.set('Failed to delete note. Please try again.');

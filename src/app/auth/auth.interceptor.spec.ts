@@ -9,7 +9,8 @@
  *   - concurrent 401s each delegate to refreshSession() and never issue their own
  *     refresh HTTP call (single-request coalescing is AuthService's contract,
  *     covered in auth.service.spec)
- *   - a failed refresh clears auth data and redirects to /login
+ *   - a failed refresh forces a logout via AuthService.forceLogout (clears both
+ *     the token store and the authState identity) (M-23)
  *   - logout requests are never replayed through the refresh flow
  *
  * SKIPPED (with reason):
@@ -23,7 +24,6 @@ import { vi } from 'vitest';
 import { TestBed } from '@angular/core/testing';
 import { HttpClient, provideHttpClient, withInterceptors } from '@angular/common/http';
 import { HttpTestingController, provideHttpClientTesting } from '@angular/common/http/testing';
-import { Router } from '@angular/router';
 import { of, throwError } from 'rxjs';
 
 import { authInterceptor } from './auth.interceptor';
@@ -38,26 +38,21 @@ describe('authInterceptor', () => {
   let httpMock: HttpTestingController;
   let tokenService: {
     getToken: ReturnType<typeof vi.fn>;
-    clearAuthData: ReturnType<typeof vi.fn>;
   };
-  let authService: { refreshSession: ReturnType<typeof vi.fn> };
-  let router: { navigate: ReturnType<typeof vi.fn> };
+  let authService: { refreshSession: ReturnType<typeof vi.fn>; forceLogout: ReturnType<typeof vi.fn> };
 
   beforeEach(() => {
     tokenService = {
-      getToken: vi.fn().mockReturnValue('access-token'),
-      clearAuthData: vi.fn()
+      getToken: vi.fn().mockReturnValue('access-token')
     };
-    authService = { refreshSession: vi.fn() };
-    router = { navigate: vi.fn() };
+    authService = { refreshSession: vi.fn(), forceLogout: vi.fn() };
 
     TestBed.configureTestingModule({
       providers: [
         provideHttpClient(withInterceptors([authInterceptor])),
         provideHttpClientTesting(),
         { provide: AuthTokenService, useValue: tokenService },
-        { provide: AuthService, useValue: authService },
-        { provide: Router, useValue: router }
+        { provide: AuthService, useValue: authService }
       ]
     });
 
@@ -123,7 +118,7 @@ describe('authInterceptor', () => {
     expect(emitted).toBe(false);
     expect((receivedError as { status: number }).status).toBe(401);
     expect(authService.refreshSession).not.toHaveBeenCalled();
-    expect(tokenService.clearAuthData).not.toHaveBeenCalled();
+    expect(authService.forceLogout).not.toHaveBeenCalled();
     httpMock.expectNone({ method: 'POST', url: REFRESH_URL });
   });
 
@@ -156,8 +151,7 @@ describe('authInterceptor', () => {
     retried.flush({ id: 'case-1' });
 
     expect(received).toEqual({ id: 'case-1' });
-    expect(router.navigate).not.toHaveBeenCalled();
-    expect(tokenService.clearAuthData).not.toHaveBeenCalled();
+    expect(authService.forceLogout).not.toHaveBeenCalled();
     httpMock.expectNone({ method: 'POST', url: REFRESH_URL });
   });
 
@@ -188,7 +182,7 @@ describe('authInterceptor', () => {
     httpMock.expectNone({ method: 'POST', url: REFRESH_URL });
   });
 
-  it('clears auth data and redirects to /login when the refresh fails', () => {
+  it('forces a logout when the refresh fails and the original 401 propagates', () => {
     let receivedError: unknown;
     let emitted = false;
     authService.refreshSession.mockReturnValue(throwError(() => ({ status: 401 })));
@@ -201,8 +195,7 @@ describe('authInterceptor', () => {
     const original = httpMock.expectOne('/api/v1/cases/1');
     original.flush({ message: 'expired' }, { status: 401, statusText: 'Unauthorized' });
 
-    expect(tokenService.clearAuthData).toHaveBeenCalled();
-    expect(router.navigate).toHaveBeenCalledWith(['/login']);
+    expect(authService.forceLogout).toHaveBeenCalled();
     expect(emitted).toBe(false);
     expect((receivedError as { status: number }).status).toBe(401);
     httpMock.expectNone({ method: 'POST', url: REFRESH_URL });
@@ -221,8 +214,7 @@ describe('authInterceptor', () => {
 
     expect(emitted).toBe(false);
     expect((receivedError as { status: number }).status).toBe(401);
-    expect(tokenService.clearAuthData).not.toHaveBeenCalled();
-    expect(router.navigate).not.toHaveBeenCalled();
+    expect(authService.forceLogout).not.toHaveBeenCalled();
     expect(authService.refreshSession).not.toHaveBeenCalled();
     httpMock.expectNone({ method: 'POST', url: REFRESH_URL });
   });
