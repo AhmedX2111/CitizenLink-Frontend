@@ -10,9 +10,9 @@
  *   - openActionModal: ASSIGN/REASSIGN route to handler picker; other actions open transition modal
  *   - closeActionModal / openHandlerPicker / closeHandlerPicker / selectHandler / retryLoadHandlers
  *   - confirmAssign: guard clauses, REASSIGN comment required, success reloads timeline+actions,
- *     409 error.message precedence, generic failure
+ *     409 -> conflict key + server message logged, generic failure
  *   - submitAction: guard clauses, comment/resolution required, AWAIT_INFO handling, success,
- *     409 error.message precedence, generic failure
+ *     409 -> conflict key + server message logged, generic failure
  *   - goBack / goToCitizenProfile navigation
  *   - filteredHandlers computed (case-insensitive displayName/email filtering)
  *   - Template helpers: statusBadgeClass, priorityBadgeClass, isOverdue, formatDateTime, isCreationEvent
@@ -133,6 +133,7 @@ describe('CaseDetailPageComponent', () => {
   };
   let router: { navigate: ReturnType<typeof vi.fn> };
   let transloco: { translate: ReturnType<typeof vi.fn> };
+  let logger: { error: ReturnType<typeof vi.fn> };
 
   let caseId: string | null;
 
@@ -149,6 +150,7 @@ describe('CaseDetailPageComponent', () => {
 
     router = { navigate: vi.fn() };
     transloco = { translate: vi.fn((key: string) => key) };
+    logger = { error: vi.fn() };
 
     await TestBed.configureTestingModule({
       imports: [CaseDetailPageComponent],
@@ -187,7 +189,7 @@ describe('CaseDetailPageComponent', () => {
             downloadAttachment: vi.fn().mockReturnValue(of(new Blob()))
           }
         },
-        { provide: LoggerService, useValue: { error: vi.fn(), info: vi.fn(), warn: vi.fn() } }
+        { provide: LoggerService, useValue: logger }
       ]
     }).compileComponents();
 
@@ -449,7 +451,7 @@ describe('CaseDetailPageComponent', () => {
       });
     });
 
-    it('prefers the server message on a 409 conflict', () => {
+    it('maps a 409 assign conflict to the conflict key and logs the server message (M-26)', () => {
       caseService.transitionCase.mockReturnValue(
         throwError(() => ({ status: 409, error: { message: 'Assignee unavailable' } }))
       );
@@ -459,8 +461,9 @@ describe('CaseDetailPageComponent', () => {
 
       component.confirmAssign();
 
-      expect(component.assignError()).toBe('Assignee unavailable');
+      expect(component.assignError()).toBe('cases.detail.assignConflict');
       expect(component.isSubmittingAssign()).toBe(false);
+      expect(logger.error).toHaveBeenCalled();
     });
 
     it('falls back to the conflict key when a 409 has no server message', () => {
@@ -578,7 +581,7 @@ describe('CaseDetailPageComponent', () => {
       });
     });
 
-    it('prefers the server message on a 409 conflict', () => {
+    it('maps a 409 transition conflict to the conflict key and logs the server message (M-26)', () => {
       caseService.transitionCase.mockReturnValue(
         throwError(() => ({ status: 409, error: { message: 'Illegal transition' } }))
       );
@@ -588,8 +591,9 @@ describe('CaseDetailPageComponent', () => {
 
       component.submitAction();
 
-      expect(component.transitionError()).toBe('Illegal transition');
+      expect(component.transitionError()).toBe('cases.detail.transitionConflict');
       expect(component.isSubmittingAction()).toBe(false);
+      expect(logger.error).toHaveBeenCalled();
     });
 
     it('falls back to the conflict key when a 409 has no server message', () => {

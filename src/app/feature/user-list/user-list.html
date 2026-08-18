@@ -74,6 +74,17 @@
       </div>
     }
 
+    <!-- Error toast -->
+    @if (actionError()) {
+      <div class="mb-4 p-4 bg-error-container text-on-error-container rounded-lg flex items-center gap-2">
+        <span class="material-symbols-outlined">error</span>
+        <span class="font-label-md flex-1">{{ actionError() }}</span>
+        <button (click)="dismissActionError()" class="ml-auto text-on-error-container hover:opacity-70 transition-opacity">
+          <span class="material-symbols-outlined">close</span>
+        </button>
+      </div>
+    }
+
     <!-- Table card -->
     <div class="card overflow-hidden">
 

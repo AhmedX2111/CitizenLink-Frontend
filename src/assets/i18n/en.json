@@ -235,6 +235,7 @@
     "successMessage": "Citizen \"{{fullName}}\" created successfully!",
     "errors": {
       "duplicate": "Citizen with this information already exists",
+      "validationFailed": "Please check the entered information.",
       "unexpected": "An error occurred while creating the citizen. Please try again.",
       "nationalIdPattern": "National ID must be exactly 16 digits",
       "minLength": "Must be at least 2 characters",

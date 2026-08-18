@@ -5,6 +5,7 @@
  *   - should create
  *   - successful submit redirects to the citizen profile after 2s
  *   - destroy cancels the redirect timer so it never yanks the user away (M-25)
+ *   - server messages are never rendered: mapped to translation keys and logged (M-26)
  *
  * SKIPPED (with reason):
  *   - Validation/error-message matrix: exercised through the shared form helpers;
@@ -13,12 +14,13 @@
 
 import { vi } from 'vitest';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
-import { of } from 'rxjs';
+import { of, throwError } from 'rxjs';
 import { Router } from '@angular/router';
 import { TranslocoService } from '@jsverse/transloco';
 
 import { NewCitizen } from './new-citizen';
 import { CitizenService } from '../../../../core/services/citizen.service';
+import { LoggerService } from '../../../../core/services/logger.service';
 
 describe('NewCitizen', () => {
   let component: NewCitizen;
@@ -26,16 +28,19 @@ describe('NewCitizen', () => {
 
   let citizenService: { createCitizen: ReturnType<typeof vi.fn> };
   let router: { navigate: ReturnType<typeof vi.fn> };
+  let logger: { error: ReturnType<typeof vi.fn> };
 
   beforeEach(async () => {
     citizenService = { createCitizen: vi.fn().mockReturnValue(of({ id: 7, fullName: 'Test Citizen' })) };
     router = { navigate: vi.fn() };
+    logger = { error: vi.fn() };
 
     await TestBed.configureTestingModule({
       imports: [NewCitizen],
       providers: [
         { provide: CitizenService, useValue: citizenService },
         { provide: Router, useValue: router },
+        { provide: LoggerService, useValue: logger },
         {
           provide: TranslocoService,
           useValue: {
@@ -69,6 +74,9 @@ describe('NewCitizen', () => {
     });
   };
 
+  const errorMessage = (): string | null =>
+    (component as unknown as { errorMessage: () => string | null }).errorMessage();
+
   it('should create', () => {
     expect(component).toBeTruthy();
   });
@@ -95,5 +103,43 @@ describe('NewCitizen', () => {
 
     vi.advanceTimersByTime(2000);
     expect(router.navigate).not.toHaveBeenCalled();
+  });
+
+  it('maps a 400 field error to the validation key and logs the raw message (M-26)', () => {
+    citizenService.createCitizen.mockReturnValue(
+      throwError(() => ({ status: 400, error: { fieldErrors: { nationalId: 'National ID must match the registry' } } }))
+    );
+    fillValidForm();
+
+    component.onSubmit();
+
+    expect(errorMessage()).toBe('newCitizen.errors.validationFailed');
+    expect(logger.error).toHaveBeenCalled();
+  });
+
+  it('maps a 409 to the duplicate key and logs the server message (M-26)', () => {
+    citizenService.createCitizen.mockReturnValue(
+      throwError(() => ({ status: 409, error: { message: 'citizen already exists' } }))
+    );
+    fillValidForm();
+
+    component.onSubmit();
+
+    expect(errorMessage()).toBe('newCitizen.errors.duplicate');
+    expect(errorMessage()).not.toBe('citizen already exists');
+    expect(logger.error).toHaveBeenCalled();
+  });
+
+  it('maps an arbitrary message error to the unexpected key and logs the server message (M-26)', () => {
+    citizenService.createCitizen.mockReturnValue(
+      throwError(() => ({ error: { message: 'Database constraint violation' } }))
+    );
+    fillValidForm();
+
+    component.onSubmit();
+
+    expect(errorMessage()).toBe('newCitizen.errors.unexpected');
+    expect(errorMessage()).not.toBe('Database constraint violation');
+    expect(logger.error).toHaveBeenCalled();
   });
 });

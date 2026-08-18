@@ -8,6 +8,7 @@ import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { Subject, of } from 'rxjs';
 import { switchMap, catchError } from 'rxjs/operators';
 import { UserAdminService } from '../../../core/services/user-admin.service';
+import { LoggerService } from '../../../core/services/logger.service';
 import { UserResponse, CreateUserRequest, UpdateUserRequest } from '../../../core/models/user.models';
 import { PagedResponse } from '../../../core/models/case.models';
 
@@ -21,6 +22,7 @@ import { PagedResponse } from '../../../core/models/case.models';
 export class UserListComponent implements OnInit, OnDestroy {
 
   private userService = inject(UserAdminService);
+  private logger      = inject(LoggerService);
   private destroyRef  = inject(DestroyRef);
   private transloco   = inject(TranslocoService);
   private reload$     = new Subject<void>();
@@ -67,6 +69,9 @@ export class UserListComponent implements OnInit, OnDestroy {
 
   // ── Success toast ────────────────────────────────────────────
   successMessage = signal<string | null>(null);
+
+  // ── Action error toast ───────────────────────────────────────
+  actionError = signal<string | null>(null);
 
   get pages(): number[] {
     return Array.from({ length: this.totalPages() }, (_, i) => i);
@@ -263,7 +268,8 @@ export class UserListComponent implements OnInit, OnDestroy {
       } else if (msg.toLowerCase().includes('email')) {
         this.fieldErrors.set({ email: this.transloco.translate('admin.users.modal.duplicateEmail') });
       } else {
-        this.submitError.set(msg || this.transloco.translate('admin.users.modal.updateFailed'));
+        this.submitError.set(this.transloco.translate('admin.users.modal.updateFailed'));
+        this.logger.error('UserListComponent', 'Update user failed (409):', msg || err);
       }
     } else if (err.status === 400) {
       const violations = err.error?.violations;
@@ -274,12 +280,14 @@ export class UserListComponent implements OnInit, OnDestroy {
         }
         this.fieldErrors.set(map);
       } else {
-        this.submitError.set(err.error?.message || this.transloco.translate('admin.users.modal.updateFailed'));
+        this.submitError.set(this.transloco.translate('admin.users.modal.updateFailed'));
+        this.logger.error('UserListComponent', 'Update user failed (400):', err.error?.message ?? err);
       }
     } else if (err.status === 404) {
       this.submitError.set(this.transloco.translate('admin.users.modal.userNotFound'));
     } else {
-      this.submitError.set(err.error?.message || this.transloco.translate('admin.users.modal.updateFailed'));
+      this.submitError.set(this.transloco.translate('admin.users.modal.updateFailed'));
+      this.logger.error('UserListComponent', 'Update user failed:', err.error?.message ?? err);
     }
   }
 
@@ -297,6 +305,9 @@ export class UserListComponent implements OnInit, OnDestroy {
       error: (err) => {
         if (err.status === 404) {
           this.reload$.next();
+        } else {
+          this.showActionError(this.transloco.translate('admin.users.modal.deactivateFailed'));
+          this.logger.error('UserListComponent', 'Update user status failed:', err.error?.message ?? err);
         }
       }
     });
@@ -310,6 +321,15 @@ export class UserListComponent implements OnInit, OnDestroy {
 
   dismissToast(): void {
     this.successMessage.set(null);
+  }
+
+  private showActionError(msg: string): void {
+    this.actionError.set(msg);
+    this.schedule(() => this.actionError.set(null), 4000);
+  }
+
+  dismissActionError(): void {
+    this.actionError.set(null);
   }
 
   // ── Helpers ──────────────────────────────────────────────────

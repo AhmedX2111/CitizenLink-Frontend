@@ -121,9 +121,9 @@ export class CallCenter {
   }
 
   private loadPage(page: number): void {
-    const term = this.searchTerm();
+    const term = this.searchTerm().trim();
     this.isLoading.set(true);
-    
+
     this.citizenService.searchCitizens(term, page, 20).subscribe({
       next: (response: PagedResponse<Citizen>) => {
         this.citizens.set(response.content);
@@ -137,6 +137,7 @@ export class CallCenter {
       },
       error: (error) => {
         this.logger.error('CallCenter', 'Page load error:', error);
+        this.errorMessage.set(this.transloco.translate('callCenter.errors.searchFailed'));
         this.isLoading.set(false);
       }
     });

@@ -5,6 +5,7 @@ import { TranslocoModule, TranslocoService } from '@jsverse/transloco';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { DestroyRef } from '@angular/core';
 import { CaseService } from '../../../../core/services/case.service';
+import { LoggerService } from '../../../../core/services/logger.service';
 import {
   CaseResponse, CaseStatus, Priority, CaseType,
   StatusHistoryResponse, WorkflowAction, CaseActionResponse,
@@ -26,6 +27,7 @@ export class CaseDetailPageComponent implements OnInit {
   private route        = inject(ActivatedRoute);
   private router        = inject(Router);
   private caseService   = inject(CaseService);
+  private logger        = inject(LoggerService);
   private transloco     = inject(TranslocoService);
   private destroyRef    = inject(DestroyRef);
 
@@ -251,11 +253,13 @@ export class CaseDetailPageComponent implements OnInit {
       },
       error: (err) => {
         this.isSubmittingAssign.set(false);
-        this.assignError.set(
-          err.status === 409
-            ? (err.error?.message ?? this.transloco.translate('cases.detail.assignConflict'))
-            : this.transloco.translate('cases.detail.assignFailed')
-        );
+        if (err.status === 409) {
+          this.assignError.set(this.transloco.translate('cases.detail.assignConflict'));
+          this.logger.error('CaseDetailPageComponent', 'Assign failed (409):', err.error?.message ?? err);
+        } else {
+          this.assignError.set(this.transloco.translate('cases.detail.assignFailed'));
+          this.logger.error('CaseDetailPageComponent', 'Assign failed:', err.error?.message ?? err);
+        }
       }
     });
   }
@@ -294,11 +298,13 @@ export class CaseDetailPageComponent implements OnInit {
       },
       error: (err) => {
         this.isSubmittingAction.set(false);
-        this.transitionError.set(
-          err.status === 409
-            ? (err.error?.message ?? this.transloco.translate('cases.detail.transitionConflict'))
-            : this.transloco.translate('cases.detail.transitionFailed')
-        );
+        if (err.status === 409) {
+          this.transitionError.set(this.transloco.translate('cases.detail.transitionConflict'));
+          this.logger.error('CaseDetailPageComponent', 'Transition failed (409):', err.error?.message ?? err);
+        } else {
+          this.transitionError.set(this.transloco.translate('cases.detail.transitionFailed'));
+          this.logger.error('CaseDetailPageComponent', 'Transition failed:', err.error?.message ?? err);
+        }
       }
     });
   }

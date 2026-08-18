@@ -91,13 +91,17 @@ export class NewCitizen implements OnDestroy {
             if (error.status === 400 && error.error?.fieldErrors) {
                 const fieldErrors = error.error.fieldErrors;
                 const firstError = Object.values(fieldErrors)[0];
-                this.errorMessage.set(firstError as string);
+                this.errorMessage.set(this.transloco.translate('newCitizen.errors.validationFailed'));
+                this.logger.error('NewCitizen', 'Create citizen validation failed:', firstError ?? error);
             } else if (error.status === 409) {
-                this.errorMessage.set(error.error?.message || this.transloco.translate('newCitizen.errors.duplicate'));
+                this.errorMessage.set(this.transloco.translate('newCitizen.errors.duplicate'));
+                this.logger.error('NewCitizen', 'Create citizen failed (409):', error.error?.message ?? error);
             } else if (error.error?.message) {
-                this.errorMessage.set(error.error.message);
+                this.errorMessage.set(this.transloco.translate('newCitizen.errors.unexpected'));
+                this.logger.error('NewCitizen', 'Create citizen failed:', error.error.message);
             } else {
                 this.errorMessage.set(this.transloco.translate('newCitizen.errors.unexpected'));
+                this.logger.error('NewCitizen', 'Create citizen failed:', error);
             }
         }
     });

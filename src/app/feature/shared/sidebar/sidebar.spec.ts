@@ -7,6 +7,7 @@
  *   - Users link visible only for ADMIN
  *   - Role change (authState$ emission) re-renders the nav immediately
  *   - Logout button triggers authService.logout
+ *   - "New Case" button navigates to /cases with tab=create (M-27)
  *
  * SKIPPED (with reason):
  *   - Full router integration (routerLinkActive): rendered via RouterModule in jsdom,
@@ -15,7 +16,8 @@
 
 import { vi } from 'vitest';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
-import { provideRouter, ActivatedRoute } from '@angular/router';
+import { provideRouter } from '@angular/router';
+import { Router } from '@angular/router';
 import { BehaviorSubject, of } from 'rxjs';
 import { TranslocoService } from '@jsverse/transloco';
 
@@ -138,6 +140,17 @@ describe('SidebarComponent', () => {
     button.click();
 
     expect(authService.logout).toHaveBeenCalled();
+  });
+
+  it('navigates to /cases with tab=create when "New Case" is clicked (M-27)', () => {
+    authState$.next(user('ADMIN'));
+    fixture.detectChanges();
+
+    const navigateSpy = vi.spyOn(TestBed.inject(Router), 'navigate').mockResolvedValue(true);
+
+    fixture.componentInstance.createNewCase();
+
+    expect(navigateSpy).toHaveBeenCalledWith(['/cases'], { queryParams: { tab: 'create' } });
   });
 
   it('links to the expected routes', () => {
