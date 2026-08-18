@@ -59,7 +59,8 @@ export class CitizenProfile {
     const citizen = this.citizen();
     if (citizen?.id) {
       this.router.navigate(['/cases'], {
-        queryParams: { citizenId: citizen.id }
+        queryParams: { tab: 'create' },
+        state: { citizenNationalId: citizen.nationalId }
       });
     }
   }

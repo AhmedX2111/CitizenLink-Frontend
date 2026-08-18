@@ -105,8 +105,8 @@ export class CaseAttachmentsComponent implements OnInit, OnDestroy {
             },
             error: (error) => {
                 this.isUploading.set(false);
-                this.errorMessage.set(error.error?.message || this.transloco.translate('cases.detail.attachments.uploadError'));
-                this.logger.error('CaseAttachmentsComponent', 'Error uploading file:', error);
+                this.errorMessage.set(this.transloco.translate('cases.detail.attachments.uploadError'));
+                this.logger.error('CaseAttachmentsComponent', 'Error uploading file:', error.error?.message ?? error);
             }
         });
     }

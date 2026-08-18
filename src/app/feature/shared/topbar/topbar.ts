@@ -1,6 +1,7 @@
 import { Component, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { TranslocoModule, TranslocoService } from '@jsverse/transloco';
+import { LanguageService } from '../../../../core/services/language.service';
 
 @Component({
   selector: 'app-topbar',
@@ -10,6 +11,7 @@ import { TranslocoModule, TranslocoService } from '@jsverse/transloco';
 })
 export class TopbarComponent {
   private transloco = inject(TranslocoService);
+  private languageService = inject(LanguageService);
 
   isArabic(): boolean {
     return this.transloco.getActiveLang() === 'ar';
@@ -22,10 +24,6 @@ export class TopbarComponent {
   }
 
   toggleLanguage(): void {
-    const next = this.isArabic() ? 'en' : 'ar';
-    this.transloco.setActiveLang(next);
-    document.documentElement.setAttribute('dir', next === 'ar' ? 'rtl' : 'ltr');
-    document.documentElement.setAttribute('lang', next);
-    localStorage.setItem('preferredLanguage', next);
+    this.languageService.toggleLanguage();
   }
 }

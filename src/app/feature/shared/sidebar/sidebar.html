@@ -65,8 +65,8 @@
   </nav>
 
   <div class="px-3 mt-auto pb-6">
-    <button routerLink="/cases" [queryParams]="{ tab: 'create' }"
-            class="w-full bg-primary text-on-primary py-3 rounded-lg font-label-md text-label-md flex items-center justify-center gap-2 hover:opacity-90 transition-opacity">
+    <button (click)="createNewCase()"
+            class="w-full bg-primary text-on-primary py-3 rounded-lg font-label-md cursor-pointer text-label-md flex items-center justify-center gap-2 hover:opacity-90 transition-opacity">
       <span class="material-symbols-outlined text-sm">add</span>
       {{ 'cases.newCase' | transloco }}
     </button>

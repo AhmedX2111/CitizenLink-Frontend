@@ -11,7 +11,7 @@ import { Subject, of } from 'rxjs';
 import { TranslocoModule, TranslocoService } from '@jsverse/transloco';
 import { CaseService } from '../../../core/services/case.service';
 import { LoggerService } from '../../../core/services/logger.service';
-import { Router } from '@angular/router';
+import { Router, ActivatedRoute } from '@angular/router';
 
 import {
   CaseResponse, CaseSearchRequest, CaseStatus,
@@ -32,12 +32,13 @@ type ActiveTab = 'list' | 'create';
 })
 export class CasesComponent implements OnInit, OnDestroy {
 
-  private fb          = inject(FormBuilder);
-  private caseService = inject(CaseService);
-  private destroyRef  = inject(DestroyRef);
-  private transloco   = inject(TranslocoService);
-  private router      = inject(Router);
-  private logger      = inject(LoggerService);
+  private fb             = inject(FormBuilder);
+  private caseService    = inject(CaseService);
+  private destroyRef     = inject(DestroyRef);
+  private transloco      = inject(TranslocoService);
+  private router         = inject(Router);
+  private activatedRoute = inject(ActivatedRoute);
+  private logger         = inject(LoggerService);
   private timers      = new Set<ReturnType<typeof setTimeout>>();
   // Breadcrumb title passed to shared topbar
   pageTitle = () => this.transloco.translate('cases.title');
@@ -131,6 +132,24 @@ export class CasesComponent implements OnInit, OnDestroy {
   }
 
   ngOnInit(): void {
+    // Check if tab query parameter is set to 'create'
+    this.activatedRoute.queryParams.pipe(
+      takeUntilDestroyed(this.destroyRef)
+    ).subscribe(params => {
+      if (params['tab'] === 'create') {
+        this.activeTab.set('create');
+      }
+    });
+
+    // Pre-fill the create form's national id from the navigation state handed
+    // over by the citizen profile "create case for this citizen" action. The
+    // id travels via router state (not the URL) so the sensitive national id
+    // never appears in the address bar, browser history, or server logs.
+    const state = this.router.getCurrentNavigation()?.extras.state as Record<string, string> | null;
+    const citizenNationalId = state?.['citizenNationalId'];
+    if (citizenNationalId) {
+      this.createForm.patchValue({ citizenNationalId });
+    }
 
     this.loadDepartments();
     this.loadCategories();
@@ -305,7 +324,8 @@ export class CasesComponent implements OnInit, OnDestroy {
         if (err.status === 400 && err.error?.fieldErrors) {
           this.serverErrors.set(err.error.fieldErrors);
         } else if (err.status === 404) {
-          this.submitError.set(err.error?.message ?? 'Citizen not found with this National ID.');
+          this.submitError.set(this.transloco.translate('cases.create.errors.notFound'));
+          this.logger.error('CasesComponent', 'Create case failed (404):', err.error?.message ?? err);
         } else {
           this.submitError.set('An unexpected error occurred. Please try again.');
         }

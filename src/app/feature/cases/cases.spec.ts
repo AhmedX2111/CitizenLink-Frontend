@@ -21,7 +21,7 @@
 
 import { vi } from 'vitest';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
-import { Router } from '@angular/router';
+import { ActivatedRoute, Router } from '@angular/router';
 import { BehaviorSubject, of, throwError } from 'rxjs';
 import { TranslocoService } from '@jsverse/transloco';
 
@@ -78,7 +78,8 @@ describe('CasesComponent', () => {
     getCategories: ReturnType<typeof vi.fn>;
     createCase: ReturnType<typeof vi.fn>;
   };
-  let router: { navigate: ReturnType<typeof vi.fn> };
+  let router: { navigate: ReturnType<typeof vi.fn>; getCurrentNavigation: ReturnType<typeof vi.fn> };
+  let queryParams$: BehaviorSubject<Record<string, string>>;
 
   beforeEach(async () => {
     caseService = {
@@ -97,13 +98,15 @@ describe('CasesComponent', () => {
       getCategories: vi.fn().mockReturnValue(of(categories)),
       createCase: vi.fn()
     };
-    router = { navigate: vi.fn() };
+    router = { navigate: vi.fn(), getCurrentNavigation: vi.fn().mockReturnValue(null) };
+    queryParams$ = new BehaviorSubject({});
 
     await TestBed.configureTestingModule({
       imports: [CasesComponent],
       providers: [
         { provide: CaseService, useValue: caseService },
         { provide: Router, useValue: router },
+        { provide: ActivatedRoute, useValue: { queryParams: queryParams$ } },
         { provide: LoggerService, useValue: { error: vi.fn(), info: vi.fn(), warn: vi.fn() } },
         {
           provide: TranslocoService,
@@ -278,5 +281,33 @@ describe('CasesComponent', () => {
   it('openCaseDetail navigates to the case detail route', () => {
     component.openCaseDetail('case-a');
     expect(router.navigate).toHaveBeenCalledWith(['/cases', 'case-a']);
+  });
+
+  it('activates the create tab when the tab=create query param arrives (M-27)', () => {
+    queryParams$.next({ tab: 'create' });
+
+    expect(component.activeTab()).toBe('create');
+  });
+
+  it('stays on the list tab when the query params carry no tab (M-27)', () => {
+    queryParams$.next({});
+
+    expect(component.activeTab()).toBe('list');
+  });
+
+  it('pre-fills the citizen national id from the navigation state (M-27)', () => {
+    router.getCurrentNavigation.mockReturnValue({
+      extras: { state: { citizenNationalId: '1234567890123456' } }
+    });
+    component.ngOnInit();
+
+    expect(component.createForm.get('citizenNationalId')?.value).toBe('1234567890123456');
+  });
+
+  it('does not pre-fill the national id when no navigation state is present (M-27)', () => {
+    router.getCurrentNavigation.mockReturnValue(null);
+    component.ngOnInit();
+
+    expect(component.createForm.get('citizenNationalId')?.value).toBe('');
   });
 });

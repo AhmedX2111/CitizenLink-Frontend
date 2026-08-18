@@ -165,7 +165,7 @@ describe('CaseAttachmentsComponent', () => {
       expect(component.successMessage()).toBeNull();
     });
 
-    it('shows the server-provided message when the upload fails', () => {
+    it('maps an upload failure to the generic key and logs the server message (M-26)', () => {
       attachmentService.uploadAttachment.mockReturnValue(
         throwError(() => ({ error: { message: 'Storage full' } }))
       );
@@ -173,8 +173,9 @@ describe('CaseAttachmentsComponent', () => {
 
       component.uploadFile(file);
 
-      expect(component.errorMessage()).toBe('Storage full');
+      expect(component.errorMessage()).toBe('cases.detail.attachments.uploadError');
       expect(component.isUploading()).toBe(false);
+      expect(logger.error).toHaveBeenCalled();
     });
 
     it('falls back to the generic message when the failure has no message', () => {
