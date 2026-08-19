@@ -1,4 +1,4 @@
-import { Component, signal, computed, inject, DestroyRef } from '@angular/core';
+import { Component, signal, computed, inject, DestroyRef, effect } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Router } from '@angular/router';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
@@ -40,7 +40,8 @@ export class DashboardComponent {
   isLoadingCases  = signal(false);
   myOpenCasesError = signal<string | null>(null);
 
-  isHandler = computed(() => this.authUserService.hasRole('HANDLER'));
+  isHandler = this.authUserService.hasRoleSignal('HANDLER');
+  private casesRequested = false;
 
   statusChartData = computed(() => {
     const s = this.summary();
@@ -67,9 +68,12 @@ export class DashboardComponent {
 
   constructor() {
     this.loadSummary();
-    if (this.isHandler()) {
-      this.loadMyOpenCases();
-    }
+    effect(() => {
+      if (this.isHandler() && !this.casesRequested) {
+        this.casesRequested = true;
+        this.loadMyOpenCases();
+      }
+    }, { allowSignalWrites: true });
   }
 
   private loadSummary(): void {

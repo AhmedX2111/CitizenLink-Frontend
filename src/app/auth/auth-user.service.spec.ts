@@ -14,6 +14,7 @@
 
 import { vi } from 'vitest';
 import { TestBed } from '@angular/core/testing';
+import { signal } from '@angular/core';
 import { provideHttpClient } from '@angular/common/http';
 import { HttpTestingController, provideHttpClientTesting } from '@angular/common/http/testing';
 
@@ -41,12 +42,17 @@ const adminUser = {
 describe('AuthUserService', () => {
   let service: AuthUserService;
   let httpMock: HttpTestingController;
-  let tokenService: { getUserData: ReturnType<typeof vi.fn>; getToken: ReturnType<typeof vi.fn> };
+  let tokenService: {
+    getUserData: ReturnType<typeof vi.fn>;
+    getToken: ReturnType<typeof vi.fn>;
+    userDataSignal: ReturnType<typeof signal<typeof adminUser | null>>;
+  };
 
   beforeEach(() => {
     tokenService = {
       getUserData: vi.fn().mockReturnValue(null),
-      getToken: vi.fn().mockReturnValue(null)
+      getToken: vi.fn().mockReturnValue(null),
+      userDataSignal: signal<typeof adminUser | null>(null)
     };
 
     TestBed.configureTestingModule({
@@ -82,6 +88,22 @@ describe('AuthUserService', () => {
 
     it('returns false when there is no loaded user', () => {
       expect(service.hasRole('ADMIN')).toBe(false);
+    });
+  });
+
+  describe('hasRoleSignal', () => {
+    it('returns a reactive signal that matches the loaded user role', () => {
+      const roleSignal = service.hasRoleSignal('ADMIN');
+      expect(roleSignal()).toBe(false);
+
+      tokenService.userDataSignal.set(adminUser);
+
+      expect(roleSignal()).toBe(true);
+    });
+
+    it('returns false for a different role', () => {
+      tokenService.userDataSignal.set(adminUser);
+      expect(service.hasRoleSignal('HANDLER')()).toBe(false);
     });
   });
 
