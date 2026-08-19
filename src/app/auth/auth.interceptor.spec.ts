@@ -182,6 +182,26 @@ describe('authInterceptor', () => {
     httpMock.expectNone({ method: 'POST', url: REFRESH_URL });
   });
 
+  it('treats a refresh with no token as a failure: no retry, forces logout', () => {
+    let receivedError: unknown;
+    let emitted = false;
+    authService.refreshSession.mockReturnValue(of({ token: null } as never));
+
+    http.get('/api/v1/cases/1').subscribe({
+      next: () => (emitted = true),
+      error: err => (receivedError = err)
+    });
+
+    const original = httpMock.expectOne('/api/v1/cases/1');
+    original.flush({ message: 'expired' }, { status: 401, statusText: 'Unauthorized' });
+
+    expect(authService.forceLogout).toHaveBeenCalled();
+    expect(emitted).toBe(false);
+    expect((receivedError as { status: number }).status).toBe(401);
+    httpMock.expectNone({ method: 'GET', url: '/api/v1/cases/1' });
+    httpMock.expectNone({ method: 'POST', url: REFRESH_URL });
+  });
+
   it('forces a logout when the refresh fails and the original 401 propagates', () => {
     let receivedError: unknown;
     let emitted = false;
