@@ -69,8 +69,7 @@ export const authInterceptor: HttpInterceptorFn = (req, next) => {
           if (!res.token) {
             return throwError(() => error);
           }
-          const newToken = tokenService.getToken();
-          return next(addAuthHeader(req, newToken ?? ''));
+          return next(addAuthHeader(req, res.token));
         }),
         catchError(() => {
           authService.forceLogout();
