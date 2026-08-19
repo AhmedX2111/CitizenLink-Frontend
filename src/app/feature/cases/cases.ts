@@ -205,7 +205,12 @@ export class CasesComponent implements OnInit, OnDestroy {
     // Auto-search on filter change with debounce
     this.searchForm.valueChanges.pipe(
       debounceTime(400),
-      distinctUntilChanged(),
+      distinctUntilChanged((a, b) =>
+        a.keyword  === b.keyword &&
+        a.status   === b.status &&
+        a.type     === b.type &&
+        a.priority === b.priority
+      ),
       takeUntilDestroyed(this.destroyRef)
     ).subscribe(() => {
       this.currentPage.set(0);

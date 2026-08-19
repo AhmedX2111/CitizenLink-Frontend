@@ -247,6 +247,27 @@ describe('CasesComponent', () => {
     });
   });
 
+  it('does not reload when search values are unchanged (L-17)', () => {
+    vi.useFakeTimers();
+    const values = {
+      keyword: 'tap',
+      status: 'NEW' as 'NEW',
+      type: 'REQUEST' as 'REQUEST',
+      priority: 'HIGH' as 'HIGH'
+    };
+    component.searchForm.patchValue(values);
+    vi.advanceTimersByTime(500);
+
+    const callsAfterChange = caseService.searchCases.mock.calls.length;
+    expect(callsAfterChange).toBeGreaterThan(0);
+
+    component.searchForm.patchValue(values);
+    vi.advanceTimersByTime(500);
+    vi.useRealTimers();
+
+    expect(caseService.searchCases.mock.calls.length).toBe(callsAfterChange);
+  });
+
   it('goToPage reloads with the requested page number', () => {
     component.totalPages.set(5);
     component.goToPage(2);
