@@ -4,9 +4,8 @@ import { Router, ActivatedRoute, RouterModule } from '@angular/router';
 import { CommonModule } from '@angular/common';
 import { TranslocoModule, TranslocoService } from '@jsverse/transloco';
 import { AuthService } from '../auth.service';
-import { AuthTokenService } from '../auth-token.service';
-import { AuthUserService } from '../auth-user.service';
 import { Subscription } from 'rxjs';
+import { filter, take } from 'rxjs/operators';
 
 @Component({
   selector: 'app-login',
@@ -17,8 +16,6 @@ import { Subscription } from 'rxjs';
 export class Login implements OnInit, OnDestroy {
 
   private transloco = inject(TranslocoService);
-  private tokenService = inject(AuthTokenService);
-  private userService = inject(AuthUserService);
 
   loginForm: FormGroup;
   protected readonly isLoading     = signal(false);
@@ -42,11 +39,17 @@ export class Login implements OnInit, OnDestroy {
 
   ngOnInit(): void {
     this.returnUrl = this.route.snapshot.queryParams['returnUrl'] || null;
-    if (this.tokenService.isAuthenticated()) {
-      const safeReturn = this.isSafeReturnUrl(this.returnUrl) ? this.returnUrl! : '/dashboard';
-      this.router.navigateByUrl(safeReturn);
-      return;
-    }
+    this.subscriptions.add(
+      this.authService.authState$
+        .pipe(
+          filter(user => !!user),
+          take(1)
+        )
+        .subscribe(() => {
+          const safeReturn = this.isSafeReturnUrl(this.returnUrl) ? this.returnUrl! : '/dashboard';
+          this.router.navigateByUrl(safeReturn);
+        })
+    );
   }
 
   ngOnDestroy(): void {
@@ -113,17 +116,6 @@ export class Login implements OnInit, OnDestroy {
     if (url.includes(':')) return false;
     if (!url.startsWith('/')) return false;
     return true;
-  }
-
-  private getRoleRoute(): string {
-    const role = this.userService.getRoleFromToken();
-    switch (role) {
-      case 'ADMIN':
-      case 'SUPERVISOR': 
-      case 'HANDLER':
-      case 'AGENT':      return '/dashboard';
-      default:           return '/login';
-    }
   }
 
   private markFormGroupTouched(fg: FormGroup): void {

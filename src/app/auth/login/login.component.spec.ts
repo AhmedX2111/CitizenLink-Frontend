@@ -10,7 +10,8 @@
  *   - Forbidden (403): inactive account -> accountInactive, stays on login page
  *   - Network error (status 0) -> connectionFailed message
  *   - Server errors (5xx), 4xx and unknown statuses map to the right i18n key
- *   - Already-authenticated visits redirect away from the login page
+ *   - Already-authenticated visits redirect away from the login page based on
+ *     the resolved authState session (not the in-memory token)
  *
  * SKIPPED (with reason):
  *   - Refresh token flows: covered by auth.service.spec / auth.interceptor.spec /
@@ -20,28 +21,23 @@
 import { vi } from 'vitest';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { ActivatedRoute, Router } from '@angular/router';
-import { of, throwError } from 'rxjs';
+import { BehaviorSubject, of, throwError } from 'rxjs';
 import { TranslocoService } from '@jsverse/transloco';
 
 import { Login } from './login.component';
 import { AuthService } from '../auth.service';
-import { AuthTokenService } from '../auth-token.service';
-import { AuthUserService } from '../auth-user.service';
+import { AuthResponse } from '../models/auth.models';
 
 describe('Login', () => {
   let fixture: ComponentFixture<Login>;
   let component: Login;
 
-  let authService: { login: ReturnType<typeof vi.fn> };
-  let tokenService: { isAuthenticated: ReturnType<typeof vi.fn> };
-  let userService: { getRoleFromToken: ReturnType<typeof vi.fn> };
+  let authService: { login: ReturnType<typeof vi.fn>; authState$: BehaviorSubject<AuthResponse | null> };
   let router: { navigateByUrl: ReturnType<typeof vi.fn> };
   let route: { snapshot: { queryParams: { returnUrl?: string | null } } };
 
   beforeEach(async () => {
-    authService = { login: vi.fn() };
-    tokenService = { isAuthenticated: vi.fn().mockReturnValue(false) };
-    userService = { getRoleFromToken: vi.fn().mockReturnValue('ADMIN') };
+    authService = { login: vi.fn(), authState$: new BehaviorSubject<AuthResponse | null>(null) };
     router = { navigateByUrl: vi.fn() };
     route = { snapshot: { queryParams: {} } };
 
@@ -49,8 +45,6 @@ describe('Login', () => {
       imports: [Login],
       providers: [
         { provide: AuthService, useValue: authService },
-        { provide: AuthTokenService, useValue: tokenService },
-        { provide: AuthUserService, useValue: userService },
         { provide: Router, useValue: router },
         { provide: ActivatedRoute, useValue: route },
         {
@@ -286,21 +280,33 @@ describe('Login', () => {
   });
 
   describe('already authenticated', () => {
-    it('redirects to /dashboard when already authenticated and no returnUrl', () => {
-      tokenService.isAuthenticated.mockReturnValue(true);
+    it('redirects to /dashboard when the session resolves with no returnUrl', () => {
+      authService.authState$.next({
+        token: 'jwt', id: 'u-1', username: 'admin', displayName: 'Admin',
+        email: 'a@b.c', role: 'ADMIN'
+      });
 
       component.ngOnInit();
 
       expect(router.navigateByUrl).toHaveBeenCalledWith('/dashboard');
     });
 
-    it('redirects to a safe returnUrl when already authenticated', () => {
+    it('redirects to a safe returnUrl when the session resolves', () => {
       route.snapshot.queryParams.returnUrl = '/app/cases/456';
-      tokenService.isAuthenticated.mockReturnValue(true);
+      authService.authState$.next({
+        token: 'jwt', id: 'u-1', username: 'admin', displayName: 'Admin',
+        email: 'a@b.c', role: 'ADMIN'
+      });
 
       component.ngOnInit();
 
       expect(router.navigateByUrl).toHaveBeenCalledWith('/app/cases/456');
+    });
+
+    it('does not redirect when no session is resolved', () => {
+      component.ngOnInit();
+
+      expect(router.navigateByUrl).not.toHaveBeenCalled();
     });
   });
 });
