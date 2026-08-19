@@ -12,15 +12,15 @@
  *   - formatFileSize B / KB / MB
  *   - formatDate respects the active language
  *   - destroy clears pending timers (auto-cancel, message clears) (M-25)
+ *   - triggerFileUpload clicks the scoped file input via ViewChild (L-18)
  *
  * SKIPPED (with reason):
- *   - triggerFileUpload: relies on a DOM element injected by the template; covered
- *     implicitly when the component renders in an end-to-end context.
+ *   - None (breakpoint).
  */
 
 import { vi } from 'vitest';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
-import { of, throwError } from 'rxjs';
+import { of, throwError, type Observable } from 'rxjs';
 
 import { CaseAttachmentsComponent } from './case-attachments';
 import { AttachmentService } from '../../../../core/services/attachment.service';
@@ -53,7 +53,14 @@ describe('CaseAttachmentsComponent', () => {
     deleteAttachment: ReturnType<typeof vi.fn>;
   };
   let logger: { error: ReturnType<typeof vi.fn> };
-  let transloco: { translate: ReturnType<typeof vi.fn>; getActiveLang: ReturnType<typeof vi.fn> };
+  let transloco: {
+    translate: ReturnType<typeof vi.fn>;
+    getActiveLang: ReturnType<typeof vi.fn>;
+    setActiveLang?: ReturnType<typeof vi.fn>;
+    config?: { reRenderOnLangChange: boolean };
+    langChanges$?: Observable<string>;
+    _loadDependencies?: () => Observable<unknown>;
+  };
 
   beforeEach(async () => {
     attachmentService = {
@@ -65,7 +72,10 @@ describe('CaseAttachmentsComponent', () => {
     logger = { error: vi.fn() };
     transloco = {
       translate: vi.fn((key: string) => key),
-      getActiveLang: vi.fn().mockReturnValue('en')
+      getActiveLang: vi.fn().mockReturnValue('en'),
+      config: { reRenderOnLangChange: false },
+      langChanges$: of('en'),
+      _loadDependencies: () => of(undefined)
     };
 
     await TestBed.configureTestingModule({
@@ -79,7 +89,7 @@ describe('CaseAttachmentsComponent', () => {
 
     fixture = TestBed.createComponent(CaseAttachmentsComponent);
     component = fixture.componentInstance;
-    component.caseId = 'case-1';
+    fixture.componentRef.setInput('caseId', 'case-1');
   });
 
   afterEach(() => {
@@ -88,6 +98,21 @@ describe('CaseAttachmentsComponent', () => {
 
   it('should create', () => {
     expect(component).toBeTruthy();
+  });
+
+  describe('triggerFileUpload', () => {
+    it('clicks the component-scoped file input via ViewChild (L-18)', () => {
+      fixture.detectChanges();
+      const clickSpy = vi.spyOn(HTMLInputElement.prototype, 'click').mockImplementation(() => undefined);
+
+      component.triggerFileUpload();
+
+      expect(clickSpy).toHaveBeenCalledTimes(1);
+    });
+
+    it('does not throw when the input has not rendered', () => {
+      expect(() => component.triggerFileUpload()).not.toThrow();
+    });
   });
 
   describe('loadAttachments', () => {

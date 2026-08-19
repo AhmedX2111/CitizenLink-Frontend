@@ -9,7 +9,7 @@
             <span class="text-xs text-slate-400">({{ attachments().length }})</span>
         </div>
         <div>
-            <input type="file" id="fileInput" class="hidden" (change)="onFileSelected($event)" 
+            <input type="file" #fileInput class="hidden" (change)="onFileSelected($event)" 
                    [accept]="'.pdf,.png,.jpg,.jpeg,.docx'">
             <button (click)="triggerFileUpload()" [disabled]="isUploading()"
                     class="text-xs text-blue-600 hover:text-blue-800 font-medium flex items-center gap-1">

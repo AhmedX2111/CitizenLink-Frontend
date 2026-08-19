@@ -1,4 +1,4 @@
-import { Component, Input, signal, inject, OnInit, DestroyRef, OnDestroy } from '@angular/core';
+import { Component, input, ViewChild, ElementRef, signal, inject, OnInit, DestroyRef, OnDestroy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { TranslocoModule, TranslocoService } from '@jsverse/transloco';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
@@ -15,7 +15,9 @@ import { errorCode, logServerError } from '../../../../core/utils/server-error';
     styleUrls: ['./case-attachments.css']
 })
 export class CaseAttachmentsComponent implements OnInit, OnDestroy {
-    @Input() caseId!: string;
+    caseId = input.required<string>();
+
+    @ViewChild('fileInput') private fileInput!: ElementRef<HTMLInputElement>;
 
     private attachmentService = inject(AttachmentService);
     private logger = inject(LoggerService);
@@ -54,7 +56,7 @@ export class CaseAttachmentsComponent implements OnInit, OnDestroy {
         this.isLoading.set(true);
         this.errorMessage.set(null);
 
-        this.attachmentService.getAttachmentsByCaseId(this.caseId).pipe(
+        this.attachmentService.getAttachmentsByCaseId(this.caseId()).pipe(
             takeUntilDestroyed(this.destroyRef)
         ).subscribe({
             next: (attachments) => {
@@ -95,7 +97,7 @@ export class CaseAttachmentsComponent implements OnInit, OnDestroy {
         this.errorMessage.set(null);
         this.successMessage.set(null);
 
-        this.attachmentService.uploadAttachment(this.caseId, file).pipe(
+        this.attachmentService.uploadAttachment(this.caseId(), file).pipe(
             takeUntilDestroyed(this.destroyRef)
         ).subscribe({
             next: (attachment) => {
@@ -123,7 +125,7 @@ error: (error) => {
     }
 
     downloadAttachment(attachment: Attachment): void {
-        this.attachmentService.downloadAttachment(this.caseId, attachment.id).pipe(
+        this.attachmentService.downloadAttachment(this.caseId(), attachment.id).pipe(
             takeUntilDestroyed(this.destroyRef)
         ).subscribe({
             next: (blob) => {
@@ -162,7 +164,7 @@ error: (error) => {
     }
 
     confirmDelete(attachment: Attachment): void {
-        this.attachmentService.deleteAttachment(this.caseId, attachment.id).pipe(
+        this.attachmentService.deleteAttachment(this.caseId(), attachment.id).pipe(
             takeUntilDestroyed(this.destroyRef)
         ).subscribe({
             next: () => {
@@ -194,9 +196,6 @@ error: (error) => {
     }
 
     triggerFileUpload(): void {
-        const fileInput = document.getElementById('fileInput') as HTMLInputElement;
-        if (fileInput) {
-            fileInput.click();
-        }
+        this.fileInput?.nativeElement.click();
     }
 }
