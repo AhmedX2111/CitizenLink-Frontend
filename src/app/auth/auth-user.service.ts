@@ -1,4 +1,4 @@
-import { Injectable, inject } from '@angular/core';
+import { Injectable, inject, computed, type Signal } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import { AuthResponse } from './models/auth.models';
@@ -14,6 +14,10 @@ export class AuthUserService {
   hasRole(role: string): boolean {
     const user = this.tokenService.getUserData();
     return user?.role === role;
+  }
+
+  hasRoleSignal(role: string): Signal<boolean> {
+    return computed(() => this.tokenService.userDataSignal()?.role === role);
   }
 
   hasRoleAny(roles: string[]): boolean {

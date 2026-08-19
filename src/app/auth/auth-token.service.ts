@@ -1,10 +1,12 @@
-import { Injectable } from '@angular/core';
+import { Injectable, signal } from '@angular/core';
 import { AuthResponse } from './models/auth.models';
 
 @Injectable({ providedIn: 'root' })
 export class AuthTokenService {
   private _token: string | null = null;
   private _user: AuthResponse | null = null;
+  private readonly userData = signal<AuthResponse | null>(null);
+  readonly userDataSignal = this.userData.asReadonly();
 
   getToken(): string | null {
     return this._token;
@@ -17,6 +19,7 @@ export class AuthTokenService {
   saveAuthData(response: AuthResponse): void {
     this._token = response.token;
     this._user = response;
+    this.userData.set(response);
   }
 
   saveToken(token: string): void {
@@ -26,6 +29,7 @@ export class AuthTokenService {
   clearAuthData(): void {
     this._token = null;
     this._user = null;
+    this.userData.set(null);
   }
 
   private getTokenExpiry(): number | null | 'malformed' {

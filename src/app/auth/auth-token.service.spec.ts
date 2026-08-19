@@ -48,6 +48,21 @@ describe('AuthTokenService', () => {
       expect(service.getToken()).toBe('jwt-1');
       expect(service.getUserData()).toEqual(user);
     });
+
+    it('exposes the user identity through the reactive signal', () => {
+      const user = {
+        token: 'jwt-1',
+        id: 'u-1',
+        username: 'admin',
+        displayName: 'Admin',
+        email: 'admin@example.com',
+        role: 'ADMIN' as const
+      };
+
+      service.saveAuthData(user);
+
+      expect(service.userDataSignal()).toEqual(user);
+    });
   });
 
   describe('saveToken', () => {
@@ -84,6 +99,21 @@ describe('AuthTokenService', () => {
 
       expect(service.getToken()).toBeNull();
       expect(service.getUserData()).toBeNull();
+    });
+
+    it('clears the reactive signal alongside the token and identity', () => {
+      service.saveAuthData({
+        token: 'jwt-1',
+        id: 'u-1',
+        username: 'admin',
+        displayName: 'Admin',
+        email: 'admin@example.com',
+        role: 'ADMIN' as const
+      });
+
+      service.clearAuthData();
+
+      expect(service.userDataSignal()).toBeNull();
     });
   });
 
