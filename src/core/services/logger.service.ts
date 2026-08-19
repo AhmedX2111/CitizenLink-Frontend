@@ -2,7 +2,16 @@ import { Injectable, isDevMode } from '@angular/core';
 
 @Injectable({ providedIn: 'root' })
 export class LoggerService {
-  private isDev = isDevMode();
+  private isDev: boolean;
+
+  constructor() {
+    this.isDev = isDevMode();
+  }
+
+  /** Overrides the environment-derived dev flag (used by unit tests). */
+  setDevMode(value: boolean): void {
+    this.isDev = value;
+  }
 
   info(context: string, message: string, ...data: unknown[]): void {
     if (this.isDev) {
@@ -17,8 +26,6 @@ export class LoggerService {
   }
 
   error(context: string, message: string, ...data: unknown[]): void {
-    if (this.isDev) {
-      console.error(`[${context}] ${message}`, ...data);
-    }
+    console.error(`[${context}] ${message}`, ...data);
   }
 }

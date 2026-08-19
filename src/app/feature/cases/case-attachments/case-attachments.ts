@@ -5,6 +5,7 @@ import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { AttachmentService } from '../../../../core/services/attachment.service';
 import { LoggerService } from '../../../../core/services/logger.service';
 import { Attachment } from '../../../../core/models/attachment.models';
+import { errorCode, logServerError } from '../../../../core/utils/server-error';
 
 @Component({
     selector: 'app-case-attachments',
@@ -103,10 +104,14 @@ export class CaseAttachmentsComponent implements OnInit, OnDestroy {
                 this.attachments.update(list => [attachment, ...list]);
                 this.schedule(() => this.successMessage.set(null), 3000);
             },
-            error: (error) => {
+error: (error) => {
                 this.isUploading.set(false);
-                this.errorMessage.set(this.transloco.translate('cases.detail.attachments.uploadError'));
-                this.logger.error('CaseAttachmentsComponent', 'Error uploading file:', error.error?.message ?? error);
+                logServerError(this.logger, 'CaseAttachmentsComponent', error);
+                this.errorMessage.set(
+                    errorCode(error) === 'PAYLOAD_TOO_LARGE'
+                        ? this.transloco.translate('cases.detail.attachments.fileTooLarge')
+                        : this.transloco.translate('cases.detail.attachments.uploadError')
+                );
             }
         });
     }

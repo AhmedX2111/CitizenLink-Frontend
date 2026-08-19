@@ -6,6 +6,7 @@ import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { CitizenService } from '../../../../core/services/citizen.service';
 import { LoggerService } from '../../../../core/services/logger.service';
 import { TranslocoModule, TranslocoService } from '@jsverse/transloco';
+import { errorDetails, errorCode, logServerError } from '../../../../core/utils/server-error';
 
 @Component({
   selector: 'app-new-citizen',
@@ -86,22 +87,14 @@ export class NewCitizen implements OnDestroy {
         },
         error: (error) => {
             this.isLoading.set(false);
-            this.logger.error('NewCitizen', 'Create citizen error:', error);
-            
-            if (error.status === 400 && error.error?.fieldErrors) {
-                const fieldErrors = error.error.fieldErrors;
-                const firstError = Object.values(fieldErrors)[0];
+            logServerError(this.logger, 'NewCitizen', error);
+
+            if (error.status === 400) {
                 this.errorMessage.set(this.transloco.translate('newCitizen.errors.validationFailed'));
-                this.logger.error('NewCitizen', 'Create citizen validation failed:', firstError ?? error);
-            } else if (error.status === 409) {
+            } else if (errorCode(error) === 'DUPLICATE_RESOURCE') {
                 this.errorMessage.set(this.transloco.translate('newCitizen.errors.duplicate'));
-                this.logger.error('NewCitizen', 'Create citizen failed (409):', error.error?.message ?? error);
-            } else if (error.error?.message) {
-                this.errorMessage.set(this.transloco.translate('newCitizen.errors.unexpected'));
-                this.logger.error('NewCitizen', 'Create citizen failed:', error.error.message);
             } else {
                 this.errorMessage.set(this.transloco.translate('newCitizen.errors.unexpected'));
-                this.logger.error('NewCitizen', 'Create citizen failed:', error);
             }
         }
     });

@@ -1,4 +1,4 @@
-import { Injectable, inject } from '@angular/core';
+import { Injectable } from '@angular/core';
 import { HttpClient, HttpParams } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import { UserResponse, CreateUserRequest, UpdateUserRequest } from '../models/user.models';
@@ -10,7 +10,7 @@ export class UserAdminService {
 
   private readonly baseUrl = `${environment.apiUrl}/api/v1/users`;
 
-  constructor(private http: HttpClient) {}
+  constructor(private readonly http: HttpClient) {}
 
   getUsers(
     role: string,

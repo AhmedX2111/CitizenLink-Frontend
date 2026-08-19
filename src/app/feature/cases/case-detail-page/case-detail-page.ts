@@ -6,6 +6,7 @@ import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { DestroyRef } from '@angular/core';
 import { CaseService } from '../../../../core/services/case.service';
 import { LoggerService } from '../../../../core/services/logger.service';
+import { errorCode, logServerError } from '../../../../core/utils/server-error';
 import {
   CaseResponse, CaseStatus, Priority, CaseType,
   StatusHistoryResponse, WorkflowAction, CaseActionResponse,
@@ -27,9 +28,9 @@ export class CaseDetailPageComponent implements OnInit {
   private route        = inject(ActivatedRoute);
   private router        = inject(Router);
   private caseService   = inject(CaseService);
-  private logger        = inject(LoggerService);
   private transloco     = inject(TranslocoService);
   private destroyRef    = inject(DestroyRef);
+  private logger        = inject(LoggerService);
 
   pageTitle = () => this.transloco.translate('cases.detail.title');
 
@@ -106,6 +107,7 @@ export class CaseDetailPageComponent implements OnInit {
       },
       error: (err) => {
         this.isLoading.set(false);
+        logServerError(this.logger, 'CaseDetailPageComponent', err);
         this.loadError.set(
           err.status === 404
             ? this.transloco.translate('cases.detail.notFound')
@@ -128,6 +130,7 @@ export class CaseDetailPageComponent implements OnInit {
       },
       error: (err) => {
         this.isTimelineLoading.set(false);
+        logServerError(this.logger, 'CaseDetailPageComponent', err);
         this.timelineError.set(
           err.status === 404
             ? this.transloco.translate('cases.detail.notFound')
@@ -253,13 +256,14 @@ export class CaseDetailPageComponent implements OnInit {
       },
       error: (err) => {
         this.isSubmittingAssign.set(false);
-        if (err.status === 409) {
-          this.assignError.set(this.transloco.translate('cases.detail.assignConflict'));
-          this.logger.error('CaseDetailPageComponent', 'Assign failed (409):', err.error?.message ?? err);
-        } else {
-          this.assignError.set(this.transloco.translate('cases.detail.assignFailed'));
-          this.logger.error('CaseDetailPageComponent', 'Assign failed:', err.error?.message ?? err);
-        }
+        logServerError(this.logger, 'CaseDetailPageComponent', err);
+        this.assignError.set(
+          err.status === 409
+            ? (errorCode(err) === 'CONCURRENT_MODIFICATION'
+                ? this.transloco.translate('cases.detail.concurrentModification')
+                : this.transloco.translate('cases.detail.assignConflict'))
+            : this.transloco.translate('cases.detail.assignFailed')
+        );
       }
     });
   }
@@ -298,13 +302,14 @@ export class CaseDetailPageComponent implements OnInit {
       },
       error: (err) => {
         this.isSubmittingAction.set(false);
-        if (err.status === 409) {
-          this.transitionError.set(this.transloco.translate('cases.detail.transitionConflict'));
-          this.logger.error('CaseDetailPageComponent', 'Transition failed (409):', err.error?.message ?? err);
-        } else {
-          this.transitionError.set(this.transloco.translate('cases.detail.transitionFailed'));
-          this.logger.error('CaseDetailPageComponent', 'Transition failed:', err.error?.message ?? err);
-        }
+        logServerError(this.logger, 'CaseDetailPageComponent', err);
+        this.transitionError.set(
+          err.status === 409
+            ? (errorCode(err) === 'CONCURRENT_MODIFICATION'
+                ? this.transloco.translate('cases.detail.concurrentModification')
+                : this.transloco.translate('cases.detail.transitionConflict'))
+            : this.transloco.translate('cases.detail.transitionFailed')
+        );
       }
     });
   }

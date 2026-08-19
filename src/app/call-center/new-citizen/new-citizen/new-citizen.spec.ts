@@ -119,7 +119,7 @@ describe('NewCitizen', () => {
 
   it('maps a 409 to the duplicate key and logs the server message (M-26)', () => {
     citizenService.createCitizen.mockReturnValue(
-      throwError(() => ({ status: 409, error: { message: 'citizen already exists' } }))
+      throwError(() => ({ status: 409, error: { code: 'DUPLICATE_RESOURCE', message: 'citizen already exists' } }))
     );
     fillValidForm();
 

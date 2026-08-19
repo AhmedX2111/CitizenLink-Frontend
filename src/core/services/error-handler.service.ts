@@ -7,6 +7,5 @@ export class GlobalErrorHandler implements ErrorHandler {
 
   handleError(error: unknown): void {
     this.logger.error('GlobalErrorHandler', 'Unhandled error:', error);
-    console.error(error);
   }
 }
