@@ -110,6 +110,7 @@
       "duplicateUsername": "Username already taken",
       "duplicateEmail": "Email already in use",
       "userNotFound": "User not found",
+      "validationFailed": "Please correct the highlighted fields and try again.",
       "updateFailed": "Failed to update user. Please try again.",
       "deactivateFailed": "Failed to update user status. Please try again."
     }
@@ -469,6 +470,7 @@
       "transitionFailed": "Failed to update the case. Please try again.",
       "assignConflict": "This case could not be assigned. It may have been already assigned by another user.",
       "assignFailed": "Failed to assign this case. Please try again.",
+      "concurrentModification": "This case was updated by another user. Refresh and try again.",
       "loadingHandlers": "Loading handlers…",
       "searchHandlers": "Search handlers by name or email…",
       "noHandlersMatch": "No handlers match your search.",
@@ -621,6 +623,8 @@
       },
       "errors": {
         "notFound": "A referenced record was not found.",
+        "citizenNotFound": "No citizen was found with this National ID.",
+        "validationFailed": "Please correct the highlighted fields and try again.",
         "unexpected": "An unexpected error occurred. Please try again."
       }
     }

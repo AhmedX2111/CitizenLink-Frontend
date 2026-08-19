@@ -11,6 +11,7 @@ import { UserAdminService } from '../../../core/services/user-admin.service';
 import { LoggerService } from '../../../core/services/logger.service';
 import { UserResponse, CreateUserRequest, UpdateUserRequest } from '../../../core/models/user.models';
 import { PagedResponse } from '../../../core/models/case.models';
+import { errorDetails, fieldErrorsFromDetails, logServerError } from '../../../core/utils/server-error';
 
 @Component({
   selector: 'app-user-list',
@@ -260,6 +261,7 @@ export class UserListComponent implements OnInit, OnDestroy {
 
   private handleSubmitError(err: any): void {
     this.isSubmitting.set(false);
+    logServerError(this.logger, 'UserListComponent', err);
 
     if (err.status === 409) {
       const msg: string = err.error?.message ?? '';
@@ -269,25 +271,20 @@ export class UserListComponent implements OnInit, OnDestroy {
         this.fieldErrors.set({ email: this.transloco.translate('admin.users.modal.duplicateEmail') });
       } else {
         this.submitError.set(this.transloco.translate('admin.users.modal.updateFailed'));
-        this.logger.error('UserListComponent', 'Update user failed (409):', msg || err);
       }
     } else if (err.status === 400) {
-      const violations = err.error?.violations;
-      if (violations && Array.isArray(violations)) {
-        const map: Record<string, string> = {};
-        for (const v of violations) {
-          map[v.field] = v.message;
-        }
-        this.fieldErrors.set(map);
+      const details = errorDetails(err);
+      if (details.length > 0) {
+        this.fieldErrors.set(
+          fieldErrorsFromDetails(details, this.transloco.translate('admin.users.modal.validationFailed'))
+        );
       } else {
         this.submitError.set(this.transloco.translate('admin.users.modal.updateFailed'));
-        this.logger.error('UserListComponent', 'Update user failed (400):', err.error?.message ?? err);
       }
     } else if (err.status === 404) {
       this.submitError.set(this.transloco.translate('admin.users.modal.userNotFound'));
     } else {
       this.submitError.set(this.transloco.translate('admin.users.modal.updateFailed'));
-      this.logger.error('UserListComponent', 'Update user failed:', err.error?.message ?? err);
     }
   }
 

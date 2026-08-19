@@ -11,6 +11,9 @@ import { Subject, of } from 'rxjs';
 import { TranslocoModule, TranslocoService } from '@jsverse/transloco';
 import { CaseService } from '../../../core/services/case.service';
 import { LoggerService } from '../../../core/services/logger.service';
+import {
+  errorDetails, fieldErrorsFromDetails, logServerError
+} from '../../../core/utils/server-error';
 import { Router, ActivatedRoute } from '@angular/router';
 
 import {
@@ -321,13 +324,16 @@ export class CasesComponent implements OnInit, OnDestroy {
       },
       error: (err) => {
         this.isSubmitting.set(false);
-        if (err.status === 400 && err.error?.fieldErrors) {
-          this.serverErrors.set(err.error.fieldErrors);
+        logServerError(this.logger, 'CasesComponent', err);
+        const details = errorDetails(err);
+        if (err.status === 400 && details.length > 0) {
+          this.serverErrors.set(
+            fieldErrorsFromDetails(details, this.transloco.translate('cases.create.errors.validationFailed'))
+          );
         } else if (err.status === 404) {
-          this.submitError.set(this.transloco.translate('cases.create.errors.notFound'));
-          this.logger.error('CasesComponent', 'Create case failed (404):', err.error?.message ?? err);
+          this.submitError.set(this.transloco.translate('cases.create.errors.citizenNotFound'));
         } else {
-          this.submitError.set('An unexpected error occurred. Please try again.');
+          this.submitError.set(this.transloco.translate('cases.create.errors.unexpected'));
         }
       }
     });

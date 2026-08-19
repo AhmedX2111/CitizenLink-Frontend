@@ -7,6 +7,7 @@ import { AdminService } from '../../../../core/services/admin.service';
 import { LoggerService } from '../../../../core/services/logger.service';
 import { Category, CreateCategoryPayload, UpdateCategoryPayload } from '../../../../core/models/category.model';
 import { Department, CreateDepartmentPayload, UpdateDepartmentPayload } from '../../../../core/models/department.model';
+import { logServerError } from '../../../../core/utils/server-error';
 
 type ActiveTab = 'categories' | 'departments';
 
@@ -282,15 +283,13 @@ export class ReferenceDataComponent implements OnInit, OnDestroy {
   // ── Error handling ──────────────────────────────────────────
   private handleSubmitError(err: any): void {
     this.isSubmitting.set(false);
+    logServerError(this.logger, 'ReferenceDataComponent', err);
     if (err.status === 400) {
       this.submitError.set(this.transloco.translate('admin.referenceData.validationError'));
-      this.logger.error('ReferenceDataComponent', 'Save failed (400):', err.error?.message ?? err);
     } else if (err.status === 409) {
       this.submitError.set(this.transloco.translate('admin.referenceData.duplicateError'));
-      this.logger.error('ReferenceDataComponent', 'Save failed (409):', err.error?.message ?? err);
     } else {
       this.submitError.set(this.transloco.translate('admin.referenceData.saveError'));
-      this.logger.error('ReferenceDataComponent', 'Save failed:', err.error?.message ?? err);
     }
   }
 
