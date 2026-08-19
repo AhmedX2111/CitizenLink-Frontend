@@ -43,4 +43,8 @@ export class UserAdminService {
   deactivateUser(id: string): Observable<UserResponse> {
     return this.http.put<UserResponse>(`${this.baseUrl}/${id}/deactivate`, {});
   }
+
+  activateUser(id: string): Observable<UserResponse> {
+    return this.http.put<UserResponse>(`${this.baseUrl}/${id}/activate`, {});
+  }
 }
