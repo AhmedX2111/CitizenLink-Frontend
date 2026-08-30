@@ -649,6 +649,39 @@
     "chart": {
       "title": "الحالات حسب الوضع"
     },
+    "myInbox": {
+      "title": "صندوق العمل",
+      "searchPlaceholder": "بحث برقم الحالة أو الموضوع",
+      "allStatuses": "جميع الحالات",
+      "allPriorities": "جميع الأولويات",
+      "columns": {
+        "caseNumber": "رقم الحالة",
+        "subject": "الموضوع",
+        "citizen": "المواطن",
+        "priority": "الأولوية",
+        "status": "الحالة",
+        "dueDate": "تاريخ الاستحقاق",
+        "lastUpdate": "آخر تحديث"
+      },
+      "empty": "لا توجد حالات مفتوحة معينة إليك.",
+      "loadError": "فشل تحميل صندوق العمل.",
+      "noPermission": "ليست لديك صلاحية لعرض صندوق العمل.",
+      "cases": "حالات",
+      "quickFilters": {
+        "overdue": "متأخر",
+        "dueToday": "مستحق اليوم",
+        "urgent": "عاجل",
+        "awaitingInfo": "بانتظار معلومات",
+        "newlyAssigned": "معيّن حديثاً"
+      },
+      "clearAll": "مسح عوامل التصفية",
+      "sort": {
+        "smart": "ذكي (حسب الإلحاح)",
+        "dueDate": "تاريخ الاستحقاق",
+        "priority": "الأولوية",
+        "newest": "المحدَّث حديثاً"
+      }
+    },
     "myOpenCases": {
       "title": "حالاتي المفتوحة",
       "dueDate": "تاريخ الاستحقاق",

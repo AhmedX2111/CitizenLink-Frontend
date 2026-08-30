@@ -73,7 +73,7 @@ export class DashboardComponent {
         this.casesRequested = true;
         this.loadMyOpenCases();
       }
-    }, { allowSignalWrites: true });
+    });
   }
 
   private loadSummary(): void {

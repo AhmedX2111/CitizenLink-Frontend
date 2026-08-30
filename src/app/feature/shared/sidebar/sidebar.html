@@ -23,6 +23,15 @@
       <span class="font-body-md">{{ 'cases.title' | transloco }}</span>
     </a>
 
+    <!-- US-49: handler work inbox -->
+    @if (currentUser()?.role === 'HANDLER') {
+      <a routerLink="/inbox" routerLinkActive="text-primary font-bold ltr:border-r-4 rtl:border-l-4 border-primary bg-surface-container-high"
+         class="flex items-center gap-3 px-4 py-3 rounded-lg text-on-surface-variant hover:bg-surface-container transition-colors duration-200">
+        <span class="material-symbols-outlined">inbox</span>
+        <span class="font-body-md">{{ 'dashboard.myInbox.title' | transloco }}</span>
+      </a>
+    }
+
     <a routerLink="/app/call-center" routerLinkActive="text-primary font-bold ltr:border-r-4 rtl:border-l-4 border-primary bg-surface-container-high"
        class="flex items-center gap-3 px-4 py-3 rounded-lg text-on-surface-variant hover:bg-surface-container transition-colors duration-200">
       <span class="material-symbols-outlined">call</span>

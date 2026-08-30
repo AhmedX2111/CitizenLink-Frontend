@@ -60,6 +60,13 @@ export const routes: Routes = [
           import('./feature/user-list/user-list').then(m => m.UserListComponent)
       },
       {
+        path: 'inbox',
+        data: { roles: ['HANDLER'] },
+        canActivate: [RoleGuard],
+        loadComponent: () =>
+          import('./feature/inbox/inbox').then(m => m.InboxPageComponent)
+      },
+      {
         path: 'cases',
         loadComponent: () =>
           import('./feature/cases/cases').then(m => m.CasesComponent)
