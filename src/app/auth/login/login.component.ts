@@ -4,6 +4,7 @@ import { Router, ActivatedRoute, RouterModule } from '@angular/router';
 import { CommonModule } from '@angular/common';
 import { TranslocoModule, TranslocoService } from '@jsverse/transloco';
 import { AuthService } from '../auth.service';
+import { errorCode } from '../../../core/utils/server-error';
 import { Subscription } from 'rxjs';
 import { filter, take } from 'rxjs/operators';
 
@@ -86,8 +87,14 @@ export class Login implements OnInit, OnDestroy {
   private handleLoginError(error: any): void {
     const t = (key: string) => this.transloco.translate(key);
     if (error.status === 401) {
+      // US-47: the backend guarantees the standard {code, message, details}
+      // envelope on every security failure, so account state is detected from
+      // the machine-readable code first. The legacy message-text regex remains
+      // only as a fallback for non-standard bodies (e.g. plain-string bodies).
+      const code = errorCode(error);
       const body = typeof error.error === 'string' ? error.error : error.error?.message ?? '';
-      if (/disabled|inactive|deactivated|locked/i.test(body)) {
+      if (code === 'ACCOUNT_DISABLED' || code === 'ACCOUNT_LOCKED'
+          || /disabled|inactive|deactivated|locked/i.test(body)) {
         this.errorMessage.set(t('login.errors.accountInactive'));
       } else {
         this.errorMessage.set(t('login.errors.invalidCredentials'));

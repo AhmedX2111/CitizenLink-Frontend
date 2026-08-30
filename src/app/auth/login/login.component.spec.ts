@@ -1,11 +1,14 @@
 /*
- * Login component spec — Vitest / Angular unit-test builder
+ * Login component spec â€” Vitest / Angular unit-test builder
  *
  * COVERED:
  *   - Form validation: empty / short password blocks submission
  *   - Successful login: navigates to /dashboard, or to a safe returnUrl
  *   - Unauthorized (401): invalid credentials -> invalidCredentials message,
  *     password cleared, no navigation
+ *   - US-47: 401 envelopes with machine-readable codes (ACCOUNT_DISABLED,
+ *     ACCOUNT_LOCKED, BAD_CREDENTIALS, UNAUTHORIZED) map to the right message
+ *     and a 500 INTERNAL_ERROR envelope never leaks server text into the UI
  *   - Account locked / disabled / inactive (401 body) -> accountInactive message
  *   - Forbidden (403): inactive account -> accountInactive, stays on login page
  *   - Network error (status 0) -> connectionFailed message
@@ -199,6 +202,88 @@ describe('Login', () => {
       fixture.detectChanges();
 
       expect(errorText()).toBe('login.errors.accountInactive');
+    });
+
+    // ---- US-47: the backend now emits machine-readable security envelopes ----
+
+    it('shows accountInactive for the ACCOUNT_DISABLED envelope code', () => {
+      authService.login.mockReturnValue(
+        throwError(() => ({
+          status: 401,
+          error: { code: 'ACCOUNT_DISABLED', message: 'Account is disabled. Please contact support.', details: null }
+        }))
+      );
+      component.loginForm.patchValue({ username: 'admin', password: 'password123' });
+
+      component.onSubmit();
+      fixture.detectChanges();
+
+      expect(errorText()).toBe('login.errors.accountInactive');
+      expect(router.navigateByUrl).not.toHaveBeenCalled();
+    });
+
+    it('shows accountInactive for the ACCOUNT_LOCKED envelope code', () => {
+      authService.login.mockReturnValue(
+        throwError(() => ({
+          status: 401,
+          error: { code: 'ACCOUNT_LOCKED', message: 'Account is locked. Please contact support.', details: null }
+        }))
+      );
+      component.loginForm.patchValue({ username: 'admin', password: 'password123' });
+
+      component.onSubmit();
+      fixture.detectChanges();
+
+      expect(errorText()).toBe('login.errors.accountInactive');
+    });
+
+    it('shows invalidCredentials for the BAD_CREDENTIALS envelope code', () => {
+      authService.login.mockReturnValue(
+        throwError(() => ({
+          status: 401,
+          error: { code: 'BAD_CREDENTIALS', message: 'Invalid username or password', details: null }
+        }))
+      );
+      component.loginForm.patchValue({ username: 'admin', password: 'password123' });
+
+      component.onSubmit();
+      fixture.detectChanges();
+
+      expect(errorText()).toBe('login.errors.invalidCredentials');
+    });
+
+    it('shows invalidCredentials for the security-chain UNAUTHORIZED envelope code', () => {
+      authService.login.mockReturnValue(
+        throwError(() => ({
+          status: 401,
+          error: { code: 'UNAUTHORIZED', message: 'Authentication required', details: null }
+        }))
+      );
+      component.loginForm.patchValue({ username: 'admin', password: 'password123' });
+
+      component.onSubmit();
+      fixture.detectChanges();
+
+      expect(errorText()).toBe('login.errors.invalidCredentials');
+    });
+
+    it('shows serverError for a 500 INTERNAL_ERROR envelope and never leaks server text into the UI', () => {
+      authService.login.mockReturnValue(
+        throwError(() => ({
+          status: 500,
+          error: { code: 'INTERNAL_ERROR', message: 'An unexpected error occurred', details: null }
+        }))
+      );
+      component.loginForm.patchValue({ username: 'admin', password: 'password123' });
+
+      component.onSubmit();
+      fixture.detectChanges();
+
+      expect(errorText()).toBe('login.errors.serverError');
+      // AC5: no server-provided text (message, codes, class names) may reach the DOM.
+      const html = (fixture.nativeElement as HTMLElement).textContent ?? '';
+      expect(html).not.toContain('An unexpected error occurred');
+      expect(html).not.toContain('INTERNAL_ERROR');
     });
 
     it('shows connectionFailed for a network error', () => {

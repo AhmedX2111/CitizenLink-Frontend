@@ -23,6 +23,25 @@ describe('server-error', () => {
     expect(asString).toBe('');
   });
 
+  // US-47: the exact security envelope shapes the backend emits
+  it('parses the standard security envelope codes (US-47)', () => {
+    const securityCodes = ['UNAUTHORIZED', 'BAD_CREDENTIALS', 'ACCOUNT_DISABLED', 'ACCOUNT_LOCKED', 'FORBIDDEN', 'NOT_FOUND', 'INVALID_TRANSITION', 'INTERNAL_ERROR'];
+    for (const code of securityCodes) {
+      expect(errorCode({
+        error: { code, message: 'Fixed message', details: null },
+      })).toBe(code);
+    }
+  });
+
+  it('yields no details when the security envelope carries details: null (US-47)', () => {
+    expect(errorDetails({
+      error: { code: 'UNAUTHORIZED', message: 'Authentication required', details: null },
+    })).toEqual([]);
+    expect(errorDetails({
+      error: { code: 'FORBIDDEN', message: 'Access denied', details: null },
+    })).toEqual([]);
+  });
+
   it('extracts details from the details array', () => {
     const details = errorDetails({
       error: { details: [{ field: 'email', message: 'Email must be valid' }] },
