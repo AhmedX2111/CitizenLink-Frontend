@@ -1,5 +1,5 @@
 /*
- * authInterceptor spec — Vitest / Angular unit-test builder
+ * authInterceptor spec â€” Vitest / Angular unit-test builder
  *
  * COVERED:
  *   - public auth routes (login/refresh) pass through without an Authorization header
@@ -12,6 +12,9 @@
  *   - a failed refresh forces a logout via AuthService.forceLogout (clears both
  *     the token store and the authState identity) (M-23)
  *   - logout requests are never replayed through the refresh flow
+ *   - US-47: a 401 carrying the standard {code:'UNAUTHORIZED', ...} envelope
+ *     body is handled identically (body is opaque to the interceptor): retry
+ *     after refresh, or forceLogout when the refresh itself fails
  *
  * SKIPPED (with reason):
  *   - Token persistence across requests: covered indirectly via AuthTokenService
@@ -237,5 +240,56 @@ describe('authInterceptor', () => {
     expect(authService.forceLogout).not.toHaveBeenCalled();
     expect(authService.refreshSession).not.toHaveBeenCalled();
     httpMock.expectNone({ method: 'POST', url: REFRESH_URL });
+  });
+
+  // ---- US-47: the backend now emits the standard security envelope bodies ----
+
+  it('US-47: refreshes and retries when a 401 carries the UNAUTHORIZED envelope body', () => {
+    let received: unknown;
+    authService.refreshSession.mockImplementation(() => {
+      tokenService.getToken.mockReturnValue('new-access-token');
+      return of({ token: 'new-access-token', role: 'ADMIN' } as never);
+    });
+
+    http.get('/api/v1/cases/1').subscribe(res => (received = res));
+
+    const original = httpMock.expectOne('/api/v1/cases/1');
+    original.flush(
+      { code: 'UNAUTHORIZED', message: 'Authentication required', details: null },
+      { status: 401, statusText: 'Unauthorized' }
+    );
+
+    expect(authService.refreshSession).toHaveBeenCalledTimes(1);
+
+    const retried = httpMock.expectOne('/api/v1/cases/1');
+    expect(retried.request.headers.get('Authorization')).toBe('Bearer new-access-token');
+    retried.flush({ id: 'case-1' });
+
+    expect(received).toEqual({ id: 'case-1' });
+    expect(authService.forceLogout).not.toHaveBeenCalled();
+  });
+
+  it('US-47: forces logout when the refresh itself fails with the UNAUTHORIZED envelope body', () => {
+    let receivedError: unknown;
+    let emitted = false;
+    authService.refreshSession.mockReturnValue(throwError(() => ({
+      status: 401,
+      error: { code: 'UNAUTHORIZED', message: 'Authentication required', details: null }
+    })));
+
+    http.get('/api/v1/cases/1').subscribe({
+      next: () => (emitted = true),
+      error: err => (receivedError = err)
+    });
+
+    const original = httpMock.expectOne('/api/v1/cases/1');
+    original.flush(
+      { code: 'UNAUTHORIZED', message: 'Authentication required', details: null },
+      { status: 401, statusText: 'Unauthorized' }
+    );
+
+    expect(authService.forceLogout).toHaveBeenCalled();
+    expect(emitted).toBe(false);
+    expect((receivedError as { status: number }).status).toBe(401);
   });
 });
