@@ -1,0 +1,191 @@
+<div class="p-6 max-w-7xl mx-auto">
+  <div class="flex items-center gap-3 mb-4">
+    <span class="material-symbols-outlined text-primary text-[28px]">inbox</span>
+    <h1 class="font-headline-md text-headline-md text-primary">{{ 'dashboard.myInbox.title' | transloco }}</h1>
+  </div>
+
+  <!-- US-50: quick filter chips with counts -->
+  <div class="flex flex-wrap items-center gap-2 mb-3">
+    <button type="button" (click)="toggleUrgency('overdue')"
+            [class]="'inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-label-md border transition-colors ' + (urgencyFilter() === 'overdue' ? 'bg-error text-on-error border-error' : 'border-outline-variant text-on-surface-variant hover:bg-surface-container-low')">
+      <span class="material-symbols-outlined text-[16px]">schedule</span>
+      {{ 'dashboard.myInbox.quickFilters.overdue' | transloco }}
+      @if (counts(); as c) { <span class="font-semibold">{{ c.overdue }}</span> }
+    </button>
+    <button type="button" (click)="toggleUrgency('dueToday')"
+            [class]="'inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-label-md border transition-colors ' + (urgencyFilter() === 'dueToday' ? 'bg-primary text-on-primary border-primary' : 'border-outline-variant text-on-surface-variant hover:bg-surface-container-low')">
+      <span class="material-symbols-outlined text-[16px]">today</span>
+      {{ 'dashboard.myInbox.quickFilters.dueToday' | transloco }}
+      @if (counts(); as c) { <span class="font-semibold">{{ c.dueToday }}</span> }
+    </button>
+    <button type="button" (click)="togglePriority('URGENT')"
+            [class]="'inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-label-md border transition-colors ' + (priorityFilter() === 'URGENT' ? 'bg-primary text-on-primary border-primary' : 'border-outline-variant text-on-surface-variant hover:bg-surface-container-low')">
+      <span class="material-symbols-outlined text-[16px]">priority_high</span>
+      {{ 'dashboard.myInbox.quickFilters.urgent' | transloco }}
+      @if (counts(); as c) { <span class="font-semibold">{{ c.urgent }}</span> }
+    </button>
+    <button type="button" (click)="toggleStatus('AWAITING_INFO')"
+            [class]="'inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-label-md border transition-colors ' + (statusFilter() === 'AWAITING_INFO' ? 'bg-primary text-on-primary border-primary' : 'border-outline-variant text-on-surface-variant hover:bg-surface-container-low')">
+      <span class="material-symbols-outlined text-[16px]">pending_actions</span>
+      {{ 'dashboard.myInbox.quickFilters.awaitingInfo' | transloco }}
+      @if (counts(); as c) { <span class="font-semibold">{{ c.awaitingInfo }}</span> }
+    </button>
+    <button type="button" (click)="toggleStatus('ASSIGNED')"
+            [class]="'inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-label-md border transition-colors ' + (statusFilter() === 'ASSIGNED' ? 'bg-primary text-on-primary border-primary' : 'border-outline-variant text-on-surface-variant hover:bg-surface-container-low')">
+      <span class="material-symbols-outlined text-[16px]">assignment_return</span>
+      {{ 'dashboard.myInbox.quickFilters.newlyAssigned' | transloco }}
+      @if (counts(); as c) { <span class="font-semibold">{{ c.newlyAssigned }}</span> }
+    </button>
+
+    <!-- US-50 AC4: visible active-filter reset (one action) -->
+    @if (hasActiveQuickFilters()) {
+      <button type="button" (click)="clearFilters()"
+              class="inline-flex items-center gap-1 px-3 py-1.5 rounded-full text-label-md text-error border border-error hover:bg-error-container transition-colors">
+        <span class="material-symbols-outlined text-[16px]">filter_alt_off</span>
+        {{ 'dashboard.myInbox.clearAll' | transloco }}
+      </button>
+    }
+  </div>
+
+  <div class="bg-surface border border-outline-variant rounded-xl overflow-hidden">
+
+    <!-- Text keyword filter + sort selector -->
+    <div class="flex flex-wrap items-center gap-3 px-5 py-3 border-b border-outline-variant">
+      <div class="relative flex-1 min-w-44">
+        <span class="material-symbols-outlined absolute left-2.5 top-1/2 -translate-y-1/2 text-on-surface-variant text-[16px]">search</span>
+        <input type="text"
+               [value]="keywordFilter()"
+               (keyup.enter)="onKeywordSearch($any($event.target).value)"
+               placeholder="{{ 'dashboard.myInbox.searchPlaceholder' | transloco }}"
+               class="w-full pl-8 pr-3 py-2 text-body-md border border-outline-variant rounded bg-white focus:ring-2 focus:ring-primary focus:outline-none transition-all">
+      </div>
+      <select [value]="statusFilter()"
+              (change)="onStatusChange($any($event.target).value)"
+              class="w-auto border border-outline-variant rounded px-3 py-2 bg-white text-body-md focus:ring-2 focus:ring-primary focus:outline-none transition-all">
+        <option value="">{{ 'dashboard.myInbox.allStatuses' | transloco }}</option>
+        @for (s of statuses; track s) {
+          <option [value]="s">{{ 'cases.statuses.' + s | transloco }}</option>
+        }
+      </select>
+      <select [value]="priorityFilter()"
+              (change)="onPriorityChange($any($event.target).value)"
+              class="w-auto border border-outline-variant rounded px-3 py-2 bg-white text-body-md focus:ring-2 focus:ring-primary focus:outline-none transition-all">
+        <option value="">{{ 'dashboard.myInbox.allPriorities' | transloco }}</option>
+        @for (p of priorities; track p) {
+          <option [value]="p">{{ 'cases.priorities.' + p | transloco }}</option>
+        }
+      </select>
+      <!-- US-51: alternative sort order (server-side) -->
+      <select [value]="sortFilter()"
+              (change)="onSortChange($any($event.target).value)"
+              class="w-auto border border-outline-variant rounded px-3 py-2 bg-white text-body-md focus:ring-2 focus:ring-primary focus:outline-none transition-all">
+        @for (s of sorts; track s.value) {
+          <option [value]="s.value">{{ s.labelKey | transloco }}</option>
+        }
+      </select>
+    </div>
+
+    <!-- Error -->
+    @if (error()) {
+      <div class="m-5 p-3 bg-error-container border-l-4 border-error rounded-md flex items-center gap-2">
+        <span class="material-symbols-outlined text-error">error</span>
+        <span class="text-on-error-container text-body-md">{{ error() }}</span>
+      </div>
+    }
+
+    <!-- Loading -->
+    @if (isLoading()) {
+      <div class="flex items-center justify-center py-16 text-on-surface-variant text-body-md gap-2">
+        <svg class="animate-spin w-4 h-4" fill="none" viewBox="0 0 24 24">
+          <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"/>
+          <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"/>
+        </svg>
+        {{ 'dashboard.loading' | transloco }}
+      </div>
+    }
+
+    @if (!isLoading()) {
+      @if (inboxItems().length === 0) {
+        <div class="flex flex-col items-center justify-center py-16 text-on-surface-variant">
+          <span class="material-symbols-outlined text-4xl mb-3 text-on-surface-variant">inbox</span>
+          <p class="font-label-md text-label-md text-on-surface-variant">{{ 'dashboard.myInbox.empty' | transloco }}</p>
+        </div>
+      } @else {
+        <div class="overflow-x-auto">
+          <table class="w-full text-body-md">
+            <thead class="bg-primary text-on-primary">
+              <tr>
+                <th class="px-6 py-4 font-label-md text-label-md text-left whitespace-nowrap">{{ 'dashboard.myInbox.columns.caseNumber' | transloco }}</th>
+                <th class="px-6 py-4 font-label-md text-label-md text-left">{{ 'dashboard.myInbox.columns.subject' | transloco }}</th>
+                <th class="px-6 py-4 font-label-md text-label-md text-left">{{ 'dashboard.myInbox.columns.citizen' | transloco }}</th>
+                <th class="px-6 py-4 font-label-md text-label-md text-left">{{ 'dashboard.myInbox.columns.priority' | transloco }}</th>
+                <th class="px-6 py-4 font-label-md text-label-md text-left">{{ 'dashboard.myInbox.columns.status' | transloco }}</th>
+                <th class="px-6 py-4 font-label-md text-label-md text-left whitespace-nowrap">{{ 'dashboard.myInbox.columns.dueDate' | transloco }}</th>
+                <th class="px-6 py-4 font-label-md text-label-md text-left whitespace-nowrap">{{ 'dashboard.myInbox.columns.lastUpdate' | transloco }}</th>
+              </tr>
+            </thead>
+            <tbody>
+              @for (c of inboxItems(); track c.id) {
+                <tr (click)="openCaseDetail(c.id)"
+                    [class.bg-primary-container]="lastOpenedCaseId() === c.id"
+                    class="border-b border-outline-variant hover:bg-surface-container-low transition-colors cursor-pointer">
+                  <td class="px-6 py-3 font-medium text-primary whitespace-nowrap">
+                    {{ c.caseNumber }}
+                    <!-- US-51 AC4: overdue indicator visible without opening the case -->
+                    @if (isOverdue(c.dueAt)) {
+                      <span class="material-symbols-outlined text-error text-[16px] align-middle" title="{{ 'dashboard.myInbox.quickFilters.overdue' | transloco }}">schedule</span>
+                    }
+                  </td>
+                  <td class="px-6 py-3 text-on-surface max-w-56 truncate">{{ c.subject }}</td>
+                  <td class="px-6 py-3 text-on-surface-variant">{{ c.citizenFullName }}</td>
+                  <td class="px-6 py-3">
+                    <span [class]="'inline-flex px-2 py-0.5 rounded text-[11px] font-medium ' + priorityBadgeClass(c.priority)">
+                      {{ 'cases.priorities.' + c.priority | transloco }}
+                    </span>
+                  </td>
+                  <td class="px-6 py-3">
+                    <span [class]="'inline-flex px-2 py-0.5 rounded text-[11px] font-medium ' + statusBadgeClass(c.status)">
+                      {{ 'cases.statuses.' + c.status | transloco }}
+                    </span>
+                  </td>
+                  <td class="px-6 py-3 whitespace-nowrap"
+                      [class.text-error]="isOverdue(c.dueAt)"
+                      [class.font-medium]="isOverdue(c.dueAt)"
+                      [class.text-on-surface-variant]="!isOverdue(c.dueAt)">
+                    {{ formatDate(c.dueAt) }}
+                  </td>
+                  <td class="px-6 py-3 text-on-surface-variant whitespace-nowrap">{{ formatDateTime(c.updatedAt) }}</td>
+                </tr>
+              }
+            </tbody>
+          </table>
+        </div>
+
+        <!-- US-49: server-side pagination (mirrors the cases list) -->
+        <div class="flex items-center justify-between px-6 py-4 border-t border-outline-variant">
+          <p class="text-body-md text-on-surface-variant">
+            {{ 'cases.pagination.showing' | transloco }} {{ currentPage() * pageSize + 1 }}–{{ currentPage() * pageSize + inboxItems().length }} {{ 'cases.pagination.of' | transloco }} {{ totalElements() }} {{ 'dashboard.myInbox.cases' | transloco }}
+          </p>
+          <div class="flex gap-1">
+            <button (click)="goToPage(currentPage() - 1)" [disabled]="currentPage() === 0"
+                    class="w-8 h-8 rounded-md border border-outline-variant bg-white flex items-center justify-center text-on-surface-variant hover:bg-surface-container-low disabled:opacity-40 disabled:cursor-not-allowed transition-colors">
+              <span class="material-symbols-outlined text-[16px]">chevron_left</span>
+            </button>
+            @for (p of pages; track p) {
+              @if (p < 5 || p === totalPages() - 1 || p === currentPage()) {
+                <button (click)="goToPage(p)"
+                        [class]="'w-8 h-8 rounded-md text-body-md font-label-md ' + (p === currentPage() ? 'bg-primary text-on-primary' : 'border border-outline-variant bg-white text-on-surface-variant hover:bg-surface-container-low transition-colors')">
+                  {{ p + 1 }}
+                </button>
+              }
+            }
+            <button (click)="goToPage(currentPage() + 1)" [disabled]="currentPage() >= totalPages() - 1"
+                    class="w-8 h-8 rounded-md border border-outline-variant bg-white flex items-center justify-center text-on-surface-variant hover:bg-surface-container-low disabled:opacity-40 disabled:cursor-not-allowed transition-colors">
+              <span class="material-symbols-outlined text-[16px]">chevron_right</span>
+            </button>
+          </div>
+        </div>
+      }
+    }
+  </div>
+</div>

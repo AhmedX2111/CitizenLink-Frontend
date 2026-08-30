@@ -5,6 +5,7 @@
  *   - Dashboard and Cases links are always visible regardless of role
  *   - Reports + Reference Data links visible only for ADMIN/SUPERVISOR
  *   - Users link visible only for ADMIN
+ *   - US-49: Inbox link visible only for HANDLER
  *   - Role change (authState$ emission) re-renders the nav immediately
  *   - Logout button triggers authService.logout
  *   - "New Case" button navigates to /cases with tab=create (M-27)
@@ -99,6 +100,22 @@ describe('SidebarComponent', () => {
     expect(hasLabel('nav.reports')).toBe(false);
     expect(hasLabel('nav.referenceData')).toBe(false);
     expect(hasLabel('nav.users')).toBe(false);
+  });
+
+  it('US-49: shows the Inbox link only for a HANDLER', () => {
+    authState$.next(user('HANDLER'));
+    fixture.detectChanges();
+
+    expect(hasLabel('dashboard.myInbox.title')).toBe(true);
+    expect(hasRoute('/inbox')).toBe(true);
+
+    authState$.next(user('AGENT'));
+    fixture.detectChanges();
+    expect(hasRoute('/inbox')).toBe(false);
+
+    authState$.next(user('ADMIN'));
+    fixture.detectChanges();
+    expect(hasRoute('/inbox')).toBe(false);
   });
 
   it('shows Reports and Reference Data for a SUPERVISOR but not Users', () => {
