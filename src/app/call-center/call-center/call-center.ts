@@ -1,5 +1,6 @@
 import { CommonModule } from '@angular/common';
-import { Component, computed, inject, signal } from '@angular/core';
+import { Component, computed, inject, signal, DestroyRef } from '@angular/core';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { FormsModule } from '@angular/forms';
 import { RouterModule, Router } from '@angular/router';
 import { PagedResponse } from '../../../core/models/case.models';
@@ -19,6 +20,8 @@ export class CallCenter {
   private router = inject(Router);
   private transloco = inject(TranslocoService);
   private logger = inject(LoggerService);
+  private readonly destroyRef = inject(DestroyRef);
+  private searchGeneration = 0;
 
   // Search state
   protected searchTerm = signal('');
@@ -53,8 +56,14 @@ export class CallCenter {
     this.errorMessage.set(null);
     this.hasSearched.set(true);
 
-    this.citizenService.searchCitizens(term, 0, 20).subscribe({
+    const generation = ++this.searchGeneration;
+    this.citizenService.searchCitizens(term, 0, 20).pipe(
+      takeUntilDestroyed(this.destroyRef)
+    ).subscribe({
       next: (response: PagedResponse<Citizen>) => {
+        if (generation !== this.searchGeneration) {
+          return;
+        }
         this.citizens.set(response.content);
         this.pagination.set({
           currentPage: response.page,
@@ -65,6 +74,9 @@ export class CallCenter {
         this.isLoading.set(false);
       },
       error: (error) => {
+        if (generation !== this.searchGeneration) {
+          return;
+        }
         this.logger.error('CallCenter', 'Search error:', error);
         this.errorMessage.set(this.transloco.translate('callCenter.errors.searchFailed'));
         this.isLoading.set(false);
@@ -124,8 +136,14 @@ export class CallCenter {
     const term = this.searchTerm().trim();
     this.isLoading.set(true);
 
-    this.citizenService.searchCitizens(term, page, 20).subscribe({
+    const generation = ++this.searchGeneration;
+    this.citizenService.searchCitizens(term, page, 20).pipe(
+      takeUntilDestroyed(this.destroyRef)
+    ).subscribe({
       next: (response: PagedResponse<Citizen>) => {
+        if (generation !== this.searchGeneration) {
+          return;
+        }
         this.citizens.set(response.content);
         this.pagination.set({
           currentPage: response.page,
@@ -136,6 +154,9 @@ export class CallCenter {
         this.isLoading.set(false);
       },
       error: (error) => {
+        if (generation !== this.searchGeneration) {
+          return;
+        }
         this.logger.error('CallCenter', 'Page load error:', error);
         this.errorMessage.set(this.transloco.translate('callCenter.errors.searchFailed'));
         this.isLoading.set(false);

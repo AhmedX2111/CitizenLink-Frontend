@@ -140,11 +140,11 @@
               {{ 'callCenter.pagination.showing' | transloco }} {{ pagination()!.currentPage * pagination()!.pageSize + 1 }}–{{ pagination()!.currentPage * pagination()!.pageSize + citizens().length }} {{ 'callCenter.pagination.of' | transloco }} {{ pagination()!.totalElements }} {{ 'callCenter.pagination.citizens' | transloco }}
             </p>
             <div class="flex gap-1">
-              <button (click)="previousPage()" [disabled]="pagination()!.currentPage === 0"
+              <button (click)="previousPage()" [disabled]="pagination()!.currentPage === 0 || isLoading()"
                 class="w-8 h-8 rounded-md border border-outline-variant bg-white flex items-center justify-center text-on-surface-variant hover:bg-surface-container-low disabled:opacity-40 disabled:cursor-not-allowed transition-colors">
                 <span class="material-symbols-outlined text-[16px]">chevron_left</span>
               </button>
-              <button (click)="nextPage()" [disabled]="pagination()!.currentPage + 1 >= pagination()!.totalPages"
+              <button (click)="nextPage()" [disabled]="pagination()!.currentPage + 1 >= pagination()!.totalPages || isLoading()"
                 class="w-8 h-8 rounded-md border border-outline-variant bg-white flex items-center justify-center text-on-surface-variant hover:bg-surface-container-low disabled:opacity-40 disabled:cursor-not-allowed transition-colors">
                 <span class="material-symbols-outlined text-[16px]">chevron_right</span>
               </button>

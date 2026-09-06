@@ -24,7 +24,6 @@ import {
 import { CitizenService } from '../../../core/services/citizen.service';
 import { Department } from '../../../core/models/department.model';
 import { Category } from '../../../core/models/category.model';
-import { CaseDetailModalComponent } from './case-detail-modal/case-detail-modal';
 
 type ActiveTab = 'list' | 'create';
 

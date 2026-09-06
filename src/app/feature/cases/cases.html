@@ -241,7 +241,7 @@
                 <div class="rounded-lg border border-primary/40 bg-primary-container px-4 py-3">
                   <div class="flex items-center justify-between gap-2 mb-1.5">
                     <label class="font-label-md text-label-md text-on-primary-container">{{ 'cases.create.fields.citizen' | transloco }} <span class="text-error">*</span></label>
-                    <button type="button" (click)="changeCitizen()" class="inline-flex items-center gap-1 font-label-sm text-label-sm text-on-primary hover:opacity-80 transition-opacity">
+                    <button type="button" (click)="changeCitizen()" [disabled]="isSubmitting() || linkedCitizenLoading()" class="inline-flex items-center gap-1 font-label-sm text-label-sm text-on-primary hover:opacity-80 transition-opacity disabled:opacity-40 disabled:cursor-not-allowed">
                       <span class="material-symbols-outlined text-[16px]">swap_horiz</span>
                       {{ 'cases.create.changeCitizen' | transloco }}
                     </button>
@@ -448,8 +448,8 @@
               </div>
 
               <div class="mt-4 flex items-center justify-end gap-3">
-                <button type="button" (click)="cancelCreate()"
-                        class="border-2 border-amber-600 text-amber-700 font-label-md text-label-md px-4 py-2 rounded-lg hover:bg-amber-600/5 transition-colors">
+                <button type="button" (click)="cancelCreate()" [disabled]="isSubmitting()"
+                        class="border-2 border-amber-600 text-amber-700 font-label-md text-label-md px-4 py-2 rounded-lg hover:bg-amber-600/5 transition-colors disabled:opacity-50 disabled:cursor-not-allowed">
                   {{ 'cases.create.actions.cancel' | transloco }}
                 </button>
                 <button type="button" (click)="continueWithDuplicate()" [disabled]="isSubmitting()"
@@ -471,10 +471,10 @@
                 {{ 'cases.create.duplicates.checkingHint' | transloco }}
               </span>
             }
-            <button type="button" (click)="resetForm()" class="border-2 border-primary text-primary font-label-md text-label-md px-4 py-2 rounded-lg hover:bg-primary/5 transition-colors">
+            <button type="button" (click)="resetForm()" [disabled]="isSubmitting()" class="border-2 border-primary text-primary font-label-md text-label-md px-4 py-2 rounded-lg hover:bg-primary/5 transition-colors disabled:opacity-50 disabled:cursor-not-allowed">
               {{ 'cases.create.actions.reset' | transloco }}
             </button>
-            <button type="button" (click)="cancelCreate()" class="border-2 border-primary text-primary font-label-md text-label-md px-4 py-2 rounded-lg hover:bg-primary/5 transition-colors">
+            <button type="button" (click)="cancelCreate()" [disabled]="isSubmitting()" class="border-2 border-primary text-primary font-label-md text-label-md px-4 py-2 rounded-lg hover:bg-primary/5 transition-colors disabled:opacity-50 disabled:cursor-not-allowed">
               {{ 'cases.create.actions.cancel' | transloco }}
             </button>
             <button type="submit" [disabled]="isSubmitting() || (duplicateWarning() && !duplicateOverride())" class="bg-primary text-on-primary font-label-md text-label-md px-5 py-2 rounded-lg inline-flex items-center gap-1.5 disabled:opacity-50 disabled:cursor-not-allowed transition-colors">
