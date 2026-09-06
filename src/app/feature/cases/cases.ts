@@ -18,7 +18,8 @@ import { Router, ActivatedRoute } from '@angular/router';
 
 import {
   CaseResponse, CaseSearchRequest, CaseStatus,
-  CaseType, Priority, PagedResponse, CreateCitizenCaseRequest
+  CaseType, Priority, PagedResponse, CreateCitizenCaseRequest,
+  DuplicateCaseCandidateResponse
 } from '../../../core/models/case.models';
 import { CitizenService } from '../../../core/services/citizen.service';
 import { Department } from '../../../core/models/department.model';
@@ -68,6 +69,31 @@ export class CasesComponent implements OnInit, OnDestroy {
   // stale in-flight lookup can never resurrect a citizen the user already
   // changed or reset.
   private citizenLinkGeneration = 0;
+
+  // ── US-58: possible-duplicate open-case preflight ──────────────────
+  // Read-only check run before creating a case for a locked citizen so the
+  // agent can be warned about already-open cases on the same citizen that
+  // overlap on category or department. The server never blocks creation —
+  // the warning is advisory; the agent may continue by confirming a short
+  // reason that is recorded on the new case. A failed check also never
+  // blocks (the Agent proceeds without a warning).
+  duplicateCandidates  = signal<DuplicateCaseCandidateResponse[]>([]);
+  duplicateChecking    = signal(false);  // a preflight request is in flight
+  duplicateWarning     = signal(false);  // open candidates exist -> warn UI
+  duplicateOverride    = signal(false);  // agent confirmed continuation
+  duplicateCheckFailed = signal(false);  // preflight errored -> proceed clean
+  // Signature (citizen|category|department) the last COMPLETED result covers;
+  // '' means inputs changed or nothing was checked for the current tuple.
+  private checkedSignature = '';
+  // Bumped whenever a check input changes so a stale in-flight response can
+  // never resurrect an older warning (mirrors citizenLinkGeneration).
+  private duplicateCheckGeneration = 0;
+  // True while onSubmit() is waiting on a freshly-triggered preflight before
+  // it may create (or stop on a warning).
+  private submitAfterCheck = false;
+  // Debounced so rapid category/department changes result in at most one
+  // request per 600ms of quiet instead of one per keystroke of the dropdowns.
+  private duplicateCheckTrigger$ = new Subject<void>();
 
   // ── List loading error state ────────────────────────────────────
   listError = signal<string | null>(null);
@@ -132,6 +158,7 @@ export class CasesComponent implements OnInit, OnDestroy {
     categoryId:       ['', Validators.required],
     departmentId:     ['', Validators.required],
     dueAt:            [''],
+    duplicateReason:  ['', [Validators.maxLength(500)]],
   });
 
   // ── Computed stats ────────────────────────────────────────────
@@ -242,6 +269,22 @@ export class CasesComponent implements OnInit, OnDestroy {
       this.filteredCategories.set(this.categories());
       this.createForm.get('categoryId')?.setValue('');
     });
+
+    // US-58: live duplicate pre-check, debounced. Once the agent has chosen a
+    // category and department for a locked citizen, the form quietly asks the
+    // server for open candidates so the warning is already visible before the
+    // agent presses "Create Case" (it is also re-run at submit time as a
+    // safety net — see onSubmit()/runDuplicateCheck()).
+    this.duplicateCheckTrigger$.pipe(
+      debounceTime(600),
+      takeUntilDestroyed(this.destroyRef)
+    ).subscribe(() => this.runDuplicateCheck());
+
+    ['categoryId', 'departmentId'].forEach(name =>
+      this.createForm.get(name)?.valueChanges.pipe(
+        takeUntilDestroyed(this.destroyRef)
+      ).subscribe(() => this.scheduleDuplicateCheck())
+    );
   }
 
   // ── Load Departments and Categories ───────────────────────────
@@ -316,6 +359,7 @@ export class CasesComponent implements OnInit, OnDestroy {
         });
         this.linkedCitizenLoading.set(false);
         this.syncCitizenValidators();
+        this.scheduleDuplicateCheck();
       },
       error: (err) => {
         if (generation !== this.citizenLinkGeneration) return;
@@ -344,6 +388,7 @@ export class CasesComponent implements OnInit, OnDestroy {
     this.linkedCitizen.set(null);
     this.linkedCitizenLoading.set(false);
     this.serverErrors.set({});
+    this.invalidateDuplicateCheck();
     this.syncCitizenValidators();
   }
 
@@ -383,13 +428,69 @@ export class CasesComponent implements OnInit, OnDestroy {
       this.createForm.markAllAsTouched();
       return;
     }
+    this.submitError.set(null);
+    this.serverErrors.set({});
+
+    const linked = this.linkedCitizen();
+    // US-58: the duplicate preflight only applies to the Citizen 360 flow —
+    // the check endpoint needs the citizen UUID, which free-typed creation
+    // (national-id only) does not have.
+    if (!linked) {
+      this.createCase();
+      return;
+    }
+
+    const signature = this.currentDuplicateSignature();
+
+    // A preflight for exactly these inputs is already in flight — the safe
+    // move is to wait for it instead of creating under a possibly-dirty form.
+    if (this.duplicateChecking()) {
+      this.submitAfterCheck = true;
+      return;
+    }
+
+    if (this.checkedSignature === signature) {
+      // Fresh result for exactly these inputs already exists.
+      if (this.duplicateCheckFailed()) {
+        // Advisory only: a failing check never blocks creation.
+        this.createCase();
+        return;
+      }
+      if (this.duplicateWarning() && !this.duplicateOverride()) {
+        // Warning panel is already showing; the agent must confirm a reason
+        // (the panel's "Continue" button — not the form's "Create Case").
+        this.createForm.get('duplicateReason')?.markAsTouched();
+        return;
+      }
+      this.createCase();
+      return;
+    }
+
+    // No fresh result yet for the current inputs — run the preflight now and
+    // resume from its completion.
+    this.submitAfterCheck = true;
+    this.runDuplicateCheck();
+  }
+
+  // US-58: the only path that reaches the actual create. Handles both the
+  // generic endpoint (free-typed national id) and the citizen-scoped endpoint
+  // (locked citizen), attaching the confirmed duplicate-reason when the agent
+  // overrode a duplicate warning.
+  private createCase(): void {
+    const linked = this.linkedCitizen();
+    const v = this.createForm.value;
+
+    const reason = ((this.createForm.get('duplicateReason')?.value ?? '') as string).trim();
+    if (this.duplicateWarning() && !this.duplicateOverride() && !reason) {
+      // Safety net: never send a blank override reason.
+      this.createForm.get('duplicateReason')?.markAsTouched();
+      return;
+    }
 
     this.isSubmitting.set(true);
     this.submitError.set(null);
     this.serverErrors.set({});
 
-    const linked = this.linkedCitizen();
-    const v = this.createForm.value;
     const base = {
       subject:          v.subject,
       description:      v.description,
@@ -399,6 +500,8 @@ export class CasesComponent implements OnInit, OnDestroy {
       categoryId:       v.categoryId,
       departmentId:     v.departmentId,
       ...(v.dueAt            && { dueAt: new Date(v.dueAt).toISOString() }),
+      // US-58: only sent when the agent explicitly confirmed continuation.
+      ...(this.duplicateOverride() && reason ? { duplicateReason: reason } : {}),
     };
 
     // US-57: a locked citizen posts to the citizen-scoped endpoint (no
@@ -421,6 +524,7 @@ export class CasesComponent implements OnInit, OnDestroy {
         }
         this.submitSuccess.set(true);
         this.createForm.reset();
+        this.invalidateDuplicateCheck();
         this.reloadCases$.next();
         this.schedule(() => this.showTab('list'), 1500);
       },
@@ -441,11 +545,129 @@ export class CasesComponent implements OnInit, OnDestroy {
     });
   }
 
+  // US-58 helpers ─────────────────────────────────────────────────
+
+  // Agent confirmed the warning: record the mandatory reason and create.
+  continueWithDuplicate(): void {
+    const reason = ((this.createForm.get('duplicateReason')?.value ?? '') as string).trim();
+    if (!reason) {
+      this.createForm.get('duplicateReason')?.markAsTouched();
+      return;
+    }
+    this.duplicateOverride.set(true);
+    this.createCase();
+  }
+
+  // One preflight request for the CURRENT (citizen, category, department).
+  // Guards itself with a generation counter so a response that arrives after
+  // the inputs changed again is dropped (never resurrects an old warning).
+  private runDuplicateCheck(): void {
+    const linked = this.linkedCitizen();
+    const categoryId   = this.createForm.get('categoryId')?.value;
+    const departmentId = this.createForm.get('departmentId')?.value;
+
+    if (!linked || !categoryId || !departmentId) {
+      this.duplicateChecking.set(false);
+      this.duplicateWarning.set(false);
+      this.duplicateOverride.set(false);
+      this.duplicateCandidates.set([]);
+      this.duplicateCheckFailed.set(false);
+      this.checkedSignature = '';
+      this.resumeSubmitIfPending();
+      return;
+    }
+
+    const generation = ++this.duplicateCheckGeneration;
+    const signature  = `${linked.id}|${categoryId}|${departmentId}`;
+    this.checkedSignature = '';
+    this.duplicateChecking.set(true);
+    this.duplicateCheckFailed.set(false);
+
+    this.caseService.checkDuplicateCases(linked.id, categoryId, departmentId).pipe(
+      takeUntilDestroyed(this.destroyRef)
+    ).subscribe({
+      next: (candidates) => {
+        if (generation !== this.duplicateCheckGeneration) return;
+        this.duplicateChecking.set(false);
+        this.checkedSignature = signature;
+        this.duplicateCandidates.set(candidates);
+        this.duplicateCheckFailed.set(false);
+        this.duplicateWarning.set(candidates.length > 0);
+        this.duplicateOverride.set(false);
+        this.resumeSubmitIfPending();
+      },
+      error: (err) => {
+        if (generation !== this.duplicateCheckGeneration) return;
+        this.logger.error('CasesComponent', 'US-58 duplicate pre-check failed:', err);
+        this.duplicateChecking.set(false);
+        this.checkedSignature = signature;
+        this.duplicateCandidates.set([]);
+        this.duplicateWarning.set(false);
+        this.duplicateOverride.set(false);
+        this.duplicateCheckFailed.set(true);
+        this.resumeSubmitIfPending();
+      }
+    });
+  }
+
+  // Invalidate everything derived from a previous preflight: called whenever
+  // the citizen, category or department that scope the check changes.
+  private invalidateDuplicateCheck(): void {
+    this.duplicateCheckGeneration++;
+    this.checkedSignature = '';
+    this.submitAfterCheck = false;
+    this.duplicateChecking.set(false);
+    this.duplicateWarning.set(false);
+    this.duplicateOverride.set(false);
+    this.duplicateCandidates.set([]);
+    this.duplicateCheckFailed.set(false);
+  }
+
+  // Invalidate + (debounced) re-trigger: used by the live input watchers and
+  // right after a citizen is locked in.
+  private scheduleDuplicateCheck(): void {
+    this.invalidateDuplicateCheck();
+    this.duplicateCheckTrigger$.next();
+  }
+
+  private currentDuplicateSignature(): string {
+    const linked = this.linkedCitizen();
+    const categoryId   = this.createForm.get('categoryId')?.value;
+    const departmentId = this.createForm.get('departmentId')?.value;
+    if (!linked || !categoryId || !departmentId) return '';
+    return `${linked.id}|${categoryId}|${departmentId}`;
+  }
+
+  // When onSubmit() had to wait for a preflight it triggered, this runs once
+  // the preflight lands: create if the way is clean, otherwise stay blocked
+  // on the warning panel.
+  private resumeSubmitIfPending(): void {
+    if (!this.submitAfterCheck) return;
+    this.submitAfterCheck = false;
+    // The agent may have edited the form while the check flew.
+    if (this.createForm.invalid) {
+      this.createForm.markAllAsTouched();
+      return;
+    }
+    if (this.duplicateWarning() && !this.duplicateOverride()) {
+      this.createForm.get('duplicateReason')?.markAsTouched();
+      return;
+    }
+    this.createCase();
+  }
+
+  duplicateReasonInvalid(): boolean {
+    const ctrl = this.createForm.get('duplicateReason');
+    if (!ctrl?.touched) return false;
+    return !((ctrl.value ?? '') as string).trim();
+  }
+
   resetForm(): void {
     this.citizenLinkGeneration++;
     this.createForm.reset();
     this.linkedCitizen.set(null);
     this.linkedCitizenLoading.set(false);
+    this.invalidateDuplicateCheck();
     this.syncCitizenValidators();
     this.submitSuccess.set(false);
     this.submitError.set(null);

@@ -10,7 +10,8 @@ import {
   PagedResponse,
   CaseTransitionRequest,
   CaseActionResponse,
-  HandlerResponse
+  HandlerResponse,
+  DuplicateCaseCandidateResponse
 } from '../models/case.models';
 import { Department } from '../models/department.model';
 import { Category } from '../models/category.model';
@@ -39,6 +40,26 @@ export class CaseService {
    */
   createCaseForCitizen(citizenId: string, request: CreateCitizenCaseRequest): Observable<CaseResponse> {
     return this.http.post<CaseResponse>(`${this.citizensUrl}/${citizenId}/cases`, request);
+  }
+
+  /**
+   * US-58: read-only preflight before creating a case from the Citizen 360
+   * screen. Returns open cases (non-final status) for the same citizen that
+   * overlap on category OR department. The backend never blocks creation —
+   * the result only decides whether the UI warns the agent.
+   */
+  checkDuplicateCases(
+    citizenId: string,
+    categoryId: string,
+    departmentId: string,
+  ): Observable<DuplicateCaseCandidateResponse[]> {
+    const params = new HttpParams()
+      .set('categoryId', categoryId)
+      .set('departmentId', departmentId);
+    return this.http.get<DuplicateCaseCandidateResponse[]>(
+      `${this.citizensUrl}/${citizenId}/cases/duplicate-candidates`,
+      { params },
+    );
   }
 
   searchCases(filter: CaseSearchRequest): Observable<PagedResponse<CaseResponse>> {
