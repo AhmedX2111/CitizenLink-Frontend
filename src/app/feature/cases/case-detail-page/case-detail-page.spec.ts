@@ -67,7 +67,8 @@ const mockCase: CaseResponse = {
   createdAt: '2026-01-01T10:00:00Z',
   updatedAt: '2026-01-02T12:00:00Z',
   resolvedAt: null,
-  closedAt: null
+  closedAt: null,
+  duplicateReason: null
 };
 
 const mockTimeline: StatusHistoryResponse[] = [

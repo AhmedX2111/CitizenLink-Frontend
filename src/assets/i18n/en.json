@@ -454,6 +454,7 @@
       "timeline": "Timeline",
       "updated": "Last Updated",
       "resolvedAt": "Resolved At",
+      "duplicateReason": "Duplicate Case Reason",
       "citizenPhone": "Phone",
       "viewCitizen": "View Citizen Profile",
       "timelineLoadError": "Failed to load case timeline. Please try again.",
@@ -630,6 +631,16 @@
         "citizenNotFound": "No citizen was found with this National ID.",
         "validationFailed": "Please correct the highlighted fields and try again.",
         "unexpected": "An unexpected error occurred. Please try again."
+      },
+      "duplicates": {
+        "title": "Possible duplicate open case detected",
+        "body": "This citizen already has an open case overlapping the selected category or department. You can open any of them to review before deciding.",
+        "open": "Open",
+        "reasonLabel": "Reason for proceeding",
+        "reasonPlaceholder": "Brief reason this case must be created anyway…",
+        "reasonRequired": "A reason is required to continue.",
+        "confirm": "Confirm & create anyway",
+        "checkingHint": "Checking for possible duplicate open cases…"
       }
     }
   },
