@@ -588,12 +588,16 @@
       "title": "حالة جديدة",
       "backToList": "العودة للقائمة",
       "success": "تم إنشاء الحالة بنجاح. جاري التحويل...",
+      "changeCitizen": "تغيير المواطن",
+      "citizenLocked": "مقيد بملف هذا المواطن",
+      "loadingCitizen": "جاري تحميل المواطن...",
       "sections": {
         "citizen": "بيانات المواطن",
         "details": "تفاصيل الحالة",
         "assignment": "الإسناد"
       },
       "fields": {
+        "citizen": "المواطن",
         "citizenId": "الرقم الوطني",
         "citizenIdPlaceholder": "أدخل الرقم الوطني للمواطن (مثال: 12345678901234)",
         "channel": "القناة",

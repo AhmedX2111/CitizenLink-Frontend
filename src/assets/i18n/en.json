@@ -593,7 +593,11 @@
         "details": "Case Details",
         "assignment": "Assignment"
       },
+      "changeCitizen": "Change citizen",
+      "citizenLocked": "Locked to this citizen profile",
+      "loadingCitizen": "Loading citizen...",
       "fields": {
+        "citizen": "Citizen",
         "citizenId": "National ID",
         "citizenIdPlaceholder": "Enter citizen National ID (e.g., 12345678901234)",
         "channel": "Channel",

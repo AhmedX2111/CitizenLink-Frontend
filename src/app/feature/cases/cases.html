@@ -190,9 +190,9 @@
             <span class="material-symbols-outlined">note_add</span>
             {{ 'cases.create.title' | transloco }}
           </div>
-          <button (click)="showTab('list')" class="inline-flex items-center gap-1 border-2 border-primary text-primary font-label-md text-label-md px-3 py-1.5 rounded-lg hover:bg-primary/5 transition-colors">
+          <button (click)="cancelCreate()" class="inline-flex items-center gap-1 border-2 border-primary text-primary font-label-md text-label-md px-3 py-1.5 rounded-lg hover:bg-primary/5 transition-colors">
             <span class="material-symbols-outlined text-[16px]">arrow_back</span>
-            {{ 'cases.create.backToList' | transloco }}
+            {{ linkedCitizen() ? ('cases.create.actions.cancel' | transloco) : ('cases.create.backToList' | transloco) }}
           </button>
         </div>
 
@@ -228,23 +228,52 @@
               <span class="font-label-md text-label-md text-primary">{{ 'cases.create.sections.citizen' | transloco }}</span>
             </div>
             <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <!-- National ID Field -->
-              <div>
-                <label class="block font-label-md text-label-md text-outline mb-1.5">{{ 'cases.create.fields.citizenId' | transloco }} <span class="text-error">*</span></label>
-                <input formControlName="citizenNationalId"
-                       type="text"
-                       maxlength="16"
-                       oninput="this.value = this.value.replace(/[^0-9]/g, '')"
-                       placeholder="{{ 'cases.create.fields.citizenIdPlaceholder' | transloco }}"
-                       class="w-full border border-outline-variant rounded px-3 py-2 bg-white text-body-md focus:ring-2 focus:ring-primary focus:outline-none transition-all"
-                       [class.border-red-400]="hasError('citizenNationalId') || serverError('citizenNationalId')">
-                @if (hasError('citizenNationalId')) {
-                  <p class="mt-1 text-body-md text-error">{{ fieldError('citizenNationalId') }}</p>
-                }
-                @if (serverError('citizenNationalId')) {
-                  <p class="mt-1 text-body-md text-error">{{ serverError('citizenNationalId') }}</p>
-                }
-              </div>
+              <!-- US-57: citizen locked in from the Citizen 360 screen. It is
+                   resolved server-side by id, so the agent never has to type
+                   (or see the unmasked) national id. Only an explicit
+                   "change citizen" releases it. -->
+              @if (linkedCitizenLoading()) {
+                <div class="rounded-lg border border-outline-variant bg-surface-container px-4 py-3 flex items-center gap-2">
+                  <span class="material-symbols-outlined animate-spin text-primary text-[18px]">sync</span>
+                  <p class="text-body-md text-on-surface-variant">{{ 'cases.create.loadingCitizen' | transloco }}</p>
+                </div>
+              } @else if (linkedCitizen(); as lc) {
+                <div class="rounded-lg border border-primary/40 bg-primary-container px-4 py-3">
+                  <div class="flex items-center justify-between gap-2 mb-1.5">
+                    <label class="font-label-md text-label-md text-on-primary-container">{{ 'cases.create.fields.citizen' | transloco }} <span class="text-error">*</span></label>
+                    <button type="button" (click)="changeCitizen()" class="inline-flex items-center gap-1 font-label-sm text-label-sm text-on-primary hover:opacity-80 transition-opacity">
+                      <span class="material-symbols-outlined text-[16px]">swap_horiz</span>
+                      {{ 'cases.create.changeCitizen' | transloco }}
+                    </button>
+                  </div>
+                  <p class="font-label-md text-label-md text-on-primary truncate">{{ lc.name }}</p>
+                  @if (lc.nationalId) {
+                    <p class="text-body-sm text-on-primary-container mt-0.5">{{ lc.nationalId }}</p>
+                  }
+                  <div class="flex items-center gap-1.5 mt-2 text-on-primary">
+                    <span class="material-symbols-outlined text-[14px]">lock</span>
+                    <p class="text-body-sm text-on-primary-container">{{ 'cases.create.citizenLocked' | transloco }}</p>
+                  </div>
+                </div>
+              } @else {
+                <!-- National ID Field -->
+                <div>
+                  <label class="block font-label-md text-label-md text-outline mb-1.5">{{ 'cases.create.fields.citizenId' | transloco }} <span class="text-error">*</span></label>
+                  <input formControlName="citizenNationalId"
+                         type="text"
+                         maxlength="16"
+                         oninput="this.value = this.value.replace(/[^0-9]/g, '')"
+                         placeholder="{{ 'cases.create.fields.citizenIdPlaceholder' | transloco }}"
+                         class="w-full border border-outline-variant rounded px-3 py-2 bg-white text-body-md focus:ring-2 focus:ring-primary focus:outline-none transition-all"
+                         [class.border-red-400]="hasError('citizenNationalId') || serverError('citizenNationalId')">
+                  @if (hasError('citizenNationalId')) {
+                    <p class="mt-1 text-body-md text-error">{{ fieldError('citizenNationalId') }}</p>
+                  }
+                  @if (serverError('citizenNationalId')) {
+                    <p class="mt-1 text-body-md text-error">{{ serverError('citizenNationalId') }}</p>
+                  }
+                </div>
+              }
 
               <!-- Channel Dropdown -->
               <div>
@@ -379,7 +408,7 @@
             <button type="button" (click)="resetForm()" class="border-2 border-primary text-primary font-label-md text-label-md px-4 py-2 rounded-lg hover:bg-primary/5 transition-colors">
               {{ 'cases.create.actions.reset' | transloco }}
             </button>
-            <button type="button" (click)="showTab('list')" class="border-2 border-primary text-primary font-label-md text-label-md px-4 py-2 rounded-lg hover:bg-primary/5 transition-colors">
+            <button type="button" (click)="cancelCreate()" class="border-2 border-primary text-primary font-label-md text-label-md px-4 py-2 rounded-lg hover:bg-primary/5 transition-colors">
               {{ 'cases.create.actions.cancel' | transloco }}
             </button>
             <button type="submit" [disabled]="isSubmitting()" class="bg-primary text-on-primary font-label-md text-label-md px-5 py-2 rounded-lg inline-flex items-center gap-1.5 disabled:opacity-50 disabled:cursor-not-allowed transition-colors">

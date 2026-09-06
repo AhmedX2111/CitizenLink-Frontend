@@ -18,8 +18,9 @@ import { Router, ActivatedRoute } from '@angular/router';
 
 import {
   CaseResponse, CaseSearchRequest, CaseStatus,
-  CaseType, Priority, PagedResponse
+  CaseType, Priority, PagedResponse, CreateCitizenCaseRequest
 } from '../../../core/models/case.models';
+import { CitizenService } from '../../../core/services/citizen.service';
 import { Department } from '../../../core/models/department.model';
 import { Category } from '../../../core/models/category.model';
 import { CaseDetailModalComponent } from './case-detail-modal/case-detail-modal';
@@ -37,6 +38,7 @@ export class CasesComponent implements OnInit, OnDestroy {
 
   private fb             = inject(FormBuilder);
   private caseService    = inject(CaseService);
+  private citizenService = inject(CitizenService);
   private destroyRef     = inject(DestroyRef);
   private transloco      = inject(TranslocoService);
   private router         = inject(Router);
@@ -53,6 +55,19 @@ export class CasesComponent implements OnInit, OnDestroy {
   submitSuccess = signal(false);
   submitError   = signal<string | null>(null);
   serverErrors  = signal<Record<string, string>>({});
+
+  // ── US-57: citizen locked in from the Citizen 360 screen ─────────
+  // Set when the agent opened the create form from a citizen profile.
+  // While set, the citizen section renders a locked card (name + masked
+  // national id for display) instead of the free-typed national id field,
+  // and submission goes to POST /citizens/{id}/cases. The citizen is only
+  // ever released by an explicit "change citizen" action — never silently.
+  linkedCitizen = signal<{ id: string; name: string; nationalId: string } | null>(null);
+  linkedCitizenLoading = signal(false);
+  // Bumped every time the linked citizen is (re)requested or released so a
+  // stale in-flight lookup can never resurrect a citizen the user already
+  // changed or reset.
+  private citizenLinkGeneration = 0;
 
   // ── List loading error state ────────────────────────────────────
   listError = signal<string | null>(null);
@@ -104,13 +119,16 @@ export class CasesComponent implements OnInit, OnDestroy {
   });
 
   // ── Create form ───────────────────────────────────────────────
+  // citizenNationalId is only *required* when no citizen is locked in
+  // (US-57). The required validator is (re)applied by syncCitizenValidators()
+  // once we know whether the form was opened from the Citizen 360 screen.
   createForm: FormGroup = this.fb.group({
     subject:          ['', [Validators.required, Validators.maxLength(255)]],
     description:      ['', Validators.required],
     type:             ['', Validators.required],
     priority:         ['', Validators.required],
     channel:          ['', Validators.required],
-    citizenNationalId: ['', [Validators.required, Validators.pattern(/^\d{16}$/)]],
+    citizenNationalId: ['', [Validators.pattern(/^\d{16}$/)]],
     categoryId:       ['', Validators.required],
     departmentId:     ['', Validators.required],
     dueAt:            [''],
@@ -135,24 +153,24 @@ export class CasesComponent implements OnInit, OnDestroy {
   }
 
   ngOnInit(): void {
-    // Check if tab query parameter is set to 'create'
+    // Check if tab query parameter is set to 'create', and if the form was
+    // launched from Citizen 360 (?citizenId=...) lock that citizen in.
     this.activatedRoute.queryParams.pipe(
       takeUntilDestroyed(this.destroyRef)
     ).subscribe(params => {
       if (params['tab'] === 'create') {
         this.activeTab.set('create');
       }
+      this.linkCitizenFromParams(params['citizenId'] ?? null);
     });
 
-    // Pre-fill the create form's national id from the navigation state handed
-    // over by the citizen profile "create case for this citizen" action. The
-    // id travels via router state (not the URL) so the sensitive national id
-    // never appears in the address bar, browser history, or server logs.
+    // Legacy fallback (M-27): a caller that only hands over a national id
+    // through router state keeps the old pre-fill behaviour.
     const state = this.router.getCurrentNavigation()?.extras.state as Record<string, string> | null;
-    const citizenNationalId = state?.['citizenNationalId'];
-    if (citizenNationalId) {
-      this.createForm.patchValue({ citizenNationalId });
+    if (state?.['citizenNationalId']) {
+      this.createForm.patchValue({ citizenNationalId: state['citizenNationalId'] });
     }
+    this.syncCitizenValidators();
 
     this.loadDepartments();
     this.loadCategories();
@@ -274,6 +292,72 @@ export class CasesComponent implements OnInit, OnDestroy {
     }
   }
 
+  // ── US-57: locked citizen handling ───────────────────────────
+  // The /cases page is launched from Citizen 360 as /cases?citizenId=<uuid>
+  // — the same identifier the profile route itself carries, so no new PII
+  // enters the URL. We resolve the citizen's display data via the existing
+  // (role-masked) getCitizenById endpoint and lock it into the form.
+  private linkCitizenFromParams(citizenId: string | null): void {
+    if (!citizenId) return;
+    if (this.linkedCitizen()?.id === citizenId) return;
+
+    const generation = ++this.citizenLinkGeneration;
+    this.linkedCitizenLoading.set(true);
+
+    this.citizenService.getCitizenById(citizenId).pipe(
+      takeUntilDestroyed(this.destroyRef)
+    ).subscribe({
+      next: (citizen) => {
+        if (generation !== this.citizenLinkGeneration) return;
+        this.linkedCitizen.set({
+          id: citizen.id,
+          name: citizen.fullName,
+          nationalId: citizen.nationalId
+        });
+        this.linkedCitizenLoading.set(false);
+        this.syncCitizenValidators();
+      },
+      error: (err) => {
+        if (generation !== this.citizenLinkGeneration) return;
+        this.logger.error('CasesComponent', 'Failed to load linked citizen:', err);
+        this.linkedCitizenLoading.set(false);
+      }
+    });
+  }
+
+  // (Re)apply the citizenNationalId validators to match whether a citizen
+  // is locked in. Required when free-typed, unneeded when locked (the
+  // citizen is resolved server-side by id).
+  syncCitizenValidators(): void {
+    const ctrl = this.createForm.get('citizenNationalId');
+    if (!ctrl) return;
+    const pattern = Validators.pattern(/^\d{16}$/);
+    ctrl.setValidators(this.linkedCitizen() ? [pattern] : [Validators.required, pattern]);
+    ctrl.updateValueAndValidity();
+  }
+
+  // Explicit, user-initiated: releases the locked citizen and returns focus
+  // to the free-typed national id field. The citizen is never swapped by the
+  // system itself while the flow is in progress.
+  changeCitizen(): void {
+    this.citizenLinkGeneration++;
+    this.linkedCitizen.set(null);
+    this.linkedCitizenLoading.set(false);
+    this.serverErrors.set({});
+    this.syncCitizenValidators();
+  }
+
+  // "Cancel" / back action. When launched from Citizen 360 this returns the
+  // agent to that same citizen profile; otherwise it just swaps to the list.
+  cancelCreate(): void {
+    const linked = this.linkedCitizen();
+    if (linked?.id) {
+      this.router.navigate(['/app/call-center/citizen', linked.id]);
+      return;
+    }
+    this.showTab('list');
+  }
+
   // ── List / Search ─────────────────────────────────────────────
   goToPage(page: number): void {
     if (page < 0 || page >= this.totalPages()) return;
@@ -304,24 +388,37 @@ export class CasesComponent implements OnInit, OnDestroy {
     this.submitError.set(null);
     this.serverErrors.set({});
 
+    const linked = this.linkedCitizen();
     const v = this.createForm.value;
-    const payload = {
+    const base = {
       subject:          v.subject,
       description:      v.description,
       type:             v.type,
       priority:         v.priority,
       channel:          v.channel,
-      citizenNationalId: v.citizenNationalId,
       categoryId:       v.categoryId,
       departmentId:     v.departmentId,
       ...(v.dueAt            && { dueAt: new Date(v.dueAt).toISOString() }),
     };
 
-    this.caseService.createCase(payload).pipe(
+    // US-57: a locked citizen posts to the citizen-scoped endpoint (no
+    // national id in the body); otherwise the generic endpoint with the
+    // free-typed national id.
+    const create$ = linked
+      ? this.caseService.createCaseForCitizen(linked.id, base as CreateCitizenCaseRequest)
+      : this.caseService.createCase({ ...base, citizenNationalId: v.citizenNationalId });
+
+    create$.pipe(
       takeUntilDestroyed(this.destroyRef)
     ).subscribe({
-      next: () => {
+      next: (created) => {
         this.isSubmitting.set(false);
+        if (linked) {
+          // US-57: land directly on the new case's detail page so the
+          // agent immediately sees the generated case id.
+          this.router.navigate(['/cases', created.id]);
+          return;
+        }
         this.submitSuccess.set(true);
         this.createForm.reset();
         this.reloadCases$.next();
@@ -345,7 +442,11 @@ export class CasesComponent implements OnInit, OnDestroy {
   }
 
   resetForm(): void {
+    this.citizenLinkGeneration++;
     this.createForm.reset();
+    this.linkedCitizen.set(null);
+    this.linkedCitizenLoading.set(false);
+    this.syncCitizenValidators();
     this.submitSuccess.set(false);
     this.submitError.set(null);
     this.serverErrors.set({});
