@@ -200,6 +200,7 @@
       "resolvedCases": "Resolved Cases"
     },
     "recentCases": "Recent Cases",
+    "viewAll": "View All",
     "lastContact": "Last Contact",
     "caseTable": {
       "caseNumber": "Case Number",
@@ -207,7 +208,15 @@
       "status": "Status",
       "priority": "Priority",
       "assignedTo": "Assigned To",
-      "created": "Created"
+      "created": "Created",
+      "department": "Department",
+      "lastUpdated": "Last Updated"
+    },
+    "history": {
+      "title": "Case History",
+      "loading": "Loading case history…",
+      "empty": "No cases found for this citizen",
+      "loadError": "Failed to load the case history. Please try again."
     },
     "errors": {
       "idNotFound": "Citizen ID not found",

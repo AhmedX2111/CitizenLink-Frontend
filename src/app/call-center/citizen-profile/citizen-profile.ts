@@ -3,28 +3,41 @@ import { Component, inject, signal, DestroyRef } from "@angular/core";
 import { ActivatedRoute, Router, RouterModule } from "@angular/router";
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { CitizenService } from "../../../core/services/citizen.service";
-import { CitizenProfile as CitizenProfileData } from "../../../core/models/citizen.models";
+import { CaseService } from "../../../core/services/case.service";
+import { CitizenProfile as CitizenProfileData, CaseSummary } from "../../../core/models/citizen.models";
 import { TranslocoModule, TranslocoService } from "@jsverse/transloco";
 import { LoggerService } from "../../../core/services/logger.service";
+import { CaseHistoryModalComponent } from "./case-history-modal/case-history-modal";
 
 @Component({
   selector: 'app-citizen-profile',
   standalone: true,
-  imports: [CommonModule, RouterModule, TranslocoModule],
+  imports: [CommonModule, RouterModule, TranslocoModule, CaseHistoryModalComponent],
   templateUrl: './citizen-profile.html',
   styleUrls: ['./citizen-profile.css']
 })
 export class CitizenProfile {
   private citizenService = inject(CitizenService);
+  private caseService = inject(CaseService);
   private route = inject(ActivatedRoute);
   private router = inject(Router);
   private logger = inject(LoggerService);
   private transloco = inject(TranslocoService);
   private destroyRef = inject(DestroyRef);
 
+  protected readonly historyPageSize = 20;
+
   protected citizen = signal<CitizenProfileData | null>(null);
   protected isLoading = signal(true);
   protected errorMessage = signal<string | null>(null);
+
+  protected historyOpen = signal(false);
+  protected historyLoading = signal(false);
+  protected historyError = signal<string | null>(null);
+  protected historyCases = signal<CaseSummary[]>([]);
+  protected historyCurrentPage = signal(0);
+  protected historyTotalPages = signal(0);
+  protected historyTotalElements = signal(0);
 
   constructor() {
     const id = this.route.snapshot.paramMap.get('id');
@@ -69,6 +82,64 @@ export class CitizenProfile {
     }
   }
 
+  openHistory(): void {
+    const citizen = this.citizen();
+    if (!citizen?.id) {
+      return;
+    }
+    this.historyOpen.set(true);
+    this.loadHistoryPage(0);
+  }
+
+  closeHistory(): void {
+    this.historyOpen.set(false);
+  }
+
+  onHistoryPageChanged(page: number): void {
+    this.loadHistoryPage(page);
+  }
+
+  openCaseFromHistory(caseId: string): void {
+    this.closeHistory();
+    this.openCaseDetail(caseId);
+  }
+
+  openCaseDetail(caseId: string): void {
+    this.router.navigate(['/cases', caseId]);
+  }
+
+  private loadHistoryPage(page: number): void {
+    const citizenId = this.citizen()?.id;
+    if (!citizenId) {
+      return;
+    }
+    this.historyLoading.set(true);
+    this.historyError.set(null);
+
+    this.caseService.getCitizenCaseHistory(citizenId, page, this.historyPageSize).pipe(
+      takeUntilDestroyed(this.destroyRef)
+    ).subscribe({
+      next: (response) => {
+        this.historyCases.set(response.content);
+        this.historyCurrentPage.set(response.page);
+        this.historyTotalPages.set(response.totalPages);
+        this.historyTotalElements.set(response.totalElements);
+        this.historyLoading.set(false);
+      },
+      error: (error) => {
+        this.logger.error('CitizenProfile', 'Error loading case history:', error);
+        this.historyError.set(this.transloco.translate('citizenProfile.history.loadError'));
+        this.historyLoading.set(false);
+      }
+    });
+  }
+
+  departmentName(c: CaseSummary): string {
+    return this.transloco.getActiveLang() === 'ar'
+      ? (c.departmentNameAr || c.departmentNameEn || '—')
+      : (c.departmentNameEn || c.departmentNameAr || '—');
+  }
+
   goBack(): void {
     this.router.navigate(['/app/call-center']);
   }
@@ -85,15 +156,5 @@ export class CitizenProfile {
       'CANCELLED': 'bg-red-100 text-red-800'
     };
     return statusMap[status] || 'bg-gray-100 text-gray-800';
-  }
-
-  getPriorityBadgeClass(priority: string): string {
-    const priorityMap: Record<string, string> = {
-      'URGENT': 'bg-red-100 text-red-800',
-      'HIGH': 'bg-orange-100 text-orange-800',
-      'MEDIUM': 'bg-yellow-100 text-yellow-800',
-      'LOW': 'bg-green-100 text-green-800'
-    };
-    return priorityMap[priority] || 'bg-gray-100 text-gray-800';
   }
 }
