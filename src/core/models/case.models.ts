@@ -34,6 +34,21 @@ export interface CreateCaseRequest {
   dueAt?: string;
 }
 
+// US-57: same as CreateCaseRequest but WITHOUT the citizen national id —
+// the citizen is bound to the URL path (POST /citizens/{citizenId}/cases),
+// so a masked national ID (US-56) is never needed.
+export interface CreateCitizenCaseRequest {
+  subject: string;
+  description: string;
+  type: CaseType;
+  priority: Priority;
+  channel: Channel;
+  categoryId: string;
+  departmentId: string;
+  assignedToUserId?: string;
+  dueAt?: string;
+}
+
 export interface CaseSearchRequest {
   status?:           CaseStatus;
   type?:             CaseType;

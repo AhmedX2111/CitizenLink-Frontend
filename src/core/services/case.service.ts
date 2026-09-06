@@ -5,6 +5,7 @@ import {
   CaseResponse,
   CaseSearchRequest,
   CreateCaseRequest,
+  CreateCitizenCaseRequest,
   StatusHistoryResponse,
   PagedResponse,
   CaseTransitionRequest,
@@ -19,6 +20,7 @@ import { environment } from '../../environments/environment';
 export class CaseService {
 
   private readonly baseUrl = `${environment.apiUrl}/api/v1/cases`;
+  private readonly citizensUrl = `${environment.apiUrl}/api/v1/citizens`;
   private readonly usersUrl = `${environment.apiUrl}/api/v1/users`;
   private readonly departmentsUrl = `${environment.apiUrl}/api/v1/departments`;
   private readonly categoriesUrl = `${environment.apiUrl}/api/v1/categories`;
@@ -27,6 +29,16 @@ export class CaseService {
 
   createCase(request: CreateCaseRequest): Observable<CaseResponse> {
     return this.http.post<CaseResponse>(this.baseUrl, request);
+  }
+
+  /**
+   * US-57: creates a case for a specific citizen resolved server-side by ID.
+   * Used by the "New Case" action on the Citizen 360 screen — the citizen is
+   * locked by the URL path, its identity is never asked of the agent, and a
+   * masked national ID (US-56) is not required.
+   */
+  createCaseForCitizen(citizenId: string, request: CreateCitizenCaseRequest): Observable<CaseResponse> {
+    return this.http.post<CaseResponse>(`${this.citizensUrl}/${citizenId}/cases`, request);
   }
 
   searchCases(filter: CaseSearchRequest): Observable<PagedResponse<CaseResponse>> {

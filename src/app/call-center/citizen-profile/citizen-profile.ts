@@ -58,9 +58,13 @@ export class CitizenProfile {
   createNewCase(): void {
     const citizen = this.citizen();
     if (citizen?.id) {
+      // US-57: the citizen is handed over by ID in the URL (the same identifier
+      // this profile route already carries) so the /cases page locks it
+      // reliably — router extras.state is timing-fragile on lazy routes.
+      // No national ID travels here: it is masked for AGENTs (US-56) and the
+      // citizen-scoped endpoint resolves the citizen server-side.
       this.router.navigate(['/cases'], {
-        queryParams: { tab: 'create' },
-        state: { citizenNationalId: citizen.nationalId }
+        queryParams: { tab: 'create', citizenId: citizen.id }
       });
     }
   }
