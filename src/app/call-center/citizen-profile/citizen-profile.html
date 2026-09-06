@@ -126,9 +126,13 @@
     <div class="mt-6 card overflow-hidden">
       <div class="bg-surface-container px-6 py-3.5 border-b border-outline-variant flex items-center justify-between">
         <h2 class="font-label-md text-label-md text-on-surface">{{ 'citizenProfile.recentCases' | transloco }}</h2>
-        <button class="flex items-center gap-1 font-label-md text-label-md text-primary hover:text-primary-container transition-colors">
-          <span class="material-symbols-outlined text-sm">filter_list</span>
-          {{ 'common.filter' | transloco }}
+        <button
+          (click)="openHistory()"
+          [disabled]="c.totalCases === 0"
+          class="flex items-center gap-1 font-label-md text-label-md text-primary hover:text-primary-container transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
+        >
+          <span class="material-symbols-outlined text-sm">history</span>
+          {{ 'citizenProfile.viewAll' | transloco }}
         </button>
       </div>
 
@@ -145,14 +149,13 @@
                 <th class="px-6 py-3.5 text-left font-label-md text-label-md">{{ 'citizenProfile.caseTable.caseNumber' | transloco }}</th>
                 <th class="px-6 py-3.5 text-left font-label-md text-label-md">{{ 'citizenProfile.caseTable.subject' | transloco }}</th>
                 <th class="px-6 py-3.5 text-left font-label-md text-label-md">{{ 'citizenProfile.caseTable.status' | transloco }}</th>
-                <th class="px-6 py-3.5 text-left font-label-md text-label-md">{{ 'citizenProfile.caseTable.priority' | transloco }}</th>
-                <th class="px-6 py-3.5 text-left font-label-md text-label-md">{{ 'citizenProfile.caseTable.assignedTo' | transloco }}</th>
-                <th class="px-6 py-3.5 text-left font-label-md text-label-md">{{ 'citizenProfile.caseTable.created' | transloco }}</th>
+                <th class="px-6 py-3.5 text-left font-label-md text-label-md">{{ 'citizenProfile.caseTable.department' | transloco }}</th>
+                <th class="px-6 py-3.5 text-left font-label-md text-label-md">{{ 'citizenProfile.caseTable.lastUpdated' | transloco }}</th>
               </tr>
             </thead>
             <tbody>
               @for (case of c.recentCases; track case.id) {
-                <tr class="zebra-row hover:bg-surface-container-high transition-colors cursor-pointer">
+                <tr class="zebra-row hover:bg-surface-container-high transition-colors cursor-pointer" (click)="openCaseDetail(case.id)">
                   <td class="px-6 py-4 whitespace-nowrap font-label-md text-label-md text-primary">
                     {{ case.caseNumber }}
                   </td>
@@ -164,16 +167,11 @@
                       {{ 'cases.statuses.' + case.status | transloco }}
                     </span>
                   </td>
-                  <td class="px-6 py-4 whitespace-nowrap">
-                    <span class="status-chip {{ getPriorityBadgeClass(case.priority) }}">
-                      {{ 'cases.priorities.' + case.priority | transloco }}
-                    </span>
+                  <td class="px-6 py-4 whitespace-nowrap font-body-md text-body-md text-on-surface-variant">
+                    {{ departmentName(case) }}
                   </td>
                   <td class="px-6 py-4 whitespace-nowrap font-body-md text-body-md text-on-surface-variant">
-                    {{ case.assignedToName || ('citizenProfile.unassigned' | transloco) }}
-                  </td>
-                  <td class="px-6 py-4 whitespace-nowrap font-body-md text-body-md text-on-surface-variant">
-                    {{ case.createdAt | date:'medium' }}
+                    {{ case.updatedAt | date:'medium' }}
                   </td>
                 </tr>
               }
@@ -182,5 +180,19 @@
         </div>
       }
     </div>
+
+    <app-case-history-modal
+      [isOpen]="historyOpen()"
+      [isLoading]="historyLoading()"
+      [loadError]="historyError()"
+      [cases]="historyCases()"
+      [currentPage]="historyCurrentPage()"
+      [totalPages]="historyTotalPages()"
+      [totalElements]="historyTotalElements()"
+      [pageSize]="historyPageSize"
+      (closed)="closeHistory()"
+      (pageChanged)="onHistoryPageChanged($event)"
+      (openCase)="openCaseFromHistory($event)"
+    ></app-case-history-modal>
   }
 </div>

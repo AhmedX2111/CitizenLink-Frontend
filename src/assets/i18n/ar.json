@@ -200,6 +200,7 @@
       "resolvedCases": "الحالات المحلولة"
     },
     "recentCases": "الحالات الأخيرة",
+    "viewAll": "عرض الكل",
     "lastContact": "آخر اتصال",
     "caseTable": {
       "caseNumber": "رقم الحالة",
@@ -207,7 +208,15 @@
       "status": "الحالة",
       "priority": "الأولوية",
       "assignedTo": "مسند إلى",
-      "created": "تاريخ الإنشاء"
+      "created": "تاريخ الإنشاء",
+      "department": "القسم",
+      "lastUpdated": "آخر تحديث"
+    },
+    "history": {
+      "title": "سجل الحالات",
+      "loading": "جاري تحميل سجل الحالات…",
+      "empty": "لا توجد حالات لهذا المواطن",
+      "loadError": "فشل تحميل سجل الحالات. يرجى المحاولة مرة أخرى."
     },
     "errors": {
       "idNotFound": "معرف المواطن غير موجود",

@@ -15,6 +15,7 @@ import {
 } from '../models/case.models';
 import { Department } from '../models/department.model';
 import { Category } from '../models/category.model';
+import { CaseSummary } from '../models/citizen.models';
 import { environment } from '../../environments/environment';
 
 @Injectable({ providedIn: 'root' })
@@ -43,6 +44,7 @@ export class CaseService {
   }
 
   /**
+/**
    * US-58: read-only preflight before creating a case from the Citizen 360
    * screen. Returns open cases (non-final status) for the same citizen that
    * overlap on category OR department. The backend never blocks creation —
@@ -60,6 +62,16 @@ export class CaseService {
       `${this.citizensUrl}/${citizenId}/cases/duplicate-candidates`,
       { params },
     );
+  }
+
+  /**
+   * US-59: fetches the paged case history for a citizen (Citizen 360 "View all").
+   * Backend re-applies the requester's Phase 1 visibility filters and returns
+   * 404 if the citizen is not visible; page defaults to 0, size defaults to 20.
+   */
+  getCitizenCaseHistory(citizenId: string, page = 0, size = 20): Observable<PagedResponse<CaseSummary>> {
+    const params = new HttpParams().set('page', page.toString()).set('size', size.toString());
+    return this.http.get<PagedResponse<CaseSummary>>(`${this.citizensUrl}/${citizenId}/cases`, { params });
   }
 
   searchCases(filter: CaseSearchRequest): Observable<PagedResponse<CaseResponse>> {
