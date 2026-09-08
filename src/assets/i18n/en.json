@@ -542,6 +542,12 @@
     "allTypes": "All types",
     "allPriorities": "All priorities",
     "clearFilters": "Clear",
+    "filters": {
+      "keyword": "Search",
+      "status": "Filter by status",
+      "type": "Filter by type",
+      "priority": "Filter by priority"
+    },
     "noResults": "No cases found",
     "noResultsHint": "Try adjusting your filters or create a new case",
     "loading": "Loading cases…",

@@ -36,15 +36,15 @@ type ActiveTab = 'list' | 'create';
 })
 export class CasesComponent implements OnInit, OnDestroy {
 
-  private fb             = inject(FormBuilder);
-  private caseService    = inject(CaseService);
-  private citizenService = inject(CitizenService);
-  private destroyRef     = inject(DestroyRef);
-  private transloco      = inject(TranslocoService);
-  private router         = inject(Router);
-  private activatedRoute = inject(ActivatedRoute);
-  private logger         = inject(LoggerService);
-  private timers      = new Set<ReturnType<typeof setTimeout>>();
+  private readonly fb             = inject(FormBuilder);
+  private readonly caseService    = inject(CaseService);
+  private readonly citizenService = inject(CitizenService);
+  private readonly destroyRef     = inject(DestroyRef);
+  private readonly transloco      = inject(TranslocoService);
+  private readonly router         = inject(Router);
+  private readonly activatedRoute = inject(ActivatedRoute);
+  private readonly logger         = inject(LoggerService);
+  private readonly timers      = new Set<ReturnType<typeof setTimeout>>();
   // Breadcrumb title passed to shared topbar
   pageTitle = () => this.transloco.translate('cases.title');
 
@@ -92,7 +92,7 @@ export class CasesComponent implements OnInit, OnDestroy {
   private submitAfterCheck = false;
   // Debounced so rapid category/department changes result in at most one
   // request per 600ms of quiet instead of one per keystroke of the dropdowns.
-  private duplicateCheckTrigger$ = new Subject<void>();
+  private readonly duplicateCheckTrigger$ = new Subject<void>();
 
   // ── List loading error state ────────────────────────────────────
   listError = signal<string | null>(null);
@@ -119,7 +119,7 @@ export class CasesComponent implements OnInit, OnDestroy {
   // trigger — this is what prevents a stale, slower response from
   // overwriting a newer one (e.g. fast filter typing, quick pagination
   // clicks, or rapid succession of any combination of these).
-  private reloadCases$ = new Subject<void>();
+  private readonly reloadCases$ = new Subject<void>();
 
   // ── Departments and Categories state ──────────────────────────
   departments = signal<Department[]>([]);
@@ -192,7 +192,7 @@ export class CasesComponent implements OnInit, OnDestroy {
 
     // Legacy fallback (M-27): a caller that only hands over a national id
     // through router state keeps the old pre-fill behaviour.
-    const state = this.router.getCurrentNavigation()?.extras.state as Record<string, string> | null;
+    const state = this.router.currentNavigation()?.extras.state as Record<string, string> | null;
     if (state?.['citizenNationalId']) {
       this.createForm.patchValue({ citizenNationalId: state['citizenNationalId'] });
     }

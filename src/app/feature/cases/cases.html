@@ -58,27 +58,37 @@
         <!-- Search & filters -->
         <div [formGroup]="searchForm" class="flex flex-wrap items-center gap-3 px-5 py-3 border-b border-outline-variant">
           <div class="relative flex-1 min-w-44">
+            <label for="filter-keyword" class="sr-only">{{ 'cases.filters.keyword' | transloco }}</label>
             <span class="material-symbols-outlined absolute left-2.5 top-1/2 -translate-y-1/2 text-on-surface-variant text-[16px]">search</span>
-            <input formControlName="keyword" type="text" placeholder="{{ 'cases.searchPlaceholder' | transloco }}" class="w-full pl-8 pr-3 py-2 text-body-md border border-outline-variant rounded bg-white focus:ring-2 focus:ring-primary focus:outline-none transition-all">
+            <input id="filter-keyword" formControlName="keyword" type="text" placeholder="{{ 'cases.searchPlaceholder' | transloco }}" class="w-full pl-8 pr-3 py-2 text-body-md border border-outline-variant rounded bg-white focus:ring-2 focus:ring-primary focus:outline-none transition-all">
           </div>
-          <select formControlName="status" class="w-auto border border-outline-variant rounded px-3 py-2 bg-white text-body-md focus:ring-2 focus:ring-primary focus:outline-none transition-all">
-            <option value="">{{ 'cases.allStatuses' | transloco }}</option>
-            @for (s of statuses; track s) {
-              <option [value]="s">{{ 'cases.statuses.' + s | transloco }}</option>
-            }
-          </select>
-          <select formControlName="type" class="w-auto border border-outline-variant rounded px-3 py-2 bg-white text-body-md focus:ring-2 focus:ring-primary focus:outline-none transition-all">
-            <option value="">{{ 'cases.allTypes' | transloco }}</option>
-            @for (t of types; track t) {
-              <option [value]="t">{{ 'cases.types.' + t | transloco }}</option>
-            }
-          </select>
-          <select formControlName="priority" class="w-auto border border-outline-variant rounded px-3 py-2 bg-white text-body-md focus:ring-2 focus:ring-primary focus:outline-none transition-all">
-            <option value="">{{ 'cases.allPriorities' | transloco }}</option>
-            @for (p of priorities; track p) {
-              <option [value]="p">{{ 'cases.priorities.' + p | transloco }}</option>
-            }
-          </select>
+          <div>
+            <label for="filter-status" class="sr-only">{{ 'cases.filters.status' | transloco }}</label>
+            <select id="filter-status" formControlName="status" class="w-auto border border-outline-variant rounded px-3 py-2 bg-white text-body-md focus:ring-2 focus:ring-primary focus:outline-none transition-all">
+              <option value="">{{ 'cases.allStatuses' | transloco }}</option>
+              @for (s of statuses; track s) {
+                <option [value]="s">{{ 'cases.statuses.' + s | transloco }}</option>
+              }
+            </select>
+          </div>
+          <div>
+            <label for="filter-type" class="sr-only">{{ 'cases.filters.type' | transloco }}</label>
+            <select id="filter-type" formControlName="type" class="w-auto border border-outline-variant rounded px-3 py-2 bg-white text-body-md focus:ring-2 focus:ring-primary focus:outline-none transition-all">
+              <option value="">{{ 'cases.allTypes' | transloco }}</option>
+              @for (t of types; track t) {
+                <option [value]="t">{{ 'cases.types.' + t | transloco }}</option>
+              }
+            </select>
+          </div>
+          <div>
+            <label for="filter-priority" class="sr-only">{{ 'cases.filters.priority' | transloco }}</label>
+            <select id="filter-priority" formControlName="priority" class="w-auto border border-outline-variant rounded px-3 py-2 bg-white text-body-md focus:ring-2 focus:ring-primary focus:outline-none transition-all">
+              <option value="">{{ 'cases.allPriorities' | transloco }}</option>
+              @for (p of priorities; track p) {
+                <option [value]="p">{{ 'cases.priorities.' + p | transloco }}</option>
+              }
+            </select>
+          </div>
           <button (click)="clearFilters()" type="button" class="border-2 border-primary text-primary font-label-md text-label-md px-3 py-2 rounded-lg hover:bg-primary/5 transition-colors">
             {{ 'cases.clearFilters' | transloco }}
           </button>
@@ -129,8 +139,17 @@
                 <tbody>
                   @for (c of cases(); track c.id) {
                     <tr (click)="openCaseDetail(c.id)"
+                        (keydown.enter)="openCaseDetail(c.id)"
+                        (keydown.space)="openCaseDetail(c.id)"
+                        tabindex="0"
                         class="zebra-row hover:bg-surface-container-low transition-colors cursor-pointer border-b border-outline-variant">
-                      <td class="px-6 py-4 font-label-md text-label-md text-primary whitespace-nowrap">{{ c.caseNumber }}</td>
+                      <td class="px-6 py-4 whitespace-nowrap">
+                        <button type="button"
+                                (click)="openCaseDetail(c.id); $event.stopPropagation()"
+                                class="font-label-md text-label-md text-on-surface whitespace-nowrap focus:outline-none focus-visible:ring-2 focus-visible:ring-primary rounded">
+                          {{ c.caseNumber }}
+                        </button>
+                      </td>
                       <td class="px-6 py-4 text-on-surface max-w-48 truncate">{{ c.subject }}</td>
                       <td class="px-6 py-4">
                         <span [class]="'inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ' + typeBadgeClass(c.type)">
@@ -240,7 +259,7 @@
               } @else if (linkedCitizen(); as lc) {
                 <div class="rounded-lg border border-primary/40 bg-primary-container px-4 py-3">
                   <div class="flex items-center justify-between gap-2 mb-1.5">
-                    <label class="font-label-md text-label-md text-on-primary-container">{{ 'cases.create.fields.citizen' | transloco }} <span class="text-error">*</span></label>
+                    <p class="font-label-md text-label-md text-on-primary-container">{{ 'cases.create.fields.citizen' | transloco }} <span class="text-error">*</span></p>
                     <button type="button" (click)="changeCitizen()" [disabled]="isSubmitting() || linkedCitizenLoading()" class="inline-flex items-center gap-1 font-label-sm text-label-sm text-on-primary hover:opacity-80 transition-opacity disabled:opacity-40 disabled:cursor-not-allowed">
                       <span class="material-symbols-outlined text-[16px]">swap_horiz</span>
                       {{ 'cases.create.changeCitizen' | transloco }}
@@ -258,8 +277,8 @@
               } @else {
                 <!-- National ID Field -->
                 <div>
-                  <label class="block font-label-md text-label-md text-outline mb-1.5">{{ 'cases.create.fields.citizenId' | transloco }} <span class="text-error">*</span></label>
-                  <input formControlName="citizenNationalId"
+                  <label for="create-citizen-national-id" class="block font-label-md text-label-md text-outline mb-1.5">{{ 'cases.create.fields.citizenId' | transloco }} <span class="text-error">*</span></label>
+                  <input id="create-citizen-national-id" formControlName="citizenNationalId"
                          type="text"
                          maxlength="16"
                          oninput="this.value = this.value.replace(/[^0-9]/g, '')"
@@ -277,8 +296,8 @@
 
               <!-- Channel Dropdown -->
               <div>
-                <label class="block font-label-md text-label-md text-outline mb-1.5">{{ 'cases.create.fields.channel' | transloco }} <span class="text-error">*</span></label>
-                <select formControlName="channel"
+                <label for="create-channel" class="block font-label-md text-label-md text-outline mb-1.5">{{ 'cases.create.fields.channel' | transloco }} <span class="text-error">*</span></label>
+                <select id="create-channel" formControlName="channel"
                         class="w-full border border-outline-variant rounded px-3 py-2 bg-white text-body-md focus:ring-2 focus:ring-primary focus:outline-none transition-all"
                         [class.border-red-400]="hasError('channel')">
                   <option value="" disabled selected>{{ 'cases.create.fields.channelPlaceholder' | transloco }}</option>
@@ -303,8 +322,8 @@
             </div>
             <div class="space-y-4">
               <div>
-                <label class="block font-label-md text-label-md text-outline mb-1.5">{{ 'cases.create.fields.subject' | transloco }} <span class="text-error">*</span></label>
-                <input formControlName="subject" type="text" placeholder="{{ 'cases.create.fields.subjectPlaceholder' | transloco }}" class="w-full border border-outline-variant rounded px-3 py-2 bg-white text-body-md focus:ring-2 focus:ring-primary focus:outline-none transition-all" [class.border-red-400]="hasError('subject') || serverError('subject')">
+                <label for="create-subject" class="block font-label-md text-label-md text-outline mb-1.5">{{ 'cases.create.fields.subject' | transloco }} <span class="text-error">*</span></label>
+                <input id="create-subject" formControlName="subject" type="text" placeholder="{{ 'cases.create.fields.subjectPlaceholder' | transloco }}" class="w-full border border-outline-variant rounded px-3 py-2 bg-white text-body-md focus:ring-2 focus:ring-primary focus:outline-none transition-all" [class.border-red-400]="hasError('subject') || serverError('subject')">
                 @if (hasError('subject')) {
                   <p class="mt-1 text-body-md text-error">{{ fieldError('subject') }}</p>
                 }
@@ -313,16 +332,16 @@
                 }
               </div>
               <div>
-                <label class="block font-label-md text-label-md text-outline mb-1.5">{{ 'cases.create.fields.description' | transloco }} <span class="text-error">*</span></label>
-                <textarea formControlName="description" rows="3" placeholder="{{ 'cases.create.fields.descriptionPlaceholder' | transloco }}" class="w-full border border-outline-variant rounded px-3 py-2 bg-white text-body-md focus:ring-2 focus:ring-primary focus:outline-none transition-all resize-none" [class.border-red-400]="hasError('description') || serverError('description')"></textarea>
+                <label for="create-description" class="block font-label-md text-label-md text-outline mb-1.5">{{ 'cases.create.fields.description' | transloco }} <span class="text-error">*</span></label>
+                <textarea id="create-description" formControlName="description" rows="3" placeholder="{{ 'cases.create.fields.descriptionPlaceholder' | transloco }}" class="w-full border border-outline-variant rounded px-3 py-2 bg-white text-body-md focus:ring-2 focus:ring-primary focus:outline-none transition-all resize-none" [class.border-red-400]="hasError('description') || serverError('description')"></textarea>
                 @if (hasError('description')) {
                   <p class="mt-1 text-body-md text-error">{{ fieldError('description') }}</p>
                 }
               </div>
               <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
                 <div>
-                  <label class="block font-label-md text-label-md text-outline mb-1.5">{{ 'cases.create.fields.type' | transloco }} <span class="text-error">*</span></label>
-                  <select formControlName="type" class="w-full border border-outline-variant rounded px-3 py-2 bg-white text-body-md focus:ring-2 focus:ring-primary focus:outline-none transition-all" [class.border-red-400]="hasError('type')">
+                  <label for="create-type" class="block font-label-md text-label-md text-outline mb-1.5">{{ 'cases.create.fields.type' | transloco }} <span class="text-error">*</span></label>
+                  <select id="create-type" formControlName="type" class="w-full border border-outline-variant rounded px-3 py-2 bg-white text-body-md focus:ring-2 focus:ring-primary focus:outline-none transition-all" [class.border-red-400]="hasError('type')">
                     <option value="" disabled selected>{{ 'cases.create.fields.typePlaceholder' | transloco }}</option>
                     @for (t of types; track t) {
                       <option [value]="t">{{ 'cases.types.' + t | transloco }}</option>
@@ -333,8 +352,8 @@
                   }
                 </div>
                 <div>
-                  <label class="block font-label-md text-label-md text-outline mb-1.5">{{ 'cases.create.fields.priority' | transloco }} <span class="text-error">*</span></label>
-                  <select formControlName="priority" class="w-full border border-outline-variant rounded px-3 py-2 bg-white text-body-md focus:ring-2 focus:ring-primary focus:outline-none transition-all" [class.border-red-400]="hasError('priority')">
+                  <label for="create-priority" class="block font-label-md text-label-md text-outline mb-1.5">{{ 'cases.create.fields.priority' | transloco }} <span class="text-error">*</span></label>
+                  <select id="create-priority" formControlName="priority" class="w-full border border-outline-variant rounded px-3 py-2 bg-white text-body-md focus:ring-2 focus:ring-primary focus:outline-none transition-all" [class.border-red-400]="hasError('priority')">
                     <option value="" disabled selected>{{ 'cases.create.fields.priorityPlaceholder' | transloco }}</option>
                     @for (p of priorities; track p) {
                       <option [value]="p">{{ 'cases.priorities.' + p | transloco }}</option>
@@ -345,8 +364,8 @@
                   }
                 </div>
                 <div>
-                  <label class="block font-label-md text-label-md text-outline mb-1.5">{{ 'cases.create.fields.dueDate' | transloco }}</label>
-                  <input formControlName="dueAt" type="date" class="w-full border border-outline-variant rounded px-3 py-2 bg-white text-body-md focus:ring-2 focus:ring-primary focus:outline-none transition-all">
+                  <label for="create-due-at" class="block font-label-md text-label-md text-outline mb-1.5">{{ 'cases.create.fields.dueDate' | transloco }}</label>
+                  <input id="create-due-at" formControlName="dueAt" type="date" class="w-full border border-outline-variant rounded px-3 py-2 bg-white text-body-md focus:ring-2 focus:ring-primary focus:outline-none transition-all">
                 </div>
               </div>
             </div>
@@ -363,8 +382,8 @@
             <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
               <!-- Department Dropdown -->
               <div>
-                <label class="block font-label-md text-label-md text-outline mb-1.5">{{ 'cases.create.fields.department' | transloco }} <span class="text-error">*</span></label>
-                <select formControlName="departmentId"
+                <label for="create-department" class="block font-label-md text-label-md text-outline mb-1.5">{{ 'cases.create.fields.department' | transloco }} <span class="text-error">*</span></label>
+                <select id="create-department" formControlName="departmentId"
                         class="w-full border border-outline-variant rounded px-3 py-2 bg-white text-body-md focus:ring-2 focus:ring-primary focus:outline-none transition-all"
                         [class.border-red-400]="hasError('departmentId') || serverError('departmentId')">
                   <option value="" disabled selected>{{ 'cases.create.fields.departmentPlaceholder' | transloco }}</option>
@@ -382,8 +401,8 @@
 
               <!-- Category Dropdown -->
               <div>
-                <label class="block font-label-md text-label-md text-outline mb-1.5">{{ 'cases.create.fields.category' | transloco }} <span class="text-error">*</span></label>
-                <select formControlName="categoryId"
+                <label for="create-category" class="block font-label-md text-label-md text-outline mb-1.5">{{ 'cases.create.fields.category' | transloco }} <span class="text-error">*</span></label>
+                <select id="create-category" formControlName="categoryId"
                         class="w-full border border-outline-variant rounded px-3 py-2 bg-white text-body-md focus:ring-2 focus:ring-primary focus:outline-none transition-all"
                         [class.border-red-400]="hasError('categoryId') || serverError('categoryId')">
                   <option value="" disabled selected>{{ 'cases.create.fields.categoryPlaceholder' | transloco }}</option>
