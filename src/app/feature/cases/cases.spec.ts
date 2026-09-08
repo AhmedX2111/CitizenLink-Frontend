@@ -295,7 +295,7 @@ describe('CasesComponent', () => {
     vi.advanceTimersByTime(500);
     vi.useRealTimers();
 
-    expect(caseService.searchCases.mock.calls.length).toBe(callsAfterChange);
+    expect(caseService.searchCases.mock.calls).toHaveLength(callsAfterChange);
   });
 
   it('goToPage reloads with the requested page number', () => {
@@ -308,7 +308,7 @@ describe('CasesComponent', () => {
     component.totalPages.set(2);
     const before = caseService.searchCases.mock.calls.length;
     component.goToPage(5);
-    expect(caseService.searchCases.mock.calls.length).toBe(before);
+    expect(caseService.searchCases.mock.calls).toHaveLength(before);
   });
 
   it('clearFilters resets the form and reloads', () => {
