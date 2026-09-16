@@ -98,6 +98,8 @@ describe('CasesComponent', () => {
     getDepartments: ReturnType<typeof vi.fn>;
     getCategories: ReturnType<typeof vi.fn>;
     createCase: ReturnType<typeof vi.fn>;
+    createCaseForCitizen: ReturnType<typeof vi.fn>;
+    checkDuplicateCases: ReturnType<typeof vi.fn>;
     getHandlers: ReturnType<typeof vi.fn>;
     bulkReassignCases: ReturnType<typeof vi.fn>;
   };
@@ -131,20 +133,16 @@ describe('CasesComponent', () => {
       getDepartments: vi.fn().mockReturnValue(of(departments)),
       getCategories: vi.fn().mockReturnValue(of(categories)),
       createCase: vi.fn(),
+      createCaseForCitizen: vi.fn(),
+      checkDuplicateCases: vi.fn().mockReturnValue(of([])),
       getHandlers: vi.fn().mockReturnValue(of([])),
       bulkReassignCases: vi.fn()
     };
     authUserService = {
       hasRole: vi.fn().mockReturnValue(false),
       hasRoleSignal: vi.fn().mockReturnValue(() => false),
-      hasRoleAny: vi.fn().mockReturnValue(false)
-    };
-    router = {
-      navigate: vi.fn(),
-      getCurrentNavigation: vi.fn().mockReturnValue(null)
-    };
+      hasRoleAny: vi.fn().mockReturnValue(false),
       createCaseForCitizen: vi.fn(),
-      // US-58: no open candidates by default -> submissions are not blocked.
       checkDuplicateCases: vi.fn().mockReturnValue(of([]))
     };
     citizenService = { getCitizenById: vi.fn().mockReturnValue(of(citizen360)) };
@@ -707,6 +705,8 @@ describe('CasesComponent', () => {
       expect(component.quickFilters()).toEqual({ overdue: false, dueToday: false, unassigned: false });
       expect(caseService.searchCases.mock.calls.length).toBeGreaterThan(before);
     });
+  });
+
   // ── US-57: create case from Citizen 360 ─────────────────────────
 
   function paramFromCitizen360(): void {

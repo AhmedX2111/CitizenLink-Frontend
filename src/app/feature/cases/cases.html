@@ -89,24 +89,6 @@
               }
             </select>
           </div>
-          <select formControlName="status" class="w-auto border border-outline-variant rounded px-3 py-2 bg-white text-body-md focus:ring-2 focus:ring-primary focus:outline-none transition-all">
-            <option value="">{{ 'cases.allStatuses' | transloco }}</option>
-            @for (s of statuses; track s) {
-              <option [value]="s">{{ 'cases.statuses.' + s | transloco }}</option>
-            }
-          </select>
-          <select formControlName="type" class="w-auto border border-outline-variant rounded px-3 py-2 bg-white text-body-md focus:ring-2 focus:ring-primary focus:outline-none transition-all">
-            <option value="">{{ 'cases.allTypes' | transloco }}</option>
-            @for (t of types; track t) {
-              <option [value]="t">{{ 'cases.types.' + t | transloco }}</option>
-            }
-          </select>
-          <select formControlName="priority" class="w-auto border border-outline-variant rounded px-3 py-2 bg-white text-body-md focus:ring-2 focus:ring-primary focus:outline-none transition-all">
-            <option value="">{{ 'cases.allPriorities' | transloco }}</option>
-            @for (p of priorities; track p) {
-              <option [value]="p">{{ 'cases.priorities.' + p | transloco }}</option>
-            }
-          </select>
           <!-- US-54: workload quick filters (deep-linkable from the dashboard) -->
           <button (click)="toggleQuickFilter('overdue')" type="button"
                   [class]="'inline-flex items-center gap-1 px-3 py-1.5 rounded-full text-label-md border transition-colors ' + (quickFilters().overdue ? 'bg-error text-on-error border-error' : 'border-outline-variant text-on-surface-variant hover:bg-surface-container-low')">
@@ -193,25 +175,23 @@
                 <tbody>
                   @for (c of cases(); track c.id) {
                     <tr (click)="openCaseDetail(c.id)"
-                        [class.bg-primary/5]="selectedCaseIds().has(c.id)"
-                        class="zebra-row hover:bg-surface-container-low transition-colors cursor-pointer border-b border-outline-variant">
-                       @if (isSupervisor()) {
-                         <td class="px-4 py-4" (click)="$event.stopPropagation()">
-                           <input type="checkbox" [checked]="selectedCaseIds().has(c.id)" (change)="toggleSelect(c.id, $event)"
-                                  [disabled]="!isReassignable(c.status)"
-                                  [title]="isReassignable(c.status) ? '' : ('cases.bulkReassign.ineligible' | transloco)"
-                                  class="w-4 h-4 rounded border-outline-variant text-primary focus:ring-primary cursor-pointer accent-primary disabled:cursor-not-allowed disabled:opacity-40">
-                         </td>
-                       }
-                      <td class="px-6 py-4 font-label-md text-label-md text-primary whitespace-nowrap">{{ c.caseNumber }}</td>
                         (keydown.enter)="openCaseDetail(c.id)"
                         (keydown.space)="openCaseDetail(c.id)"
                         tabindex="0"
-                        class="zebra-row hover:bg-surface-container-low transition-colors cursor-pointer border-b border-outline-variant">
+                        [class.bg-primary/5]="selectedCaseIds().has(c.id)"
+                        class="zebra-row hover:bg-surface-container-low transition-colors cursor-pointer border-b border-outline-variant outline-none focus-visible:ring-2 focus-visible:ring-primary/60">
+                      @if (isSupervisor()) {
+                        <td class="px-4 py-4" (click)="$event.stopPropagation()">
+                          <input type="checkbox" [checked]="selectedCaseIds().has(c.id)" (change)="toggleSelect(c.id, $event)"
+                                 [disabled]="!isReassignable(c.status)"
+                                 [title]="isReassignable(c.status) ? '' : ('cases.bulkReassign.ineligible' | transloco)"
+                                 class="w-4 h-4 rounded border-outline-variant text-primary focus:ring-primary cursor-pointer accent-primary disabled:cursor-not-allowed disabled:opacity-40">
+                        </td>
+                      }
                       <td class="px-6 py-4 whitespace-nowrap">
                         <button type="button"
                                 (click)="openCaseDetail(c.id); $event.stopPropagation()"
-                                class="font-label-md text-label-md text-on-surface whitespace-nowrap focus:outline-none focus-visible:ring-2 focus-visible:ring-primary rounded">
+                                class="font-label-md text-label-md text-primary whitespace-nowrap focus:outline-none focus-visible:ring-2 focus-visible:ring-primary rounded">
                           {{ c.caseNumber }}
                         </button>
                       </td>
