@@ -1,3 +1,4 @@
+
 {
   "common": {
     "appName": "رابط المواطن",
@@ -31,6 +32,7 @@
     "allRightsReserved": "© 2026 رابط المواطن. جميع الحقوق محفوظة.",
     "securePortal": "بوابة حكومية آمنة | جميع الحقوق محفوظة © 2025"
   },
+
   "nav": {
     "switchToArabic": "العربية",
     "switchToEnglish": "English",
@@ -48,17 +50,18 @@
     "citizens": "المواطنين",
     "departments": "الإدارات"
   },
+
   "admin": {
     "users": {
-    "title": "إدارة المستخدمين",
-    "subtitle": "إدارة وصول الموظفين والأدوار والصلاحيات.",
-    "roles": {
-      "ADMIN": "مدير",
-      "SUPERVISOR": "مشرف",
-      "HANDLER": "معالج",
-      "AGENT": "وكيل"
-    },
-    "createUser": "إنشاء مستخدم جديد",
+      "title": "إدارة المستخدمين",
+      "subtitle": "إدارة وصول الموظفين والأدوار والصلاحيات.",
+      "roles": {
+        "ADMIN": "مدير",
+        "SUPERVISOR": "مشرف",
+        "HANDLER": "معالج",
+        "AGENT": "وكيل"
+      },
+      "createUser": "إنشاء مستخدم جديد",
       "exportList": "تصدير القائمة",
       "loading": "جاري تحميل المستخدمين...",
       "empty": "لا يوجد مستخدمون مطابقون للفلاتر.",
@@ -80,71 +83,73 @@
         "active": "نشط",
         "inactive": "غير نشط"
       },
-    "errors": {
-      "forbidden": "ليس لديك صلاحية لعرض المستخدمين.",
-      "loadFailed": "فشل تحميل المستخدمين. يرجى المحاولة مرة أخرى."
+      "errors": {
+        "forbidden": "ليس لديك صلاحية لعرض المستخدمين.",
+        "loadFailed": "فشل تحميل المستخدمين. يرجى المحاولة مرة أخرى."
+      },
+      "actions": {
+        "edit": "تعديل",
+        "deactivate": "إلغاء التنشيط",
+        "activate": "تنشيط"
+      },
+      "modal": {
+        "createTitle": "إنشاء مستخدم جديد",
+        "editTitle": "تعديل المستخدم",
+        "username": "اسم المستخدم",
+        "usernameReadonly": "اسم المستخدم (لا يمكن تغييره)",
+        "displayName": "الاسم المعروض",
+        "email": "البريد الإلكتروني",
+        "role": "الدور",
+        "password": "كلمة المرور",
+        "passwordPlaceholder": "8 أحرف كحد أدنى",
+        "showPassword": "إظهار",
+        "hidePassword": "إخفاء",
+        "creating": "جارٍ الإنشاء...",
+        "saving": "جارٍ الحفظ...",
+        "createSuccess": "تم إنشاء المستخدم بنجاح!",
+        "updateSuccess": "تم تحديث المستخدم بنجاح!",
+        "deactivateSuccess": "تم إلغاء تنشيط المستخدم بنجاح!",
+        "activateSuccess": "تم تنشيط المستخدم بنجاح!",
+        "duplicateUsername": "اسم المستخدم موجود بالفعل",
+        "duplicateEmail": "البريد الإلكتروني مستخدم بالفعل",
+        "userNotFound": "المستخدم غير موجود",
+        "validationFailed": "يرجى تصحيح الحقول المميزة والمحاولة مرة أخرى.",
+        "updateFailed": "فشل تحديث المستخدم. يرجى المحاولة مرة أخرى.",
+        "deactivateFailed": "فشل تحديث حالة المستخدم. يرجى المحاولة مرة أخرى."
+      }
     },
-    "actions": {
-      "edit": "تعديل",
-      "deactivate": "إلغاء التنشيط",
-      "activate": "تنشيط"
-    },
-    "modal": {
-      "createTitle": "إنشاء مستخدم جديد",
-      "editTitle": "تعديل المستخدم",
-      "username": "اسم المستخدم",
-      "usernameReadonly": "اسم المستخدم (لا يمكن تغييره)",
-      "displayName": "الاسم المعروض",
-      "email": "البريد الإلكتروني",
-      "role": "الدور",
-      "password": "كلمة المرور",
-      "passwordPlaceholder": "8 أحرف كحد أدنى",
-      "showPassword": "إظهار",
-      "hidePassword": "إخفاء",
-      "creating": "جارٍ الإنشاء...",
-      "saving": "جارٍ الحفظ...",
-      "createSuccess": "تم إنشاء المستخدم بنجاح!",
-      "updateSuccess": "تم تحديث المستخدم بنجاح!",
-      "deactivateSuccess": "تم إلغاء تنشيط المستخدم بنجاح!",
-      "activateSuccess": "تم تنشيط المستخدم بنجاح!",
-      "duplicateUsername": "اسم المستخدم موجود بالفعل",
-      "duplicateEmail": "البريد الإلكتروني مستخدم بالفعل",
-      "userNotFound": "المستخدم غير موجود",
-      "validationFailed": "يرجى تصحيح الحقول المميزة والمحاولة مرة أخرى.",
-      "updateFailed": "فشل تحديث المستخدم. يرجى المحاولة مرة أخرى.",
-      "deactivateFailed": "فشل تحديث حالة المستخدم. يرجى المحاولة مرة أخرى."
+
+    "referenceData": {
+      "title": "البيانات المرجعية",
+      "subtitle": "إدارة التصنيفات والإدارات المستخدمة في النظام.",
+      "categoriesTab": "التصنيفات",
+      "departmentsTab": "الإدارات",
+      "categoriesList": "جميع التصنيفات",
+      "departmentsList": "جميع الإدارات",
+      "addCategory": "إضافة تصنيف",
+      "addDepartment": "إضافة إدارة",
+      "editCategory": "تعديل التصنيف",
+      "editDepartment": "تعديل الإدارة",
+      "nameEn": "الاسم (EN)",
+      "nameAr": "الاسم (AR)",
+      "status": "الحالة",
+      "actions": "الإجراءات",
+      "active": "نشط",
+      "inactive": "غير نشط",
+      "activeLabel": "نشط",
+      "emptyCategories": "لا توجد تصنيفات.",
+      "emptyDepartments": "لا توجد إدارات.",
+      "loadError": "فشل تحميل البيانات. يرجى المحاولة مرة أخرى.",
+      "validationError": "فشل التحقق من الصحة. يرجى التحقق من الإدخال.",
+      "duplicateError": "هذا الاسم موجود بالفعل.",
+      "saveError": "فشل الحفظ. يرجى المحاولة مرة أخرى.",
+      "categoryCreated": "تم إنشاء التصنيف بنجاح!",
+      "categoryUpdated": "تم تحديث التصنيف بنجاح!",
+      "departmentCreated": "تم إنشاء الإدارة بنجاح!",
+      "departmentUpdated": "تم تحديث الإدارة بنجاح!"
     }
-   },
-   "referenceData": {
-    "title": "البيانات المرجعية",
-    "subtitle": "إدارة التصنيفات والإدارات المستخدمة في النظام.",
-    "categoriesTab": "التصنيفات",
-    "departmentsTab": "الإدارات",
-    "categoriesList": "جميع التصنيفات",
-    "departmentsList": "جميع الإدارات",
-    "addCategory": "إضافة تصنيف",
-    "addDepartment": "إضافة إدارة",
-    "editCategory": "تعديل التصنيف",
-    "editDepartment": "تعديل الإدارة",
-    "nameEn": "الاسم (EN)",
-    "nameAr": "الاسم (AR)",
-    "status": "الحالة",
-    "actions": "الإجراءات",
-    "active": "نشط",
-    "inactive": "غير نشط",
-    "activeLabel": "نشط",
-    "emptyCategories": "لا توجد تصنيفات.",
-    "emptyDepartments": "لا توجد إدارات.",
-    "loadError": "فشل تحميل البيانات. يرجى المحاولة مرة أخرى.",
-    "validationError": "فشل التحقق من الصحة. يرجى التحقق من الإدخال.",
-    "duplicateError": "هذا الاسم موجود بالفعل.",
-    "saveError": "فشل الحفظ. يرجى المحاولة مرة أخرى.",
-    "categoryCreated": "تم إنشاء التصنيف بنجاح!",
-    "categoryUpdated": "تم تحديث التصنيف بنجاح!",
-    "departmentCreated": "تم إنشاء الإدارة بنجاح!",
-    "departmentUpdated": "تم تحديث الإدارة بنجاح!"
-   }
   },
+
   "callCenter": {
     "title": "مركز الاتصال",
     "subtitle": "ابحث عن المواطنين لعرض الملف الشخصي أو إنشاء حالة",
@@ -177,6 +182,7 @@
       "next": "التالي"
     }
   },
+
   "citizenProfile": {
     "title": "ملف المواطن",
     "subtitle": "الملف الشخصي الكامل للمواطن وتاريخ الحالات",
@@ -223,6 +229,7 @@
       "loadFailed": "فشل تحميل ملف المواطن. يرجى المحاولة مرة أخرى."
     }
   },
+
   "newCitizen": {
     "title": "تسجيل مواطن جديد",
     "subtitle": "إنشاء سجل مواطن جديد في النظام",
@@ -254,6 +261,7 @@
       "emailPattern": "يرجى إدخال بريد إلكتروني صالح"
     }
   },
+
   "landing": {
     "badge": "التحول الرقمي الحكومي",
     "heroTitle": "رابط المواطن",
@@ -349,6 +357,7 @@
       "lastUpdated": "آخر تحديث: 2026"
     }
   },
+
   "login": {
     "welcomeBack": "مرحباً بعودتك",
     "signInPrompt": "يرجى تسجيل الدخول للوصول إلى الخدمات الحكومية",
@@ -374,21 +383,26 @@
       "unknown": "حدث خطأ غير متوقع"
     }
   },
+
   "forbidden": {
     "title": "تم رفض الوصول",
     "message": "ليس لديك صلاحية لعرض هذه الصفحة. إذا كنت تعتقد أن هذا خطأ، يرجى التواصل مع المسؤول.",
     "backToDashboard": "العودة إلى لوحة التحكم"
   },
+
   "logout": {
     "title": "جاري تسجيل الخروج...",
     "subtitle": "يرجى الانتظار"
   },
+
   "sidebar": {
     "signOut": "تسجيل الخروج"
   },
+
   "topbar": {
     "searchPlaceholder": "ابحث عن الحالات أو المواطنين..."
   },
+
   "reports": {
     "kpi": {
       "totalCases": "إجمالي الحالات",
@@ -430,15 +444,18 @@
       "invalidRange": "يجب أن يكون تاريخ البداية قبل تاريخ النهاية."
     }
   },
+
   "cases": {
     "title": "الحالات",
     "subtitle": "إدارة وتتبع طلبات خدمات المواطنين",
+
     "errors": {
       "forbidden": "لا تملك صلاحية لعرض هذه البيانات.",
       "loadFailed": "فشل تحميل الحالات. يرجى المحاولة مرة أخرى.",
       "loadDepartmentsFailed": "فشل تحميل الأقسام. يرجى تحديث الصفحة.",
       "loadCategoriesFailed": "فشل تحميل الفئات. يرجى تحديث الصفحة."
     },
+
     "actions": {
       "assign": "إسناد",
       "reassign": "إعادة إسناد",
@@ -451,6 +468,7 @@
       "reopen": "إعادة فتح",
       "cancel": "إلغاء"
     },
+
     "detail": {
       "title": "تفاصيل الحالة",
       "loading": "جاري تحميل تفاصيل الحالة...",
@@ -491,9 +509,11 @@
       "infoRequestPlaceholder": "صف المعلومات المطلوبة من المواطن",
       "resolutionLabel": "ملخص الحل",
       "resolutionPlaceholder": "قدم ملخصًا موجزًا لكيفية حل الحالة",
+
       "events": {
         "created": "تم إنشاء الحالة"
       },
+
       "notes": {
         "title": "ملاحظات",
         "addNote": "إضافة ملاحظة",
@@ -514,6 +534,7 @@
         "deleteConfirm": "هل أنت متأكد من حذف هذه الملاحظة؟",
         "confirmDelete": "تأكيد الحذف؟"
       },
+
       "attachments": {
         "title": "المرفقات",
         "upload": "رفع ملف",
@@ -535,6 +556,7 @@
         "uploading": "جاري الرفع..."
       }
     },
+
     "newCase": "حالة جديدة",
     "caseList": "قائمة الحالات",
     "searchPlaceholder": "البحث برقم الحالة أو الموضوع...",
@@ -542,25 +564,31 @@
     "allTypes": "جميع الأنواع",
     "allPriorities": "جميع الأولويات",
     "clearFilters": "مسح",
+
     "quickFilters": {
       "overdue": "متأخر",
       "dueToday": "مستحق اليوم",
       "unassigned": "غير مسندة"
+    },
+
     "filters": {
       "keyword": "بحث",
       "status": "تصفية حسب الحالة",
       "type": "تصفية حسب النوع",
       "priority": "تصفية حسب الأولوية"
     },
+
     "noResults": "لا توجد حالات",
     "noResultsHint": "حاول تعديل الفلاتر أو إنشاء حالة جديدة",
     "loading": "جاري تحميل الحالات...",
+
     "pagination": {
       "showing": "عرض",
       "to": "إلى",
       "of": "من",
       "cases": "حالات"
     },
+
     "table": {
       "caseNumber": "رقم الحالة",
       "subject": "الموضوع",
@@ -571,6 +599,7 @@
       "assignedTo": "مسند إلى",
       "created": "تاريخ الإنشاء"
     },
+
     "stats": {
       "total": "إجمالي الحالات",
       "myCases": "حالاتي",
@@ -578,6 +607,7 @@
       "urgent": "عاجلة",
       "resolved": "محلولة"
     },
+
     "statuses": {
       "NEW": "جديد",
       "ASSIGNED": "مسند",
@@ -588,22 +618,26 @@
       "CLOSED": "مغلق",
       "CANCELLED": "ملغي"
     },
+
     "types": {
       "COMPLAINT": "شكوى",
       "REQUEST": "طلب"
     },
+
     "priorities": {
       "LOW": "منخفضة",
       "MEDIUM": "متوسطة",
       "HIGH": "عالية",
       "URGENT": "عاجلة"
     },
+
     "channels": {
       "PHONE": "هاتف",
       "WEB": "ويب",
       "WALK_IN": "حضور شخصي",
       "EMAIL": "بريد إلكتروني"
     },
+
     "create": {
       "title": "حالة جديدة",
       "backToList": "العودة للقائمة",
@@ -611,11 +645,13 @@
       "changeCitizen": "تغيير المواطن",
       "citizenLocked": "مقيد بملف هذا المواطن",
       "loadingCitizen": "جاري تحميل المواطن...",
+
       "sections": {
         "citizen": "بيانات المواطن",
         "details": "تفاصيل الحالة",
         "assignment": "الإسناد"
       },
+
       "fields": {
         "citizen": "المواطن",
         "citizenId": "الرقم الوطني",
@@ -639,18 +675,21 @@
         "assignToPlaceholder": "معرف المستخدم — اتركه فارغاً للتخطي",
         "optional": "اختياري"
       },
+
       "actions": {
         "reset": "إعادة تعيين",
         "cancel": "إلغاء",
         "creating": "جاري الإنشاء...",
         "createCase": "إنشاء حالة"
       },
-"errors": {
+
+      "errors": {
         "notFound": "أحد السجلات المرجعية غير موجود.",
         "citizenNotFound": "لم يتم العثور على مواطن بهذا الرقم الوطني.",
         "validationFailed": "يرجى تصحيح الحقول المحددة والمحاولة مرة أخرى.",
         "unexpected": "حدث خطأ غير متوقع. يرجى المحاولة مرة أخرى."
       },
+
       "duplicates": {
         "title": "تم اكتشاف حالة مفتوحة مكررة محتملة",
         "body": "لدى هذا المواطن بالفعل حالة مفتوحة تتداخل مع الفئة أو القسم المحدد. يمكنك فتح أي منها لمراجعتها قبل اتخاذ القرار.",
@@ -662,6 +701,7 @@
         "checkingHint": "جاري التحقق من الحالات المفتوحة المكررة المحتملة..."
       }
     },
+
     "bulkReassign": {
       "title": "إعادة إسناد الحالات",
       "description": "إعادة إسناد {{count}} حالة (حالات) محددة إلى معالج آخر.",
@@ -682,14 +722,17 @@
       "handlersLoadError": "فشل تحميل قائمة المعالجين."
     }
   },
+
   "dashboard": {
     "title": "لوحة المعلومات",
     "subtitle": "نظرة فورية على نشاط الحالات",
     "loading": "جاري تحميل لوحة المعلومات...",
+
     "errors": {
       "loadFailed": "فشل تحميل بيانات لوحة المعلومات. يرجى المحاولة مرة أخرى.",
       "noPermission": "ليس لديك صلاحية لعرض بيانات لوحة المعلومات."
     },
+
     "kpis": {
       "openCases": "الحالات المفتوحة",
       "resolvedThisMonth": "تم حلها هذا الشهر",
@@ -699,14 +742,17 @@
       "overdueDesc": "يتطلب انتباهاً",
       "newTodayDesc": "طلبات المواطنين الواردة"
     },
+
     "chart": {
       "title": "الحالات حسب الوضع"
     },
+
     "myInbox": {
       "title": "صندوق العمل",
       "searchPlaceholder": "بحث برقم الحالة أو الموضوع",
       "allStatuses": "جميع الحالات",
       "allPriorities": "جميع الأولويات",
+
       "columns": {
         "caseNumber": "رقم الحالة",
         "subject": "الموضوع",
@@ -716,10 +762,12 @@
         "dueDate": "تاريخ الاستحقاق",
         "lastUpdate": "آخر تحديث"
       },
+
       "empty": "لا توجد حالات مفتوحة معينة إليك.",
       "loadError": "فشل تحميل صندوق العمل.",
       "noPermission": "ليست لديك صلاحية لعرض صندوق العمل.",
       "cases": "حالات",
+
       "quickFilters": {
         "overdue": "متأخر",
         "dueToday": "مستحق اليوم",
@@ -727,7 +775,9 @@
         "awaitingInfo": "بانتظار معلومات",
         "newlyAssigned": "معيّن حديثاً"
       },
+
       "clearAll": "مسح عوامل التصفية",
+
       "sort": {
         "smart": "ذكي (حسب الإلحاح)",
         "dueDate": "تاريخ الاستحقاق",
@@ -735,6 +785,7 @@
         "newest": "المحدَّث حديثاً"
       }
     },
+
     "myOpenCases": {
       "title": "حالاتي المفتوحة",
       "dueDate": "تاريخ الاستحقاق",
@@ -742,6 +793,7 @@
       "loadError": "فشل تحميل حالاتك المفتوحة.",
       "noPermission": "ليس لديك صلاحية لعرض حالاتك المفتوحة."
     },
+
     "workload": {
       "title": "عبء العمل",
       "assigned": "مسند إلى",
@@ -751,14 +803,16 @@
       "retry": "إعادة المحاولة",
       "loadFailed": "فشل تحميل مؤشرات عبء العمل."
     },
+
     "attachments": {
-    "loadError": "فشل تحميل المرفقات. يرجى المحاولة مرة أخرى.",
-    "downloadSuccess": "تم تحميل الملف بنجاح!",
-    "downloadError": "فشل تحميل الملف. يرجى المحاولة مرة أخرى.",
-    "deleteConfirmTitle": "تأكيد الحذف",
-    "deleteConfirm": "هل أنت متأكد من حذف هذا المرفق؟ لا يمكن التراجع عن هذا الإجراء.",
-    "confirmDelete": "تأكيد؟",
-    "cancelDelete": "إلغاء"
+      "loadError": "فشل تحميل المرفقات. يرجى المحاولة مرة أخرى.",
+      "downloadSuccess": "تم تحميل الملف بنجاح!",
+      "downloadError": "فشل تحميل الملف. يرجى المحاولة مرة أخرى.",
+      "deleteConfirmTitle": "تأكيد الحذف",
+      "deleteConfirm": "هل أنت متأكد من حذف هذا المرفق؟ لا يمكن التراجع عن هذا الإجراء.",
+      "confirmDelete": "تأكيد؟",
+      "cancelDelete": "إلغاء"
     }
   }
 }
+

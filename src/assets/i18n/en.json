@@ -1,3 +1,4 @@
+
 {
   "common": {
     "appName": "CitizenLink",
@@ -49,101 +50,101 @@
     "departments": "Departments"
   },
   "admin": {
-   "users": {
-    "title": "User Administration",
-    "subtitle": "Manage staff access, roles, and system permissions.",
-    "roles": {
-      "ADMIN": "Admin",
-      "SUPERVISOR": "Supervisor",
-      "HANDLER": "Handler",
-      "AGENT": "Agent"
+    "users": {
+      "title": "User Administration",
+      "subtitle": "Manage staff access, roles, and system permissions.",
+      "roles": {
+        "ADMIN": "Admin",
+        "SUPERVISOR": "Supervisor",
+        "HANDLER": "Handler",
+        "AGENT": "Agent"
+      },
+      "createUser": "Create New User",
+      "exportList": "Export List",
+      "loading": "Loading users…",
+      "empty": "No users found matching your filters.",
+      "showing": "Showing",
+      "users": "users",
+      "filter": {
+        "role": "Filter by Role",
+        "status": "Filter by Status",
+        "allRoles": "All Roles",
+        "allStatuses": "All Statuses"
+      },
+      "table": {
+        "userInfo": "User Info",
+        "role": "Role",
+        "status": "Status",
+        "actions": "Actions"
+      },
+      "status": {
+        "active": "Active",
+        "inactive": "Inactive"
+      },
+      "errors": {
+        "forbidden": "You do not have permission to view users.",
+        "loadFailed": "Failed to load users. Please try again."
+      },
+      "actions": {
+        "edit": "Edit",
+        "deactivate": "Deactivate",
+        "activate": "Activate"
+      },
+      "modal": {
+        "createTitle": "Create New User",
+        "editTitle": "Edit User",
+        "username": "Username",
+        "usernameReadonly": "Username (cannot be changed)",
+        "displayName": "Display Name",
+        "email": "Email",
+        "role": "Role",
+        "password": "Password",
+        "passwordPlaceholder": "Min 8 characters",
+        "showPassword": "Show",
+        "hidePassword": "Hide",
+        "creating": "Creating...",
+        "saving": "Saving...",
+        "createSuccess": "User created successfully!",
+        "updateSuccess": "User updated successfully!",
+        "deactivateSuccess": "User deactivated successfully!",
+        "activateSuccess": "User activated successfully!",
+        "duplicateUsername": "Username already taken",
+        "duplicateEmail": "Email already in use",
+        "userNotFound": "User not found",
+        "validationFailed": "Please correct the highlighted fields and try again.",
+        "updateFailed": "Failed to update user. Please try again.",
+        "deactivateFailed": "Failed to update user status. Please try again."
+      }
     },
-    "createUser": "Create New User",
-   "exportList": "Export List",
-   "loading": "Loading users…",
-   "empty": "No users found matching your filters.",
-   "showing": "Showing",
-   "users": "users",
-   "filter": {
-     "role": "Filter by Role",
-     "status": "Filter by Status",
-     "allRoles": "All Roles",
-     "allStatuses": "All Statuses"
-   },
-   "table": {
-     "userInfo": "User Info",
-     "role": "Role",
-     "status": "Status",
-     "actions": "Actions"
-   },
-    "status": {
-     "active": "Active",
-     "inactive": "Inactive"
-   },
-    "errors": {
-      "forbidden": "You do not have permission to view users.",
-      "loadFailed": "Failed to load users. Please try again."
-    },
-    "actions": {
-      "edit": "Edit",
-      "deactivate": "Deactivate",
-      "activate": "Activate"
-    },
-    "modal": {
-      "createTitle": "Create New User",
-      "editTitle": "Edit User",
-      "username": "Username",
-      "usernameReadonly": "Username (cannot be changed)",
-      "displayName": "Display Name",
-      "email": "Email",
-      "role": "Role",
-      "password": "Password",
-      "passwordPlaceholder": "Min 8 characters",
-      "showPassword": "Show",
-      "hidePassword": "Hide",
-      "creating": "Creating...",
-      "saving": "Saving...",
-      "createSuccess": "User created successfully!",
-      "updateSuccess": "User updated successfully!",
-      "deactivateSuccess": "User deactivated successfully!",
-      "activateSuccess": "User activated successfully!",
-      "duplicateUsername": "Username already taken",
-      "duplicateEmail": "Email already in use",
-      "userNotFound": "User not found",
-      "validationFailed": "Please correct the highlighted fields and try again.",
-      "updateFailed": "Failed to update user. Please try again.",
-      "deactivateFailed": "Failed to update user status. Please try again."
+    "referenceData": {
+      "title": "Reference Data",
+      "subtitle": "Manage categories and departments used across the system.",
+      "categoriesTab": "Categories",
+      "departmentsTab": "Departments",
+      "categoriesList": "All Categories",
+      "departmentsList": "All Departments",
+      "addCategory": "Add Category",
+      "addDepartment": "Add Department",
+      "editCategory": "Edit Category",
+      "editDepartment": "Edit Department",
+      "nameEn": "Name (EN)",
+      "nameAr": "Name (AR)",
+      "status": "Status",
+      "actions": "Actions",
+      "active": "Active",
+      "inactive": "Inactive",
+      "activeLabel": "Active",
+      "emptyCategories": "No categories found.",
+      "emptyDepartments": "No departments found.",
+      "loadError": "Failed to load data. Please try again.",
+      "validationError": "Validation failed. Please check your input.",
+      "duplicateError": "An entry with this name already exists.",
+      "saveError": "Failed to save. Please try again.",
+      "categoryCreated": "Category created successfully!",
+      "categoryUpdated": "Category updated successfully!",
+      "departmentCreated": "Department created successfully!",
+      "departmentUpdated": "Department updated successfully!"
     }
-   },
-   "referenceData": {
-    "title": "Reference Data",
-    "subtitle": "Manage categories and departments used across the system.",
-    "categoriesTab": "Categories",
-    "departmentsTab": "Departments",
-    "categoriesList": "All Categories",
-    "departmentsList": "All Departments",
-    "addCategory": "Add Category",
-    "addDepartment": "Add Department",
-    "editCategory": "Edit Category",
-    "editDepartment": "Edit Department",
-    "nameEn": "Name (EN)",
-    "nameAr": "Name (AR)",
-    "status": "Status",
-    "actions": "Actions",
-    "active": "Active",
-    "inactive": "Inactive",
-    "activeLabel": "Active",
-    "emptyCategories": "No categories found.",
-    "emptyDepartments": "No departments found.",
-    "loadError": "Failed to load data. Please try again.",
-    "validationError": "Validation failed. Please check your input.",
-    "duplicateError": "An entry with this name already exists.",
-    "saveError": "Failed to save. Please try again.",
-    "categoryCreated": "Category created successfully!",
-    "categoryUpdated": "Category updated successfully!",
-    "departmentCreated": "Department created successfully!",
-    "departmentUpdated": "Department updated successfully!"
-   }
   },
   "callCenter": {
     "title": "Call Center",
@@ -390,14 +391,14 @@
     "searchPlaceholder": "Search cases, citizens, or IDs..."
   },
   "reports": {
-   "kpi": {
-     "totalCases": "Total Cases",
-     "totalCasesHint": "Created in selected period",
-     "resolved": "Resolved This Period",
-     "resolvedHint": "Period resolution count",
-     "period": "Period Length",
-     "topCategory": "Top Category",
-     "ofTotal": "of total"
+    "kpi": {
+      "totalCases": "Total Cases",
+      "totalCasesHint": "Created in selected period",
+      "resolved": "Resolved This Period",
+      "resolvedHint": "Period resolution count",
+      "period": "Period Length",
+      "topCategory": "Top Category",
+      "ofTotal": "of total"
     },
     "title": "Reports & Analytics",
     "subtitle": "System performance and case resolution metrics",
@@ -546,6 +547,7 @@
       "overdue": "Overdue",
       "dueToday": "Due Today",
       "unassigned": "Unassigned"
+    },
     "filters": {
       "keyword": "Search",
       "status": "Filter by status",
@@ -646,11 +648,21 @@
         "createCase": "Create Case"
       },
       "errors": {
-      "notFound": "A referenced record was not found.",
-      "citizenNotFound": "No citizen was found with this National ID.",
-      "validationFailed": "Please correct the highlighted fields and try again.",
-      "unexpected": "An unexpected error occurred. Please try again."
-    }
+        "notFound": "A referenced record was not found.",
+        "citizenNotFound": "No citizen was found with this National ID.",
+        "validationFailed": "Please correct the highlighted fields and try again.",
+        "unexpected": "An unexpected error occurred. Please try again."
+      },
+      "duplicates": {
+        "title": "Possible duplicate open case detected",
+        "body": "This citizen already has an open case overlapping the selected category or department. You can open any of them to review before deciding.",
+        "open": "Open",
+        "reasonLabel": "Reason for proceeding",
+        "reasonPlaceholder": "Brief reason this case must be created anyway…",
+        "reasonRequired": "A reason is required to continue.",
+        "confirm": "Confirm & create anyway",
+        "checkingHint": "Checking for possible duplicate open cases…"
+      }
     },
     "bulkReassign": {
       "title": "Reassign Cases",
@@ -670,21 +682,6 @@
       "ineligible": "This case cannot be reassigned in its current status.",
       "loadFailed": "Failed to reassign cases. Please try again.",
       "handlersLoadError": "Failed to load handlers."
-        "notFound": "A referenced record was not found.",
-        "citizenNotFound": "No citizen was found with this National ID.",
-        "validationFailed": "Please correct the highlighted fields and try again.",
-        "unexpected": "An unexpected error occurred. Please try again."
-      },
-      "duplicates": {
-        "title": "Possible duplicate open case detected",
-        "body": "This citizen already has an open case overlapping the selected category or department. You can open any of them to review before deciding.",
-        "open": "Open",
-        "reasonLabel": "Reason for proceeding",
-        "reasonPlaceholder": "Brief reason this case must be created anyway…",
-        "reasonRequired": "A reason is required to continue.",
-        "confirm": "Confirm & create anyway",
-        "checkingHint": "Checking for possible duplicate open cases…"
-      }
     }
   },
   "dashboard": {
@@ -757,13 +754,14 @@
       "loadFailed": "Failed to load workload indicators."
     },
     "attachments": {
-    "loadError": "Failed to load attachments. Please try again.",
-    "downloadSuccess": "File downloaded successfully!",
-    "downloadError": "Failed to download file. Please try again.",
-    "deleteConfirmTitle": "Confirm Delete",
-    "deleteConfirm": "Are you sure you want to delete this attachment? This action cannot be undone.",
-    "confirmDelete": "Confirm?",
-    "cancelDelete": "Cancel"
+      "loadError": "Failed to load attachments. Please try again.",
+      "downloadSuccess": "File downloaded successfully!",
+      "downloadError": "Failed to download file. Please try again.",
+      "deleteConfirmTitle": "Confirm Delete",
+      "deleteConfirm": "Are you sure you want to delete this attachment? This action cannot be undone.",
+      "confirmDelete": "Confirm?",
+      "cancelDelete": "Cancel"
     }
   }
 }
+
