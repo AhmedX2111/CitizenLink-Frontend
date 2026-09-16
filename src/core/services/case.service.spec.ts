@@ -114,6 +114,30 @@ describe('CaseService', () => {
       expect(req.request.params.has('keyword')).toBe(false);
       req.flush({ content: [], page: 0, size: 10, totalElements: 0, totalPages: 0, first: true, last: true });
     });
+
+    it('sets the US-54 workload quick filters (overdue / dueToday / unassigned) as query params', () => {
+      service
+        .searchCases({ overdue: true, dueToday: true, unassigned: true })
+        .subscribe();
+
+      const req = httpMock.expectOne((r) => r.method === 'GET' && r.url === CASES_URL);
+      expect(req.request.params.get('overdue')).toBe('true');
+      expect(req.request.params.get('dueToday')).toBe('true');
+      expect(req.request.params.get('unassigned')).toBe('true');
+      req.flush({ content: [], page: 0, size: 10, totalElements: 0, totalPages: 0, first: true, last: true });
+    });
+
+    it('omits the US-54 quick filters when falsy', () => {
+      service
+        .searchCases({ overdue: false, dueToday: false, unassigned: false })
+        .subscribe();
+
+      const req = httpMock.expectOne((r) => r.method === 'GET' && r.url === CASES_URL);
+      expect(req.request.params.has('overdue')).toBe(false);
+      expect(req.request.params.has('dueToday')).toBe(false);
+      expect(req.request.params.has('unassigned')).toBe(false);
+      req.flush({ content: [], page: 0, size: 10, totalElements: 0, totalPages: 0, first: true, last: true });
+    });
   });
 
   it('getCaseById GETs the single-case endpoint', () => {
@@ -165,5 +189,31 @@ describe('CaseService', () => {
 
     const req = httpMock.expectOne({ method: 'GET', url: `${environment.apiUrl}/api/v1/categories` });
     req.flush([]);
+  });
+
+  it('US-53: bulkReassignCases POSTs the request body to the bulk-reassign endpoint', () => {
+    const request = {
+      caseIds: ['case-1', 'case-2'],
+      assignedToUserId: 'handler-1',
+      comment: 'Reassigning due to workload'
+    };
+
+    service.bulkReassignCases(request).subscribe(res => {
+      expect(res.totalRequested).toBe(2);
+      expect(res.succeeded).toBe(2);
+      expect(res.failed).toBe(0);
+    });
+
+    const req = httpMock.expectOne({ method: 'POST', url: `${CASES_URL}/bulk-reassign` });
+    expect(req.request.body).toEqual(request);
+    req.flush({
+      totalRequested: 2,
+      succeeded: 2,
+      failed: 0,
+      results: [
+        { caseId: 'case-1', caseNumber: 'CASE-2026-0001', success: true, errorCode: null, message: null },
+        { caseId: 'case-2', caseNumber: 'CASE-2026-0002', success: true, errorCode: null, message: null }
+      ]
+    });
   });
 });

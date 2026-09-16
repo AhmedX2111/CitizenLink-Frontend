@@ -95,4 +95,46 @@ describe('DashboardService.getMyInbox', () => {
     expect(req.request.method).toBe('GET');
     req.flush(counts);
   });
+
+  it('US-54: getWorkloadIndicators GETs the workload endpoint', () => {
+    const workload = {
+      scope: 'PERSONAL',
+      indicators: [
+        { key: 'ASSIGNED', count: 12, link: '/api/v1/dashboard/my-inbox' },
+        { key: 'OVERDUE', count: 4, link: '/api/v1/dashboard/my-inbox?overdue=true' },
+        { key: 'DUE_TODAY', count: 2, link: '/api/v1/dashboard/my-inbox?dueToday=true' }
+      ]
+    };
+
+    service.getWorkloadIndicators().subscribe(res => {
+      expect(res.scope).toBe('PERSONAL');
+      expect(res.indicators.length).toBe(3);
+      expect(res.indicators[0].key).toBe('ASSIGNED');
+      expect(res.indicators[0].count).toBe(12);
+    });
+
+    const req = httpMock.expectOne(r => r.url === `${environment.apiUrl}/api/v1/dashboard/workload`);
+    expect(req.request.method).toBe('GET');
+    req.flush(workload);
+  });
+
+  it('US-54: getWorkloadIndicators returns TEAM scope for supervisors', () => {
+    const workload = {
+      scope: 'TEAM',
+      indicators: [
+        { key: 'OVERDUE', count: 5, link: '/api/v1/cases?overdue=true' },
+        { key: 'DUE_TODAY', count: 3, link: '/api/v1/cases?dueToday=true' },
+        { key: 'UNASSIGNED', count: 1, link: '/api/v1/cases?unassigned=true' }
+      ]
+    };
+
+    service.getWorkloadIndicators().subscribe(res => {
+      expect(res.scope).toBe('TEAM');
+      expect(res.indicators.length).toBe(3);
+      expect(res.indicators[2].key).toBe('UNASSIGNED');
+    });
+
+    const req = httpMock.expectOne(r => r.url === `${environment.apiUrl}/api/v1/dashboard/workload`);
+    req.flush(workload);
+  });
 });

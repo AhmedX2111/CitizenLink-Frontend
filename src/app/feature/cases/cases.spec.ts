@@ -27,6 +27,7 @@ import { TranslocoService } from '@jsverse/transloco';
 
 import { CasesComponent } from './cases';
 import { CaseService } from '../../../core/services/case.service';
+import { AuthUserService } from '../../auth/auth-user.service';
 import { LoggerService } from '../../../core/services/logger.service';
 import { CaseResponse, CaseStatus } from '../../../core/models/case.models';
 import { Department } from '../../../core/models/department.model';
@@ -77,9 +78,17 @@ describe('CasesComponent', () => {
     getDepartments: ReturnType<typeof vi.fn>;
     getCategories: ReturnType<typeof vi.fn>;
     createCase: ReturnType<typeof vi.fn>;
+    getHandlers: ReturnType<typeof vi.fn>;
+    bulkReassignCases: ReturnType<typeof vi.fn>;
+  };
+  let authUserService: {
+    hasRole: ReturnType<typeof vi.fn>;
+    hasRoleSignal: ReturnType<typeof vi.fn>;
+    hasRoleAny: ReturnType<typeof vi.fn>;
   };
   let router: { navigate: ReturnType<typeof vi.fn>; getCurrentNavigation: ReturnType<typeof vi.fn> };
   let queryParams$: BehaviorSubject<Record<string, string>>;
+  let routeSnapshot: { queryParams: Record<string, string> };
 
   beforeEach(async () => {
     caseService = {
@@ -96,17 +105,29 @@ describe('CasesComponent', () => {
       ),
       getDepartments: vi.fn().mockReturnValue(of(departments)),
       getCategories: vi.fn().mockReturnValue(of(categories)),
-      createCase: vi.fn()
+      createCase: vi.fn(),
+      getHandlers: vi.fn().mockReturnValue(of([])),
+      bulkReassignCases: vi.fn()
     };
-    router = { navigate: vi.fn(), getCurrentNavigation: vi.fn().mockReturnValue(null) };
+    authUserService = {
+      hasRole: vi.fn().mockReturnValue(false),
+      hasRoleSignal: vi.fn().mockReturnValue(() => false),
+      hasRoleAny: vi.fn().mockReturnValue(false)
+    };
+    router = {
+      navigate: vi.fn(),
+      getCurrentNavigation: vi.fn().mockReturnValue(null)
+    };
     queryParams$ = new BehaviorSubject({});
+    routeSnapshot = { queryParams: {} };
 
     await TestBed.configureTestingModule({
       imports: [CasesComponent],
       providers: [
         { provide: CaseService, useValue: caseService },
+        { provide: AuthUserService, useValue: authUserService },
         { provide: Router, useValue: router },
-        { provide: ActivatedRoute, useValue: { queryParams: queryParams$ } },
+        { provide: ActivatedRoute, useValue: { queryParams: queryParams$, snapshot: routeSnapshot } },
         { provide: LoggerService, useValue: { error: vi.fn(), info: vi.fn(), warn: vi.fn() } },
         {
           provide: TranslocoService,
@@ -330,5 +351,329 @@ describe('CasesComponent', () => {
     component.ngOnInit();
 
     expect(component.createForm.get('citizenNationalId')?.value).toBe('');
+  });
+
+  // ── US-53: Bulk reassign ──────────────────────────────────────────
+
+  describe('US-53: Bulk reassign', () => {
+
+    it('isSupervisor calls authUserService.hasRole', () => {
+      // The computed signal is cached at creation; verify the mock was used
+      expect(authUserService.hasRole).toHaveBeenCalled();
+    });
+
+    it('toggleSelect adds a case id to selectedCaseIds', () => {
+      const event = { stopPropagation: vi.fn() } as unknown as Event;
+      component.toggleSelect('case-a', event);
+      expect(component.selectedCaseIds().has('case-a')).toBe(true);
+      expect(event.stopPropagation).toHaveBeenCalled();
+    });
+
+    it('toggleSelect removes a case id when already selected', () => {
+      component.selectedCaseIds.set(new Set(['case-a']));
+      const event = { stopPropagation: vi.fn() } as unknown as Event;
+      component.toggleSelect('case-a', event);
+      expect(component.selectedCaseIds().has('case-a')).toBe(false);
+    });
+
+    it('toggleSelectAll selects all cases when none selected', () => {
+      component.toggleSelectAll();
+      expect(component.selectedCaseIds()).toEqual(new Set(['case-a', 'case-b']));
+    });
+
+    it('toggleSelectAll deselects all when all already selected', () => {
+      component.selectedCaseIds.set(new Set(['case-a', 'case-b']));
+      component.toggleSelectAll();
+      expect(component.selectedCaseIds().size).toBe(0);
+    });
+
+    it('allSelected is true when every case is selected', () => {
+      component.selectedCaseIds.set(new Set(['case-a', 'case-b']));
+      expect(component.allSelected()).toBe(true);
+    });
+
+    it('hasSelection is true when at least one case is selected', () => {
+      component.selectedCaseIds.set(new Set(['case-a']));
+      expect(component.hasSelection()).toBe(true);
+    });
+
+    it('selectedCount reflects the number of selected cases', () => {
+      component.selectedCaseIds.set(new Set(['case-a', 'case-b']));
+      expect(component.selectedCount()).toBe(2);
+    });
+
+    it('openReassignModal opens the modal and loads handlers', () => {
+      component.selectedCaseIds.set(new Set(['case-a']));
+      component.openReassignModal();
+      expect(component.isReassignModalOpen()).toBe(true);
+      expect(caseService.getHandlers).toHaveBeenCalled();
+    });
+
+    it('openReassignModal does nothing when no cases selected', () => {
+      component.selectedCaseIds.set(new Set());
+      component.openReassignModal();
+      expect(component.isReassignModalOpen()).toBe(false);
+    });
+
+    it('closeReassignModal closes the modal and resets state', () => {
+      component.isReassignModalOpen.set(true);
+      component.closeReassignModal();
+      expect(component.isReassignModalOpen()).toBe(false);
+      expect(component.bulkReassignError()).toBeNull();
+      expect(component.bulkReassignResult()).toBeNull();
+    });
+
+    it('submitBulkReassign calls service and updates result on success', () => {
+      const result = {
+        totalRequested: 2,
+        succeeded: 2,
+        failed: 0,
+        results: []
+      };
+      caseService.bulkReassignCases.mockReturnValue(of(result));
+
+      component.selectedCaseIds.set(new Set(['case-a', 'case-b']));
+      component.reassignHandlerId.set('handler-1');
+      component.reassignComment.set('Balancing workload');
+      component.submitBulkReassign();
+
+      expect(caseService.bulkReassignCases).toHaveBeenCalledWith({
+        caseIds: ['case-a', 'case-b'],
+        assignedToUserId: 'handler-1',
+        comment: 'Balancing workload'
+      });
+      expect(component.bulkReassignResult()).toEqual(result);
+      expect(component.bulkReassignLoading()).toBe(false);
+    });
+
+    it('submitBulkReassign sets error when handler not selected', () => {
+      component.reassignHandlerId.set('');
+      component.submitBulkReassign();
+      expect(component.bulkReassignError()).toBe('cases.bulkReassign.handlerRequired');
+      expect(caseService.bulkReassignCases).not.toHaveBeenCalled();
+    });
+
+    it('submitBulkReassign handles partial failure', () => {
+      const result = {
+        totalRequested: 2,
+        succeeded: 1,
+        failed: 1,
+        results: [
+          { caseId: 'case-a', caseNumber: 'CASE-2026-0001', success: true, errorCode: null, message: null },
+          { caseId: 'case-b', caseNumber: 'CASE-2026-0002', success: false, errorCode: 'ALREADY_ASSIGNED', message: 'Already assigned' }
+        ]
+      };
+      caseService.bulkReassignCases.mockReturnValue(of(result));
+
+      component.selectedCaseIds.set(new Set(['case-a', 'case-b']));
+      component.reassignHandlerId.set('handler-1');
+      component.reassignComment.set('Balancing workload');
+      component.submitBulkReassign();
+
+      expect(component.bulkReassignResult()?.failed).toBe(1);
+      // selectedCaseIds should NOT be cleared on partial failure
+      expect(component.selectedCaseIds().size).toBe(2);
+    });
+
+    it('submitBulkReassign clears selection on full success', () => {
+      const result = {
+        totalRequested: 2,
+        succeeded: 2,
+        failed: 0,
+        results: []
+      };
+      caseService.bulkReassignCases.mockReturnValue(of(result));
+
+      component.selectedCaseIds.set(new Set(['case-a', 'case-b']));
+      component.reassignHandlerId.set('handler-1');
+      component.reassignComment.set('Balancing workload');
+      component.submitBulkReassign();
+
+      expect(component.selectedCaseIds().size).toBe(0);
+    });
+
+    it('submitBulkReassign handles HTTP error', () => {
+      caseService.bulkReassignCases.mockReturnValue(throwError(() => ({ status: 500 })));
+
+      component.selectedCaseIds.set(new Set(['case-a']));
+      component.reassignHandlerId.set('handler-1');
+      component.reassignComment.set('Balancing workload');
+      component.submitBulkReassign();
+
+      expect(component.bulkReassignError()).toBe('cases.bulkReassign.loadFailed');
+      expect(component.bulkReassignLoading()).toBe(false);
+    });
+
+    it('submitBulkReassign handles 403 error', () => {
+      caseService.bulkReassignCases.mockReturnValue(throwError(() => ({ status: 403 })));
+
+      component.selectedCaseIds.set(new Set(['case-a']));
+      component.reassignHandlerId.set('handler-1');
+      component.reassignComment.set('Balancing workload');
+      component.submitBulkReassign();
+
+      expect(component.bulkReassignError()).toBe('cases.errors.forbidden');
+    });
+
+    it('submitBulkReassign sets error when comment is blank (AUD-01)', () => {
+      caseService.bulkReassignCases.mockReturnValue(of({ totalRequested: 1, succeeded: 0, failed: 0, results: [] }));
+
+      component.selectedCaseIds.set(new Set(['case-a']));
+      component.reassignHandlerId.set('handler-1');
+      component.reassignComment.set('   ');
+      component.submitBulkReassign();
+
+      expect(component.bulkReassignError()).toBe('cases.bulkReassign.commentRequired');
+      expect(caseService.bulkReassignCases).not.toHaveBeenCalled();
+    });
+
+    it('reassignCommentFilled is false for blank/whitespace comment', () => {
+      component.reassignComment.set('');
+      expect(component.reassignCommentFilled()).toBe(false);
+      component.reassignComment.set('   ');
+      expect(component.reassignCommentFilled()).toBe(false);
+      component.reassignComment.set('reason');
+      expect(component.reassignCommentFilled()).toBe(true);
+    });
+
+    it('bulkReassignFailures lists only failed cases (no silent skips)', () => {
+      component.bulkReassignResult.set({
+        totalRequested: 3,
+        succeeded: 1,
+        failed: 2,
+        results: [
+          { caseId: 'case-a', caseNumber: 'CASE-2026-0001', success: true, errorCode: null, message: null },
+          { caseId: 'case-b', caseNumber: 'CASE-2026-0002', success: false, errorCode: 'INVALID_TRANSITION', message: 'Closed' },
+          { caseId: 'case-c', caseNumber: 'CASE-2026-0003', success: false, errorCode: 'NOT_FOUND', message: 'Missing' }
+        ]
+      });
+
+      const failures = component.bulkReassignFailures();
+      expect(failures).toHaveLength(2);
+      expect(failures.map(f => f.caseNumber)).toEqual(['CASE-2026-0002', 'CASE-2026-0003']);
+    });
+
+    it('bulkReassignFailures is empty when there is no result', () => {
+      component.bulkReassignResult.set(null);
+      expect(component.bulkReassignFailures()).toEqual([]);
+    });
+
+    it('isReassignable is true only for ASSIGNED / IN_PROGRESS / AWAITING_INFO / SUSPENDED', () => {
+      expect(component.isReassignable('ASSIGNED')).toBe(true);
+      expect(component.isReassignable('IN_PROGRESS')).toBe(true);
+      expect(component.isReassignable('AWAITING_INFO')).toBe(true);
+      expect(component.isReassignable('SUSPENDED')).toBe(true);
+      expect(component.isReassignable('NEW')).toBe(false);
+      expect(component.isReassignable('RESOLVED')).toBe(false);
+      expect(component.isReassignable('CLOSED')).toBe(false);
+      expect(component.isReassignable('CANCELLED')).toBe(false);
+    });
+
+    it('toggleSelect ignores a case whose status is ineligible', () => {
+      component.cases.set([{ ...caseA, status: 'CLOSED' }]);
+      const event = { stopPropagation: vi.fn() } as unknown as Event;
+      component.toggleSelect('case-a', event);
+      expect(component.selectedCaseIds().size).toBe(0);
+    });
+
+    it('toggleSelectAll selects only the reassignable rows on the page', () => {
+      component.cases.set([caseA, { ...caseA, id: 'case-c', caseNumber: 'CASE-2026-0003', status: 'CLOSED' }]);
+      component.toggleSelectAll();
+      expect(component.selectedCaseIds()).toEqual(new Set(['case-a']));
+    });
+
+    it('allSelected is false when the page has only ineligible cases', () => {
+      component.cases.set([{ ...caseA, status: 'CLOSED' }]);
+      component.selectedCaseIds.set(new Set());
+      expect(component.allSelected()).toBe(false);
+    });
+
+    it('onHandlerSearch updates handlerSearchTerm', () => {
+      component.onHandlerSearch('john');
+      expect(component.handlerSearchTerm()).toBe('john');
+    });
+
+    it('selectHandler sets reassignHandlerId', () => {
+      component.selectHandler('handler-1');
+      expect(component.reassignHandlerId()).toBe('handler-1');
+    });
+  });
+
+  // ── US-54: Workload quick filters on the case list ───────────────
+
+  describe('US-54: Workload quick filters', () => {
+
+    it('toggleQuickFilter("overdue") enables the filter and reloads with overdue=true', () => {
+      component.toggleQuickFilter('overdue');
+
+      expect(component.quickFilters()).toEqual({ overdue: true, dueToday: false, unassigned: false });
+      const args = lastSearchArgs();
+      expect(args.overdue).toBe(true);
+      expect(args.dueToday).toBeUndefined();
+      expect(args.unassigned).toBeUndefined();
+    });
+
+    it('toggleQuickFilter sends all three params when all active', () => {
+      component.toggleQuickFilter('overdue');
+      component.toggleQuickFilter('dueToday');
+      component.toggleQuickFilter('unassigned');
+
+      const args = lastSearchArgs();
+      expect(args.overdue).toBe(true);
+      expect(args.dueToday).toBe(true);
+      expect(args.unassigned).toBe(true);
+    });
+
+    it('toggleQuickFilter disables the filter on second toggle and omits the param', () => {
+      component.toggleQuickFilter('overdue');
+      component.toggleQuickFilter('overdue');
+
+      expect(component.quickFilters()).toEqual({ overdue: false, dueToday: false, unassigned: false });
+      expect(lastSearchArgs().overdue).toBeUndefined();
+    });
+
+    it('toggleQuickFilter syncs the active filter into the URL query params', () => {
+      component.toggleQuickFilter('dueToday');
+
+      expect(router.navigate).toHaveBeenCalledWith([], expect.objectContaining({
+        queryParams: { dueToday: 'true' }
+      }));
+    });
+
+    it('toggleQuickFilter removes a param from the URL when turned off', () => {
+      // Seed the route with two active filters, then turn one off.
+      routeSnapshot.queryParams = { overdue: 'true', dueToday: 'true' };
+      component.quickFilters.set({ overdue: true, dueToday: true, unassigned: false });
+
+      component.toggleQuickFilter('dueToday');
+
+      expect(router.navigate).toHaveBeenCalledWith([], expect.objectContaining({
+        queryParams: { overdue: 'true' }
+      }));
+    });
+
+    it('applies quick filters carried in the URL on a later navigation (deep link)', () => {
+      component.applyUrlQuickFilters({ overdue: 'true' }, false);
+
+      expect(component.quickFilters()).toEqual({ overdue: true, dueToday: false, unassigned: false });
+      expect(lastSearchArgs().overdue).toBe(true);
+    });
+
+    it('does not reload when the URL quick filters are unchanged', () => {
+      const before = caseService.searchCases.mock.calls.length;
+      // Signals already all-false; applying an empty param set is a no-op.
+      component.applyUrlQuickFilters({}, false);
+      expect(caseService.searchCases.mock.calls.length).toBe(before);
+    });
+
+    it('clearFilters clears active quick filters and reloads', () => {
+      component.toggleQuickFilter('overdue');
+      const before = caseService.searchCases.mock.calls.length;
+
+      component.clearFilters();
+
+      expect(component.quickFilters()).toEqual({ overdue: false, dueToday: false, unassigned: false });
+      expect(caseService.searchCases.mock.calls.length).toBeGreaterThan(before);
+    });
   });
 });

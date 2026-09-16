@@ -10,6 +10,7 @@ import { debounceTime, distinctUntilChanged, switchMap, catchError } from 'rxjs/
 import { Subject, of } from 'rxjs';
 import { TranslocoModule, TranslocoService } from '@jsverse/transloco';
 import { CaseService } from '../../../core/services/case.service';
+import { AuthUserService } from '../../auth/auth-user.service';
 import { LoggerService } from '../../../core/services/logger.service';
 import {
   errorDetails, fieldErrorsFromDetails, logServerError
@@ -18,7 +19,8 @@ import { Router, ActivatedRoute } from '@angular/router';
 
 import {
   CaseResponse, CaseSearchRequest, CaseStatus,
-  CaseType, Priority, PagedResponse
+  CaseType, Priority, PagedResponse,
+  HandlerResponse, BulkReassignResponse
 } from '../../../core/models/case.models';
 import { Department } from '../../../core/models/department.model';
 import { Category } from '../../../core/models/category.model';
@@ -42,6 +44,7 @@ export class CasesComponent implements OnInit, OnDestroy {
   private router         = inject(Router);
   private activatedRoute = inject(ActivatedRoute);
   private logger         = inject(LoggerService);
+  private authUser       = inject(AuthUserService);
   private timers      = new Set<ReturnType<typeof setTimeout>>();
   // Breadcrumb title passed to shared topbar
   pageTitle = () => this.transloco.translate('cases.title');
@@ -66,12 +69,31 @@ export class CasesComponent implements OnInit, OnDestroy {
   modalError      = signal<string | null>(null);
   selectedCase    = signal<CaseResponse | null>(null);
 
+  // ── US-53: Bulk reassign state ──────────────────────────────────
+  selectedCaseIds        = signal<Set<string>>(new Set());
+  isReassignModalOpen    = signal(false);
+  handlers               = signal<HandlerResponse[]>([]);
+  bulkReassignLoading    = signal(false);
+  bulkReassignError      = signal<string | null>(null);
+  bulkReassignResult     = signal<BulkReassignResponse | null>(null);
+  reassignHandlerId      = signal('');
+  reassignComment        = signal('');
+  handlerSearchTerm      = signal('');
+  handlerSearchLoading   = signal(false);
+
   // ── Case list state ───────────────────────────────────────────
   cases         = signal<CaseResponse[]>([]);
   totalElements = signal(0);
   totalPages    = signal(0);
   currentPage   = signal(0);
   pageSize      = 20;
+
+  // US-54: workload quick filters — applied server-side via the case-search
+  // request and round-tripped in the URL so the dashboard indicator links
+  // (/cases?overdue=true, etc.) land on an already-filtered list.
+  quickFilters = signal<{ overdue: boolean; dueToday: boolean; unassigned: boolean }>(
+    { overdue: false, dueToday: false, unassigned: false }
+  );
 
   // Every reload of the case list goes through this single subject.
   // switchMap (wired up in ngOnInit) guarantees that triggering a reload
@@ -121,6 +143,36 @@ export class CasesComponent implements OnInit, OnDestroy {
   urgentCount   = computed(() => this.cases().filter(c => c.priority === 'URGENT').length);
   resolvedCount = computed(() => this.cases().filter(c => c.status === 'RESOLVED').length);
 
+  // ── US-53: Selection + role computed ──────────────────────────
+  isSupervisor = computed(() =>
+    this.authUser.hasRole('SUPERVISOR') || this.authUser.hasRole('ADMIN')
+  );
+  // US-53 / ASN-01: only these statuses may be reassigned (mirrors the backend
+  // REASSIGN workflow rules). CLOSED / CANCELLED / NEW / RESOLVED are ineligible.
+  readonly reassignableStatuses: readonly CaseStatus[] = ['ASSIGNED', 'IN_PROGRESS', 'AWAITING_INFO', 'SUSPENDED'];
+  isReassignable = (status: CaseStatus): boolean => this.reassignableStatuses.includes(status);
+  selectedCount = computed(() => this.selectedCaseIds().size);
+  allSelected   = computed(() => {
+    const eligible = this.cases().filter(c => this.isReassignable(c.status));
+    return eligible.length > 0 && eligible.every(c => this.selectedCaseIds().has(c.id));
+  });
+  hasSelection  = computed(() => this.selectedCaseIds().size > 0);
+  // US-53: comment is required for audit accountability (backend enforces @NotBlank).
+  reassignCommentFilled = computed(() => this.reassignComment().trim().length > 0);
+  // US-53: per-case failures surfaced in the result banner (no silent skips).
+  bulkReassignFailures = computed(() =>
+    (this.bulkReassignResult()?.results ?? []).filter(r => !r.success)
+  );
+
+  filteredHandlers = computed(() => {
+    const term = this.handlerSearchTerm().trim().toLowerCase();
+    if (!term) return this.handlers();
+    return this.handlers().filter(h =>
+      h.displayName.toLowerCase().includes(term) ||
+      h.email.toLowerCase().includes(term)
+    );
+  });
+
   private schedule(fn: () => void, ms: number): void {
     const handle = setTimeout(() => {
       this.timers.delete(handle);
@@ -136,12 +188,16 @@ export class CasesComponent implements OnInit, OnDestroy {
 
   ngOnInit(): void {
     // Check if tab query parameter is set to 'create'
+    let firstParamEmission = true;
     this.activatedRoute.queryParams.pipe(
       takeUntilDestroyed(this.destroyRef)
     ).subscribe(params => {
       if (params['tab'] === 'create') {
         this.activeTab.set('create');
       }
+      // US-54: apply any quick filters carried in the URL (dashboard links).
+      this.applyUrlQuickFilters(params, firstParamEmission);
+      firstParamEmission = false;
     });
 
     // Pre-fill the create form's national id from the navigation state handed
@@ -166,6 +222,7 @@ export class CasesComponent implements OnInit, OnDestroy {
         this.isLoading.set(true);
         this.listError.set(null);
         const v = this.searchForm.value;
+        const q = this.quickFilters();
 
         const filter: CaseSearchRequest = {
           page: this.currentPage(),
@@ -174,6 +231,10 @@ export class CasesComponent implements OnInit, OnDestroy {
           ...(v.status           && { status:  v.status as CaseStatus }),
           ...(v.type             && { type:    v.type   as CaseType }),
           ...(v.priority         && { priority: v.priority as Priority }),
+          // US-54: workload quick filters (overdue / dueToday / unassigned)
+          ...(q.overdue    && { overdue: true }),
+          ...(q.dueToday   && { dueToday: true }),
+          ...(q.unassigned && { unassigned: true }),
         };
 
         return this.caseService.searchCases(filter).pipe(
@@ -286,11 +347,25 @@ export class CasesComponent implements OnInit, OnDestroy {
   }
 
   clearFilters(): void {
+    const hadQuickFilters =
+      this.quickFilters().overdue || this.quickFilters().dueToday || this.quickFilters().unassigned;
     this.searchForm.reset({ keyword: '', status: '', type: '', priority: '' });
     this.currentPage.set(0);
     // searchForm.reset() triggers valueChanges automatically, which already
     // calls reloadCases$.next() via the subscription set up in ngOnInit —
-    // no separate call needed here.
+    // no separate call needed for the form itself.
+    if (hadQuickFilters) {
+      this.quickFilters.set({ overdue: false, dueToday: false, unassigned: false });
+      this.reloadCases$.next();
+    }
+    // Drop the US-54 quick-filter params from the URL so a refresh is clean.
+    const params: Record<string, string> = { ...this.activatedRoute.snapshot.queryParams };
+    delete params['overdue'];
+    delete params['dueToday'];
+    delete params['unassigned'];
+    if (Object.keys(params).length > 0) {
+      this.router.navigate([], { relativeTo: this.activatedRoute, queryParams: params });
+    }
   }
 
   // ── Create Case ───────────────────────────────────────────────
@@ -440,5 +515,151 @@ export class CasesComponent implements OnInit, OnDestroy {
   // ── Navigate to case detail page (US-14) ─────────────────────────
   openCaseDetail(caseId: string): void {
     this.router.navigate(['/cases', caseId]);
+  }
+
+  // ── US-53: Bulk reassign ─────────────────────────────────────────
+
+  toggleSelectAll(): void {
+    if (this.allSelected()) {
+      this.selectedCaseIds.set(new Set());
+    } else {
+      // US-53: select only the reassignable rows on the current page —
+      // ineligible cases (closed/cancelled/new/resolved) are never selectable.
+      this.selectedCaseIds.set(
+        new Set(this.cases().filter(c => this.isReassignable(c.status)).map(c => c.id))
+      );
+    }
+  }
+
+  toggleSelect(caseId: string, event: Event): void {
+    event.stopPropagation();
+    const target = this.cases().find(c => c.id === caseId);
+    if (!target || !this.isReassignable(target.status)) return;
+    const current = new Set(this.selectedCaseIds());
+    if (current.has(caseId)) {
+      current.delete(caseId);
+    } else {
+      current.add(caseId);
+    }
+    this.selectedCaseIds.set(current);
+  }
+
+  // ── US-54: Workload quick filters (URL round-trip) ──────────────
+  // Toggles a quick filter, reloads the list with it, and syncs the URL so the
+  // state is refresh-safe and shareable (mirrors the inbox US-52 pattern).
+  toggleQuickFilter(key: 'overdue' | 'dueToday' | 'unassigned'): void {
+    const next = { ...this.quickFilters(), [key]: !this.quickFilters()[key] };
+    this.quickFilters.set(next);
+    this.currentPage.set(0);
+    this.reloadCases$.next();
+    const params: Record<string, string> = { ...this.activatedRoute.snapshot.queryParams };
+    (['overdue', 'dueToday', 'unassigned'] as const).forEach(k => {
+      if (next[k]) params[k] = 'true';
+      else delete params[k];
+    });
+    this.router.navigate([], { relativeTo: this.activatedRoute, queryParams: params });
+  }
+
+  // Applies quick filters carried in the URL (e.g. arriving from a dashboard
+  // workload indicator). The first emission during init seeds the signals
+  // before the initial list load; later emissions (back/forward, in-app nav)
+  // reload when the values actually change.
+  applyUrlQuickFilters(params: Record<string, string>, isFirst: boolean): void {
+    const next = {
+      overdue:    params['overdue'] === 'true',
+      dueToday:   params['dueToday'] === 'true',
+      unassigned: params['unassigned'] === 'true'
+    };
+    const q = this.quickFilters();
+    if (q.overdue === next.overdue && q.dueToday === next.dueToday && q.unassigned === next.unassigned) {
+      return;
+    }
+    this.quickFilters.set(next);
+    if (!isFirst) {
+      this.currentPage.set(0);
+      this.reloadCases$.next();
+    }
+  }
+
+  openReassignModal(): void {
+    if (!this.hasSelection()) return;
+    this.bulkReassignError.set(null);
+    this.bulkReassignResult.set(null);
+    this.reassignHandlerId.set('');
+    this.reassignComment.set('');
+    this.handlerSearchTerm.set('');
+    this.isReassignModalOpen.set(true);
+    this.loadHandlers();
+  }
+
+  closeReassignModal(): void {
+    this.isReassignModalOpen.set(false);
+    this.bulkReassignError.set(null);
+    this.bulkReassignResult.set(null);
+  }
+
+  onHandlerSearch(term: string): void {
+    this.handlerSearchTerm.set(term);
+  }
+
+  selectHandler(handlerId: string): void {
+    this.reassignHandlerId.set(handlerId);
+  }
+
+  submitBulkReassign(): void {
+    if (!this.reassignHandlerId()) {
+      this.bulkReassignError.set(this.transloco.translate('cases.bulkReassign.handlerRequired'));
+      return;
+    }
+    // US-53 / AUD-01: a reason is required so every reassignment is auditable.
+    if (!this.reassignCommentFilled()) {
+      this.bulkReassignError.set(this.transloco.translate('cases.bulkReassign.commentRequired'));
+      return;
+    }
+
+    this.bulkReassignLoading.set(true);
+    this.bulkReassignError.set(null);
+    this.bulkReassignResult.set(null);
+
+    this.caseService.bulkReassignCases({
+      caseIds: Array.from(this.selectedCaseIds()),
+      assignedToUserId: this.reassignHandlerId(),
+      comment: this.reassignComment(),
+    }).pipe(
+      takeUntilDestroyed(this.destroyRef)
+    ).subscribe({
+      next: (res) => {
+        this.bulkReassignLoading.set(false);
+        this.bulkReassignResult.set(res);
+        if (res.failed === 0) {
+          this.selectedCaseIds.set(new Set());
+          this.reloadCases$.next();
+        }
+      },
+      error: (err) => {
+        this.bulkReassignLoading.set(false);
+        this.bulkReassignError.set(
+          err.status === 403
+            ? this.transloco.translate('cases.errors.forbidden')
+            : this.transloco.translate('cases.bulkReassign.loadFailed')
+        );
+      }
+    });
+  }
+
+  private loadHandlers(): void {
+    this.handlerSearchLoading.set(true);
+    this.caseService.getHandlers().pipe(
+      takeUntilDestroyed(this.destroyRef)
+    ).subscribe({
+      next: (handlers) => {
+        this.handlers.set(handlers);
+        this.handlerSearchLoading.set(false);
+      },
+      error: () => {
+        this.handlerSearchLoading.set(false);
+        this.bulkReassignError.set(this.transloco.translate('cases.bulkReassign.handlersLoadError'));
+      }
+    });
   }
 }

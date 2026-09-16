@@ -79,6 +79,22 @@
               <option [value]="p">{{ 'cases.priorities.' + p | transloco }}</option>
             }
           </select>
+          <!-- US-54: workload quick filters (deep-linkable from the dashboard) -->
+          <button (click)="toggleQuickFilter('overdue')" type="button"
+                  [class]="'inline-flex items-center gap-1 px-3 py-1.5 rounded-full text-label-md border transition-colors ' + (quickFilters().overdue ? 'bg-error text-on-error border-error' : 'border-outline-variant text-on-surface-variant hover:bg-surface-container-low')">
+            <span class="material-symbols-outlined text-[16px]">warning</span>
+            {{ 'cases.quickFilters.overdue' | transloco }}
+          </button>
+          <button (click)="toggleQuickFilter('dueToday')" type="button"
+                  [class]="'inline-flex items-center gap-1 px-3 py-1.5 rounded-full text-label-md border transition-colors ' + (quickFilters().dueToday ? 'bg-primary text-on-primary border-primary' : 'border-outline-variant text-on-surface-variant hover:bg-surface-container-low')">
+            <span class="material-symbols-outlined text-[16px]">today</span>
+            {{ 'cases.quickFilters.dueToday' | transloco }}
+          </button>
+          <button (click)="toggleQuickFilter('unassigned')" type="button"
+                  [class]="'inline-flex items-center gap-1 px-3 py-1.5 rounded-full text-label-md border transition-colors ' + (quickFilters().unassigned ? 'bg-tertiary-fixed text-on-tertiary-fixed border-tertiary-fixed' : 'border-outline-variant text-on-surface-variant hover:bg-surface-container-low')">
+            <span class="material-symbols-outlined text-[16px]">person_off</span>
+            {{ 'cases.quickFilters.unassigned' | transloco }}
+          </button>
           <button (click)="clearFilters()" type="button" class="border-2 border-primary text-primary font-label-md text-label-md px-3 py-2 rounded-lg hover:bg-primary/5 transition-colors">
             {{ 'cases.clearFilters' | transloco }}
           </button>
@@ -112,10 +128,30 @@
               <p class="font-body-md text-body-md mt-1">{{ 'cases.noResultsHint' | transloco }}</p>
             </div>
           } @else {
+            <!-- US-53: Bulk reassign toolbar -->
+            @if (isSupervisor() && hasSelection()) {
+              <div class="mx-5 mt-4 mb-2 px-5 py-3 bg-primary-container/10 border border-primary/30 rounded-lg flex items-center justify-between">
+                <span class="text-body-md text-on-surface">
+                  {{ selectedCount() }} {{ 'cases.bulkReassign.selected' | transloco }}
+                </span>
+                <button (click)="openReassignModal()"
+                        class="inline-flex items-center gap-1.5 bg-primary text-on-primary font-label-md text-label-md px-4 py-2 rounded-lg transition-colors cursor-pointer hover:bg-primary/90">
+                  <span class="material-symbols-outlined text-[16px]">swap_horiz</span>
+                  {{ 'cases.bulkReassign.reassignSelected' | transloco }}
+                </button>
+              </div>
+            }
+
             <div class="overflow-x-auto">
               <table class="w-full text-body-md">
                 <thead class="bg-primary text-on-primary">
                   <tr>
+                    @if (isSupervisor()) {
+                      <th class="px-4 py-4 w-10">
+                        <input type="checkbox" [checked]="allSelected()" (change)="toggleSelectAll()"
+                               class="w-4 h-4 rounded border-outline-variant text-primary focus:ring-primary cursor-pointer accent-primary">
+                      </th>
+                    }
                     <th class="px-6 py-4 font-label-md text-label-md text-left whitespace-nowrap">{{ 'cases.table.caseNumber' | transloco }}</th>
                     <th class="px-6 py-4 font-label-md text-label-md text-left">{{ 'cases.table.subject' | transloco }}</th>
                     <th class="px-6 py-4 font-label-md text-label-md text-left">{{ 'cases.table.type' | transloco }}</th>
@@ -129,7 +165,16 @@
                 <tbody>
                   @for (c of cases(); track c.id) {
                     <tr (click)="openCaseDetail(c.id)"
+                        [class.bg-primary/5]="selectedCaseIds().has(c.id)"
                         class="zebra-row hover:bg-surface-container-low transition-colors cursor-pointer border-b border-outline-variant">
+                       @if (isSupervisor()) {
+                         <td class="px-4 py-4" (click)="$event.stopPropagation()">
+                           <input type="checkbox" [checked]="selectedCaseIds().has(c.id)" (change)="toggleSelect(c.id, $event)"
+                                  [disabled]="!isReassignable(c.status)"
+                                  [title]="isReassignable(c.status) ? '' : ('cases.bulkReassign.ineligible' | transloco)"
+                                  class="w-4 h-4 rounded border-outline-variant text-primary focus:ring-primary cursor-pointer accent-primary disabled:cursor-not-allowed disabled:opacity-40">
+                         </td>
+                       }
                       <td class="px-6 py-4 font-label-md text-label-md text-primary whitespace-nowrap">{{ c.caseNumber }}</td>
                       <td class="px-6 py-4 text-on-surface max-w-48 truncate">{{ c.subject }}</td>
                       <td class="px-6 py-4">
@@ -399,4 +444,146 @@
       </div>
     }
   </div>
+
+  <!-- US-53: Bulk Reassign Modal -->
+  @if (isReassignModalOpen()) {
+    <div class="fixed inset-0 z-50 flex items-center justify-center bg-black/50" (click)="closeReassignModal()">
+      <div class="bg-surface-container-lowest rounded-xl shadow-xl w-full max-w-lg mx-4" (click)="$event.stopPropagation()">
+        <!-- Modal header -->
+        <div class="flex items-center justify-between px-6 py-4 border-b border-outline-variant">
+          <h2 class="font-title-lg text-title-lg text-on-surface">{{ 'cases.bulkReassign.title' | transloco }}</h2>
+          <button (click)="closeReassignModal()" class="text-on-surface-variant hover:text-primary transition-colors">
+            <span class="material-symbols-outlined">close</span>
+          </button>
+        </div>
+
+        <!-- Modal body -->
+        <div class="px-6 py-4 space-y-4">
+          <p class="text-body-md text-on-surface-variant">
+            {{ 'cases.bulkReassign.description' | transloco: { count: selectedCount() } }}
+          </p>
+
+          <!-- Handler picker -->
+          <div>
+            <label class="block font-label-md text-label-md text-outline mb-1.5">{{ 'cases.bulkReassign.handler' | transloco }} <span class="text-error">*</span></label>
+            <div class="relative">
+              <span class="material-symbols-outlined absolute left-2.5 top-1/2 -translate-y-1/2 text-on-surface-variant text-[16px]">search</span>
+              <input type="text"
+                     [value]="handlerSearchTerm()"
+                     (input)="onHandlerSearch($any($event.target).value)"
+                     placeholder="{{ 'cases.detail.searchHandlers' | transloco }}"
+                     class="w-full pl-8 pr-3 py-2 text-body-md border border-outline-variant rounded bg-white focus:ring-2 focus:ring-primary focus:outline-none transition-all">
+            </div>
+
+            @if (handlerSearchLoading()) {
+              <div class="flex items-center gap-2 py-3 text-on-surface-variant text-body-md">
+                <svg class="animate-spin w-4 h-4" fill="none" viewBox="0 0 24 24">
+                  <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"/>
+                  <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"/>
+                </svg>
+                {{ 'cases.detail.loadingHandlers' | transloco }}
+              </div>
+            }
+
+            @if (!handlerSearchLoading()) {
+              @if (filteredHandlers().length === 0) {
+                <p class="py-3 text-body-md text-on-surface-variant">{{ 'cases.detail.noHandlersMatch' | transloco }}</p>
+              } @else {
+                <div class="max-h-48 overflow-y-auto border border-outline-variant rounded mt-2">
+                  @for (h of filteredHandlers(); track h.id) {
+                    <button (click)="selectHandler(h.id)"
+                            [class]="'w-full text-left px-4 py-2.5 flex items-center gap-3 border-b border-outline-variant last:border-b-0 transition-colors cursor-pointer ' + (reassignHandlerId() === h.id ? 'bg-primary/10 text-primary' : 'hover:bg-surface-container-low text-on-surface')">
+                      <div class="w-8 h-8 rounded-full bg-surface-variant flex items-center justify-center text-on-surface-variant text-xs font-semibold flex-shrink-0">
+                        {{ h.displayName.slice(0,2).toUpperCase() }}
+                      </div>
+                      <div class="min-w-0">
+                        <p class="font-label-md text-label-md truncate">{{ h.displayName }}</p>
+                        <p class="text-xs text-on-surface-variant truncate">{{ h.email }}</p>
+                      </div>
+                      @if (reassignHandlerId() === h.id) {
+                        <span class="material-symbols-outlined text-primary ml-auto">check_circle</span>
+                      }
+                    </button>
+                  }
+                </div>
+              }
+            }
+          </div>
+
+          <!-- Comment (required for audit trail) -->
+          <div>
+            <label class="block font-label-md text-label-md text-outline mb-1.5">{{ 'cases.bulkReassign.comment' | transloco }} <span class="text-error">*</span></label>
+            <textarea rows="3"
+                      [value]="reassignComment()"
+                      (input)="reassignComment.set($any($event.target).value)"
+                      placeholder="{{ 'cases.bulkReassign.commentPlaceholder' | transloco }}"
+                      class="w-full border border-outline-variant rounded px-3 py-2 bg-white text-body-md focus:ring-2 focus:ring-primary focus:outline-none transition-all resize-none">
+            </textarea>
+          </div>
+
+          <!-- Error -->
+          @if (bulkReassignError()) {
+            <div class="p-3 bg-red-50 border-l-4 border-red-500 rounded-md flex items-center gap-2">
+              <span class="material-symbols-outlined text-red-500">error</span>
+              <span class="text-red-700 text-body-md">{{ bulkReassignError() }}</span>
+            </div>
+          }
+
+          <!-- Result summary -->
+          @if (bulkReassignResult()) {
+            <div class="p-3 rounded-md flex items-center gap-2"
+                 [class]="bulkReassignResult()!.failed === 0 ? 'bg-emerald-50 border-l-4 border-emerald-500' : 'bg-yellow-50 border-l-4 border-yellow-500'">
+              @if (bulkReassignResult()!.failed === 0) {
+                <span class="material-symbols-outlined text-emerald-600">check_circle</span>
+                <span class="text-emerald-800 text-body-md">
+                  {{ 'cases.bulkReassign.successAll' | transloco: { count: bulkReassignResult()!.succeeded } }}
+                </span>
+              } @else {
+                <span class="material-symbols-outlined text-yellow-600">warning</span>
+                <span class="text-yellow-800 text-body-md">
+                  {{ 'cases.bulkReassign.partialSuccess' | transloco: { succeeded: bulkReassignResult()!.succeeded, failed: bulkReassignResult()!.failed } }}
+                </span>
+              }
+            </div>
+            <!-- US-53: per-case failures — no silent skips -->
+            @if (bulkReassignFailures().length > 0) {
+              <div class="p-3 bg-yellow-50 border-l-4 border-yellow-500 rounded-md">
+                <p class="text-yellow-800 text-body-md font-medium mb-1.5">{{ 'cases.bulkReassign.failedCases' | transloco }}</p>
+                <ul class="space-y-1.5">
+                  @for (f of bulkReassignFailures(); track f.caseId) {
+                    <li class="text-yellow-800 text-body-sm flex items-start gap-1.5">
+                      <span class="material-symbols-outlined text-[14px] mt-0.5">cancel</span>
+                      <span><span class="font-semibold whitespace-nowrap">{{ f.caseNumber }}</span><span class="text-yellow-700"> — {{ f.message }}</span></span>
+                    </li>
+                  }
+                </ul>
+              </div>
+            }
+          }
+        </div>
+
+        <!-- Modal footer -->
+        <div class="flex items-center justify-end gap-3 px-6 py-4 border-t border-outline-variant">
+          <button (click)="closeReassignModal()"
+                  class="border-2 border-primary text-primary font-label-md text-label-md px-4 py-2 rounded-lg hover:bg-primary/5 transition-colors">
+            {{ 'common.cancel' | transloco }}
+          </button>
+          <button (click)="submitBulkReassign()"
+                  [disabled]="bulkReassignLoading() || !reassignHandlerId() || !reassignCommentFilled() || bulkReassignResult() !== null"
+                  class="bg-primary text-on-primary font-label-md text-label-md px-5 py-2 rounded-lg inline-flex items-center gap-1.5 disabled:opacity-50 disabled:cursor-not-allowed transition-colors">
+            @if (bulkReassignLoading()) {
+              <svg class="animate-spin w-4 h-4" fill="none" viewBox="0 0 24 24">
+                <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"/>
+                <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"/>
+              </svg>
+              {{ 'cases.bulkReassign.reassigning' | transloco }}
+            } @else {
+              <span class="material-symbols-outlined text-[16px]">swap_horiz</span>
+              {{ 'cases.bulkReassign.confirm' | transloco }}
+            }
+          </button>
+        </div>
+      </div>
+    </div>
+  }
 </div>
