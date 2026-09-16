@@ -57,6 +57,10 @@ export interface CaseSearchRequest {
   priority?:         Priority;
   assignedToUserId?: string;
   keyword?:          string;
+  // US-54: workload quick filters — mirrored from the dashboard indicator links.
+  overdue?:          boolean;
+  dueToday?:         boolean;
+  unassigned?:       boolean;
   page?:             number;
   size?:             number;
 }
@@ -127,6 +131,28 @@ export interface CaseActionResponse {
   resultingStatus:            CaseStatus;
   requiresComment:            boolean;
   requiresResolutionSummary:  boolean;
+}
+
+// US-53: bulk reassignment of selected cases to one handler.
+export interface BulkReassignRequest {
+  caseIds:          string[];
+  assignedToUserId: string;
+  comment:          string;
+}
+
+export interface BulkReassignCaseResult {
+  caseId:    string;
+  caseNumber: string;
+  success:    boolean;
+  errorCode:  string | null;
+  message:    string | null;
+}
+
+export interface BulkReassignResponse {
+  totalRequested: number;
+  succeeded:      number;
+  failed:         number;
+  results:        BulkReassignCaseResult[];
 }
 
 export interface CaseTransitionRequest {

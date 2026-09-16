@@ -56,3 +56,17 @@ export interface InboxCountsResponse {
   awaitingInfo:   number;
   newlyAssigned:  number;
 }
+
+// US-54: workload indicators displayed on the dashboard per role.
+export type WorkloadIndicatorKey = 'ASSIGNED' | 'OVERDUE' | 'DUE_TODAY' | 'UNASSIGNED';
+
+export interface WorkloadIndicator {
+  key:   WorkloadIndicatorKey;
+  count: number;
+  link:  string;
+}
+
+export interface WorkloadIndicatorsResponse {
+  scope:      'PERSONAL' | 'TEAM';
+  indicators: WorkloadIndicator[];
+}

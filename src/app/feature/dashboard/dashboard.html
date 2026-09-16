@@ -94,6 +94,61 @@
 
       </section>
 
+      <!-- US-54: Workload Indicators -->
+      @if (isLoadingWorkload()) {
+        <section class="bg-surface border border-outline-variant hover:border-primary transition-colors duration-300 rounded-xl p-6">
+          <div class="flex items-center justify-center py-6 text-on-surface-variant gap-2">
+            <svg class="animate-spin w-4 h-4" fill="none" viewBox="0 0 24 24">
+              <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"/>
+              <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"/>
+            </svg>
+            <span class="text-label-md">{{ t('dashboard.loading') }}</span>
+          </div>
+        </section>
+      }
+
+      @if (workloadError() && !isLoadingWorkload()) {
+        <section class="bg-surface border border-outline-variant hover:border-primary transition-colors duration-300 rounded-xl p-6">
+          <div class="p-3 bg-error-container border border-error rounded-lg flex items-center gap-2 mb-3">
+            <span class="material-symbols-outlined text-error">error</span>
+            <span class="text-sm text-on-error-container">{{ workloadError() }}</span>
+          </div>
+          <button (click)="loadWorkloadIndicators()"
+                  class="inline-flex items-center gap-1.5 bg-primary text-on-primary font-label-md text-label-md px-4 py-2 rounded-lg transition-colors cursor-pointer hover:bg-primary/90">
+            <span class="material-symbols-outlined text-[16px]">refresh</span>
+            {{ t('dashboard.workload.retry') }}
+          </button>
+        </section>
+      }
+
+      @if (!isLoadingWorkload() && workload() && workloadCards().length > 0) {
+        <section class="bg-surface border border-outline-variant rounded-xl p-6">
+          <div class="flex items-center gap-2 mb-4">
+            <span class="material-symbols-outlined text-primary text-[20px]">speed</span>
+            <h3 class="font-headline-md text-headline-md text-primary">{{ t('dashboard.workload.title') }}</h3>
+          </div>
+          <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+            @for (card of workloadCards(); track card.key) {
+              <div (click)="onWorkloadCardClick(card)"
+                   role="button" tabindex="0"
+                   (keydown.enter)="onWorkloadCardClick(card)"
+                   (keydown.space)="onWorkloadCardClick(card)"
+                   [title]="t(card.labelKey)"
+                   class="group bg-surface border border-outline-variant hover:border-primary transition-colors duration-300 p-5 rounded-xl flex items-center gap-4 cursor-pointer focus:ring-2 focus:ring-primary focus:outline-none">
+                <div [class]="'w-11 h-11 rounded-lg flex items-center justify-center ' + card.colorClass">
+                  <span class="material-symbols-outlined text-[22px]">{{ card.icon }}</span>
+                </div>
+                <div class="min-w-0 flex-1">
+                  <p class="text-label-md text-on-surface-variant">{{ t(card.labelKey) }}</p>
+                  <p class="text-headline-md font-bold text-primary">{{ card.count }}</p>
+                </div>
+                <span class="material-symbols-outlined text-on-surface-variant opacity-0 group-hover:opacity-100 rtl:rotate-180 transition-opacity">arrow_forward</span>
+              </div>
+            }
+          </div>
+        </section>
+      }
+
       <!-- Cases By Status Chart -->
       <section class="bg-surface border border-outline-variant rounded-xl p-6">
         <div class="flex items-center gap-2 mb-4">

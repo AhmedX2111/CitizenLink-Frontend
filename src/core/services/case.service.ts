@@ -11,6 +11,8 @@ import {
   CaseTransitionRequest,
   CaseActionResponse,
   HandlerResponse,
+  BulkReassignRequest,
+  BulkReassignResponse,
   DuplicateCaseCandidateResponse
 } from '../models/case.models';
 import { Department } from '../models/department.model';
@@ -82,6 +84,10 @@ export class CaseService {
     if (filter.priority)         params = params.set('priority',         filter.priority);
     if (filter.assignedToUserId) params = params.set('assignedToUserId', filter.assignedToUserId);
     if (filter.keyword?.trim())  params = params.set('keyword',          filter.keyword.trim());
+    // US-54: workload quick filters (overdue / dueToday / unassigned)
+    if (filter.overdue)          params = params.set('overdue',          'true');
+    if (filter.dueToday)         params = params.set('dueToday',         'true');
+    if (filter.unassigned)       params = params.set('unassigned',       'true');
     if (filter.page  != null)    params = params.set('page',             filter.page.toString());
     if (filter.size  != null)    params = params.set('size',             filter.size.toString());
 
@@ -125,6 +131,15 @@ export class CaseService {
 
   getHandlers(): Observable<HandlerResponse[]> {
     return this.http.get<HandlerResponse[]>(`${this.usersUrl}/handlers`);
+  }
+
+  /**
+   * US-53: reassign one or more eligible cases to a single active HANDLER
+   * (SUPERVISOR/ADMIN only). Returns a per-case result so failures are
+   * surfaced explicitly, never silently skipped.
+   */
+  bulkReassignCases(request: BulkReassignRequest): Observable<BulkReassignResponse> {
+    return this.http.post<BulkReassignResponse>(`${this.baseUrl}/bulk-reassign`, request);
   }
 
   getDepartments(): Observable<Department[]> {

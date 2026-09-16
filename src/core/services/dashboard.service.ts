@@ -6,7 +6,8 @@ import {
   MyOpenCaseResponse,
   InboxCaseResponse,
   InboxCountsResponse,
-  InboxFilter
+  InboxFilter,
+  WorkloadIndicatorsResponse
 } from '../models/dashboard.models';
 import { PagedResponse } from '../models/case.models';
 import { environment } from '../../environments/environment';
@@ -58,5 +59,10 @@ export class DashboardService {
   // US-50: quick-filter badge counts for the handler inbox.
   getMyInboxCounts(): Observable<InboxCountsResponse> {
     return this.http.get<InboxCountsResponse>(`${this.baseUrl}/my-inbox/counts`);
+  }
+
+  // US-54: role-scoped workload indicators (handlers see personal; supervisors see team totals).
+  getWorkloadIndicators(): Observable<WorkloadIndicatorsResponse> {
+    return this.http.get<WorkloadIndicatorsResponse>(`${this.baseUrl}/workload`);
   }
 }

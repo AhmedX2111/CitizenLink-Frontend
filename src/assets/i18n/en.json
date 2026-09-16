@@ -542,6 +542,10 @@
     "allTypes": "All types",
     "allPriorities": "All priorities",
     "clearFilters": "Clear",
+    "quickFilters": {
+      "overdue": "Overdue",
+      "dueToday": "Due Today",
+      "unassigned": "Unassigned"
     "filters": {
       "keyword": "Search",
       "status": "Filter by status",
@@ -642,6 +646,30 @@
         "createCase": "Create Case"
       },
       "errors": {
+      "notFound": "A referenced record was not found.",
+      "citizenNotFound": "No citizen was found with this National ID.",
+      "validationFailed": "Please correct the highlighted fields and try again.",
+      "unexpected": "An unexpected error occurred. Please try again."
+    }
+    },
+    "bulkReassign": {
+      "title": "Reassign Cases",
+      "description": "Reassign {{count}} selected case(s) to another handler.",
+      "handler": "Assign to",
+      "handlerRequired": "Please select a handler.",
+      "comment": "Reason",
+      "commentPlaceholder": "Why are these cases being reassigned?",
+      "commentRequired": "Please enter a reason for the reassignment.",
+      "selected": "case(s) selected",
+      "reassignSelected": "Reassign Selected",
+      "reassigning": "Reassigning...",
+      "confirm": "Confirm Reassign",
+      "successAll": "{{count}} case(s) reassigned successfully.",
+      "partialSuccess": "{{succeeded}} case(s) reassigned, {{failed}} failed.",
+      "failedCases": "The following cases could not be reassigned:",
+      "ineligible": "This case cannot be reassigned in its current status.",
+      "loadFailed": "Failed to reassign cases. Please try again.",
+      "handlersLoadError": "Failed to load handlers."
         "notFound": "A referenced record was not found.",
         "citizenNotFound": "No citizen was found with this National ID.",
         "validationFailed": "Please correct the highlighted fields and try again.",
@@ -718,6 +746,15 @@
       "empty": "You have no open cases assigned.",
       "loadError": "Failed to load your open cases.",
       "noPermission": "You do not have permission to view your cases."
+    },
+    "workload": {
+      "title": "Workload",
+      "assigned": "Assigned to Me",
+      "overdue": "Overdue",
+      "dueToday": "Due Today",
+      "unassigned": "Unassigned",
+      "retry": "Retry",
+      "loadFailed": "Failed to load workload indicators."
     },
     "attachments": {
     "loadError": "Failed to load attachments. Please try again.",
