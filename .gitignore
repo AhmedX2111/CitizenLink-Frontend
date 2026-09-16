@@ -6,6 +6,9 @@
 /out-tsc
 /bazel-out
 
+# CI test reports (GitHub Actions vitest output)
+/ci-test-results
+
 # Node
 /node_modules
 npm-debug.log

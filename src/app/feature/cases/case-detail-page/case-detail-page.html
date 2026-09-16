@@ -300,6 +300,14 @@
               </div>
             }
 
+            <!-- US-58: why the agent proceeded despite an open duplicate -->
+            @if (caseDetail()!.duplicateReason) {
+              <div>
+                <p class="text-[10px] uppercase font-bold text-amber-800 tracking-wider mb-1">{{ 'cases.detail.duplicateReason' | transloco }}</p>
+                <p class="text-sm font-medium text-on-surface">{{ caseDetail()!.duplicateReason }}</p>
+              </div>
+            }
+
           </div>
         </div>
       </div>

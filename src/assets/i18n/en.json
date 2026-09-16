@@ -200,6 +200,7 @@
       "resolvedCases": "Resolved Cases"
     },
     "recentCases": "Recent Cases",
+    "viewAll": "View All",
     "lastContact": "Last Contact",
     "caseTable": {
       "caseNumber": "Case Number",
@@ -207,7 +208,15 @@
       "status": "Status",
       "priority": "Priority",
       "assignedTo": "Assigned To",
-      "created": "Created"
+      "created": "Created",
+      "department": "Department",
+      "lastUpdated": "Last Updated"
+    },
+    "history": {
+      "title": "Case History",
+      "loading": "Loading case history…",
+      "empty": "No cases found for this citizen",
+      "loadError": "Failed to load the case history. Please try again."
     },
     "errors": {
       "idNotFound": "Citizen ID not found",
@@ -454,6 +463,7 @@
       "timeline": "Timeline",
       "updated": "Last Updated",
       "resolvedAt": "Resolved At",
+      "duplicateReason": "Duplicate Case Reason",
       "citizenPhone": "Phone",
       "viewCitizen": "View Citizen Profile",
       "timelineLoadError": "Failed to load case timeline. Please try again.",
@@ -536,6 +546,11 @@
       "overdue": "Overdue",
       "dueToday": "Due Today",
       "unassigned": "Unassigned"
+    "filters": {
+      "keyword": "Search",
+      "status": "Filter by status",
+      "type": "Filter by type",
+      "priority": "Filter by priority"
     },
     "noResults": "No cases found",
     "noResultsHint": "Try adjusting your filters or create a new case",
@@ -598,7 +613,11 @@
         "details": "Case Details",
         "assignment": "Assignment"
       },
+      "changeCitizen": "Change citizen",
+      "citizenLocked": "Locked to this citizen profile",
+      "loadingCitizen": "Loading citizen...",
       "fields": {
+        "citizen": "Citizen",
         "citizenId": "National ID",
         "citizenIdPlaceholder": "Enter citizen National ID (e.g., 12345678901234)",
         "channel": "Channel",
@@ -651,6 +670,21 @@
       "ineligible": "This case cannot be reassigned in its current status.",
       "loadFailed": "Failed to reassign cases. Please try again.",
       "handlersLoadError": "Failed to load handlers."
+        "notFound": "A referenced record was not found.",
+        "citizenNotFound": "No citizen was found with this National ID.",
+        "validationFailed": "Please correct the highlighted fields and try again.",
+        "unexpected": "An unexpected error occurred. Please try again."
+      },
+      "duplicates": {
+        "title": "Possible duplicate open case detected",
+        "body": "This citizen already has an open case overlapping the selected category or department. You can open any of them to review before deciding.",
+        "open": "Open",
+        "reasonLabel": "Reason for proceeding",
+        "reasonPlaceholder": "Brief reason this case must be created anyway…",
+        "reasonRequired": "A reason is required to continue.",
+        "confirm": "Confirm & create anyway",
+        "checkingHint": "Checking for possible duplicate open cases…"
+      }
     }
   },
   "dashboard": {

@@ -11,6 +11,9 @@
  *   - search filter changes reload the list with the matching query params
  *   - clearFilters resets the form and reloads
  *   - goToPage reloads with the requested page
+ *   - US-58: duplicate preflight gates the Citizen 360 create flow — warns on
+ *     open candidates, requires a confirmed reason to override, never blocks
+ *     on preflight failure, and is skipped for the generic (unlinked) flow
  *
  * SKIPPED (with reason):
  *   - Client-side role filtering of the case list: the backend only returns
@@ -21,6 +24,7 @@
 
 import { vi } from 'vitest';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
+import { signal, WritableSignal } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
 import { BehaviorSubject, of, throwError } from 'rxjs';
 import { TranslocoService } from '@jsverse/transloco';
@@ -28,8 +32,10 @@ import { TranslocoService } from '@jsverse/transloco';
 import { CasesComponent } from './cases';
 import { CaseService } from '../../../core/services/case.service';
 import { AuthUserService } from '../../auth/auth-user.service';
+import { CitizenService } from '../../../core/services/citizen.service';
 import { LoggerService } from '../../../core/services/logger.service';
 import { CaseResponse, CaseStatus } from '../../../core/models/case.models';
+import { Citizen } from '../../../core/models/citizen.models';
 import { Department } from '../../../core/models/department.model';
 import { Category } from '../../../core/models/category.model';
 
@@ -61,7 +67,8 @@ const caseA: CaseResponse = {
   createdAt: '2026-01-01T10:00:00Z',
   updatedAt: '2026-01-02T12:00:00Z',
   resolvedAt: null,
-  closedAt: null
+  closedAt: null,
+  duplicateReason: null
 };
 
 const caseB: CaseResponse = { ...caseA, id: 'case-b', caseNumber: 'CASE-2026-0002' };
@@ -69,9 +76,22 @@ const caseB: CaseResponse = { ...caseA, id: 'case-b', caseNumber: 'CASE-2026-000
 const departments: Department[] = [{ id: 'dep-1', code: 'DEP1', nameEn: 'Utilities', nameAr: 'مرافق', active: true }];
 const categories: Category[] = [{ id: 'cat-1', code: 'CAT1', nameEn: 'Water', nameAr: 'مياه', active: true }];
 
+const citizen360: Citizen = {
+  id: 'cit-360',
+  fullName: 'Jane Citizen',
+  nationalId: '1234567890123456',
+  phone: '0100000000',
+  email: 'jane@example.gov',
+  preferredLanguage: 'en',
+  createdAt: '2026-01-01T00:00:00Z',
+  caseCount: 2
+};
+
 describe('CasesComponent', () => {
   let fixture: ComponentFixture<CasesComponent>;
   let component: CasesComponent;
+
+  let citizenService: { getCitizenById: ReturnType<typeof vi.fn> };
 
   let caseService: {
     searchCases: ReturnType<typeof vi.fn>;
@@ -85,8 +105,13 @@ describe('CasesComponent', () => {
     hasRole: ReturnType<typeof vi.fn>;
     hasRoleSignal: ReturnType<typeof vi.fn>;
     hasRoleAny: ReturnType<typeof vi.fn>;
+    createCaseForCitizen: ReturnType<typeof vi.fn>;
+    checkDuplicateCases: ReturnType<typeof vi.fn>;
   };
-  let router: { navigate: ReturnType<typeof vi.fn>; getCurrentNavigation: ReturnType<typeof vi.fn> };
+  let router: {
+    navigate: ReturnType<typeof vi.fn>;
+    currentNavigation: WritableSignal<{ extras: { state: Record<string, string> } } | null>;
+  };
   let queryParams$: BehaviorSubject<Record<string, string>>;
   let routeSnapshot: { queryParams: Record<string, string> };
 
@@ -118,6 +143,12 @@ describe('CasesComponent', () => {
       navigate: vi.fn(),
       getCurrentNavigation: vi.fn().mockReturnValue(null)
     };
+      createCaseForCitizen: vi.fn(),
+      // US-58: no open candidates by default -> submissions are not blocked.
+      checkDuplicateCases: vi.fn().mockReturnValue(of([]))
+    };
+    citizenService = { getCitizenById: vi.fn().mockReturnValue(of(citizen360)) };
+    router = { navigate: vi.fn(), currentNavigation: signal(null) };
     queryParams$ = new BehaviorSubject({});
     routeSnapshot = { queryParams: {} };
 
@@ -126,6 +157,7 @@ describe('CasesComponent', () => {
       providers: [
         { provide: CaseService, useValue: caseService },
         { provide: AuthUserService, useValue: authUserService },
+        { provide: CitizenService, useValue: citizenService },
         { provide: Router, useValue: router },
         { provide: ActivatedRoute, useValue: { queryParams: queryParams$, snapshot: routeSnapshot } },
         { provide: LoggerService, useValue: { error: vi.fn(), info: vi.fn(), warn: vi.fn() } },
@@ -286,7 +318,7 @@ describe('CasesComponent', () => {
     vi.advanceTimersByTime(500);
     vi.useRealTimers();
 
-    expect(caseService.searchCases.mock.calls.length).toBe(callsAfterChange);
+    expect(caseService.searchCases.mock.calls).toHaveLength(callsAfterChange);
   });
 
   it('goToPage reloads with the requested page number', () => {
@@ -299,7 +331,7 @@ describe('CasesComponent', () => {
     component.totalPages.set(2);
     const before = caseService.searchCases.mock.calls.length;
     component.goToPage(5);
-    expect(caseService.searchCases.mock.calls.length).toBe(before);
+    expect(caseService.searchCases.mock.calls).toHaveLength(before);
   });
 
   it('clearFilters resets the form and reloads', () => {
@@ -338,7 +370,7 @@ describe('CasesComponent', () => {
   });
 
   it('pre-fills the citizen national id from the navigation state (M-27)', () => {
-    router.getCurrentNavigation.mockReturnValue({
+    router.currentNavigation.set({
       extras: { state: { citizenNationalId: '1234567890123456' } }
     });
     component.ngOnInit();
@@ -347,7 +379,7 @@ describe('CasesComponent', () => {
   });
 
   it('does not pre-fill the national id when no navigation state is present (M-27)', () => {
-    router.getCurrentNavigation.mockReturnValue(null);
+    router.currentNavigation.set(null);
     component.ngOnInit();
 
     expect(component.createForm.get('citizenNationalId')?.value).toBe('');
@@ -675,5 +707,311 @@ describe('CasesComponent', () => {
       expect(component.quickFilters()).toEqual({ overdue: false, dueToday: false, unassigned: false });
       expect(caseService.searchCases.mock.calls.length).toBeGreaterThan(before);
     });
+  // ── US-57: create case from Citizen 360 ─────────────────────────
+
+  function paramFromCitizen360(): void {
+    queryParams$.next({ tab: 'create', citizenId: 'cit-360' });
+  }
+
+  function fillCreateForm(extra: Record<string, string> = {}): void {
+    // departmentId must be patched BEFORE categoryId: the component resets
+    // categoryId whenever departmentId changes (existing behaviour).
+    component.createForm.patchValue({
+      subject: 'Water leak',
+      description: 'Leak on the main road',
+      type: 'COMPLAINT',
+      priority: 'HIGH',
+      channel: 'PHONE',
+      departmentId: 'dep-1',
+      categoryId: 'cat-1',
+      ...extra
+    });
+  }
+
+  it('locks the citizen from the citizenId query param (US-57)', () => {
+    paramFromCitizen360();
+
+    expect(citizenService.getCitizenById).toHaveBeenCalledWith('cit-360');
+    expect(component.linkedCitizen()).toEqual({
+      id: 'cit-360',
+      name: 'Jane Citizen',
+      nationalId: '1234567890123456'
+    });
+    expect(component.linkedCitizenLoading()).toBe(false);
+    // The free-typed field must NOT be prefilled — the citizen is bound by id.
+    expect(component.createForm.get('citizenNationalId')?.value).toBe('');
+  });
+
+  it('does not re-fetch the linked citizen on repeated param emissions (US-57)', () => {
+    paramFromCitizen360();
+    paramFromCitizen360();
+
+    expect(citizenService.getCitizenById).toHaveBeenCalledTimes(1);
+  });
+
+  it('keeps the national id optional while the citizen is locked (US-57)', () => {
+    paramFromCitizen360();
+    fillCreateForm();
+
+    expect(component.createForm.valid).toBe(true);
+    expect(component.createForm.get('citizenNationalId')?.errors).toBeNull();
+  });
+
+  it('submits via the citizen-scoped endpoint and opens the new case (US-57)', () => {
+    paramFromCitizen360();
+    fillCreateForm();
+    caseService.createCaseForCitizen.mockReturnValue(of(caseA));
+
+    component.onSubmit();
+
+    expect(caseService.createCaseForCitizen).toHaveBeenCalledWith('cit-360', {
+      subject: 'Water leak',
+      description: 'Leak on the main road',
+      type: 'COMPLAINT',
+      priority: 'HIGH',
+      channel: 'PHONE',
+      categoryId: 'cat-1',
+      departmentId: 'dep-1'
+    });
+    // No citizenNationalId leaks into the payload.
+    expect(caseService.createCaseForCitizen.mock.calls[0][1]).not.toHaveProperty('citizenNationalId');
+    expect(caseService.createCase).not.toHaveBeenCalled();
+    // Success lands on the case-detail page showing the generated case id.
+    expect(router.navigate).toHaveBeenCalledWith(['/cases', 'case-a']);
+  });
+
+  it('changeCitizen releases the lock and restores the required field (US-57)', () => {
+    paramFromCitizen360();
+    expect(component.linkedCitizen()).not.toBeNull();
+
+    component.changeCitizen();
+
+    expect(component.linkedCitizen()).toBeNull();
+    fillCreateForm();
+    expect(component.createForm.get('citizenNationalId')?.errors?.['required']).toBeTruthy();
+    expect(component.createForm.valid).toBe(false);
+  });
+
+  it('changeCitizen allows a free-typed national id submission (US-57)', () => {
+    paramFromCitizen360();
+    component.changeCitizen();
+    fillCreateForm({ citizenNationalId: '1234567890123456' });
+    caseService.createCase.mockReturnValue(of(caseA));
+
+    component.onSubmit();
+
+    expect(caseService.createCase).toHaveBeenCalledWith(expect.objectContaining({
+      citizenNationalId: '1234567890123456'
+    }));
+    expect(caseService.createCaseForCitizen).not.toHaveBeenCalled();
+  });
+
+  it('cancelCreate returns to the same Citizen 360 profile (US-57)', () => {
+    paramFromCitizen360();
+
+    component.cancelCreate();
+
+    expect(router.navigate).toHaveBeenCalledWith(['/app/call-center/citizen', 'cit-360']);
+  });
+
+  it('cancelCreate falls back to the list tab when no citizen is linked', () => {
+    router.currentNavigation.set(null);
+    component.ngOnInit();
+    component.activeTab.set('create');
+
+    component.cancelCreate();
+
+    expect(router.navigate).not.toHaveBeenCalled();
+    expect(component.activeTab()).toBe('list');
+  });
+
+  it('submits via the generic endpoint when no citizen is linked (US-57 regression guard)', () => {
+    router.currentNavigation.set(null);
+    component.ngOnInit();
+    fillCreateForm({ citizenNationalId: '1234567890123456' });
+    caseService.createCase.mockReturnValue(of(caseA));
+
+    component.onSubmit();
+
+    expect(caseService.createCase).toHaveBeenCalledWith(expect.objectContaining({
+      citizenNationalId: '1234567890123456'
+    }));
+    expect(caseService.createCaseForCitizen).not.toHaveBeenCalled();
+    // Legacy behaviour preserved: banner + back to list, no navigation.
+    expect(router.navigate).not.toHaveBeenCalled();
+    expect(component.submitSuccess()).toBe(true);
+  });
+
+  // ── US-58: possible-duplicate open-case warning ─────────────────
+
+  const openCandidate = {
+    id: 'dup-1',
+    caseNumber: 'CASE-2026-0100',
+    subject: 'Same leak',
+    status: 'IN_PROGRESS' as CaseStatus,
+    createdAt: '2026-01-05T08:00:00Z'
+  };
+
+  it('runs the preflight before the first linked submission and warns on open candidates (US-58)', () => {
+    paramFromCitizen360();
+    fillCreateForm();
+    caseService.checkDuplicateCases.mockReturnValue(of([openCandidate]));
+    caseService.createCaseForCitizen.mockReturnValue(of(caseA));
+
+    component.onSubmit();
+
+    // Preflight targets the locked citizen + the selected category/department.
+    expect(caseService.checkDuplicateCases).toHaveBeenCalledWith('cit-360', 'cat-1', 'dep-1');
+    // Blocked: no create happened, no spinner is left on, warning is visible.
+    expect(caseService.createCaseForCitizen).not.toHaveBeenCalled();
+    expect(caseService.createCase).not.toHaveBeenCalled();
+    expect(component.duplicateWarning()).toBe(true);
+    expect(component.duplicateCandidates()).toEqual([openCandidate]);
+    expect(component.isSubmitting()).toBe(false);
+  });
+
+  it('does not call the duplicate preflight for the generic (unlinked) flow (US-58)', () => {
+    router.currentNavigation.set(null);
+    component.ngOnInit();
+    component.activeTab.set('create');
+    fillCreateForm({ citizenNationalId: '1234567890123456' });
+    caseService.createCase.mockReturnValue(of(caseA));
+
+    component.onSubmit();
+
+    expect(caseService.checkDuplicateCases).not.toHaveBeenCalled();
+    expect(caseService.createCase).toHaveBeenCalled();
+  });
+
+  it('blocks until the agent confirms a non-blank reason, then sends it (US-58)', () => {
+    paramFromCitizen360();
+    fillCreateForm();
+    caseService.checkDuplicateCases.mockReturnValue(of([openCandidate]));
+    caseService.createCaseForCitizen.mockReturnValue(of(caseA));
+
+    component.onSubmit();
+    expect(component.duplicateWarning()).toBe(true);
+
+    // Blank reason -> still blocked + validation hint.
+    component.continueWithDuplicate();
+    expect(component.duplicateReasonInvalid()).toBe(true);
+    expect(caseService.createCaseForCitizen).not.toHaveBeenCalled();
+
+    // Confirmed reason -> create with the reason attached.
+    component.createForm.patchValue({ duplicateReason: 'Citizen insists' });
+    component.continueWithDuplicate();
+
+    expect(caseService.createCaseForCitizen).toHaveBeenCalledWith('cit-360', expect.objectContaining({
+      subject: 'Water leak',
+      duplicateReason: 'Citizen insists'
+    }));
+    expect(router.navigate).toHaveBeenCalledWith(['/cases', 'case-a']);
+  });
+
+  it('submits directly when the preflight finds no open candidates (US-58)', () => {
+    paramFromCitizen360();
+    fillCreateForm();
+    caseService.checkDuplicateCases.mockReturnValue(of([]));
+    caseService.createCaseForCitizen.mockReturnValue(of(caseA));
+
+    component.onSubmit();
+
+    expect(component.duplicateWarning()).toBe(false);
+    expect(caseService.createCaseForCitizen).toHaveBeenCalledWith('cit-360', expect.objectContaining({
+      subject: 'Water leak',
+      categoryId: 'cat-1',
+      departmentId: 'dep-1'
+    }));
+    // No reason is sent when there was nothing to override.
+    expect(caseService.createCaseForCitizen.mock.calls[0][1]).not.toHaveProperty('duplicateReason');
+    expect(router.navigate).toHaveBeenCalledWith(['/cases', 'case-a']);
+  });
+
+  it('proceeds without blocking when the preflight request fails (advisory only, US-58)', () => {
+    paramFromCitizen360();
+    fillCreateForm();
+    caseService.checkDuplicateCases.mockReturnValue(throwError(() => ({ status: 500 })));
+    caseService.createCaseForCitizen.mockReturnValue(of(caseA));
+
+    component.onSubmit();
+
+    expect(component.duplicateCheckFailed()).toBe(true);
+    expect(component.duplicateWarning()).toBe(false);
+    expect(caseService.createCaseForCitizen).toHaveBeenCalled();
+  });
+
+  it('runs the live pre-check debounced once category/department are chosen (US-58)', () => {
+    vi.useFakeTimers();
+    try {
+      paramFromCitizen360();
+      fillCreateForm();
+      caseService.checkDuplicateCases.mockReturnValue(of([openCandidate]));
+
+      // Before the debounce elapses no request has been issued.
+      expect(caseService.checkDuplicateCases).not.toHaveBeenCalled();
+
+      vi.advanceTimersByTime(600);
+
+      expect(caseService.checkDuplicateCases).toHaveBeenCalledWith('cit-360', 'cat-1', 'dep-1');
+      expect(component.duplicateWarning()).toBe(true);
+
+      // Submitting now is blocked by the already-visible warning.
+      component.onSubmit();
+      expect(caseService.createCaseForCitizen).not.toHaveBeenCalled();
+    } finally {
+      vi.useRealTimers();
+    }
+  });
+
+  it('invalidates stale results and re-checks when the inputs change (US-58)', () => {
+    vi.useFakeTimers();
+    try {
+      paramFromCitizen360();
+      fillCreateForm();
+      caseService.checkDuplicateCases.mockReturnValue(of([]));
+      caseService.createCaseForCitizen.mockReturnValue(of(caseA));
+
+      component.onSubmit();
+      expect(component.duplicateWarning()).toBe(false);
+
+      // Rapid category changes invalidate the old result and coalesce into a
+      // single fresh check for the last-selected category.
+      component.createForm.patchValue({ categoryId: 'cat-2' });
+      component.createForm.patchValue({ categoryId: 'cat-3' });
+      vi.advanceTimersByTime(600);
+
+      expect(caseService.checkDuplicateCases).toHaveBeenLastCalledWith('cit-360', 'cat-3', 'dep-1');
+    } finally {
+      vi.useRealTimers();
+    }
+  });
+
+  it('changeCitizen clears the duplicate warning state (US-58)', () => {
+    paramFromCitizen360();
+    fillCreateForm();
+    caseService.checkDuplicateCases.mockReturnValue(of([openCandidate]));
+    component.onSubmit();
+    expect(component.duplicateWarning()).toBe(true);
+
+    component.changeCitizen();
+
+    expect(component.duplicateWarning()).toBe(false);
+    expect(component.duplicateCandidates()).toEqual([]);
+    expect(component.duplicateOverride()).toBe(false);
+  });
+
+  it('renders the warning panel with the candidate case number and subject (US-58)', () => {
+    paramFromCitizen360();
+    fillCreateForm();
+    caseService.checkDuplicateCases.mockReturnValue(of([openCandidate]));
+    caseService.createCaseForCitizen.mockReturnValue(of(caseA));
+
+    component.onSubmit();
+    component.createForm.patchValue({ duplicateReason: 'Duplicate of an urgent request' });
+    fixture.detectChanges();
+
+    const text = fixture.nativeElement.textContent as string;
+    expect(text).toContain('CASE-2026-0100');
+    expect(text).toContain('Same leak');
   });
 });

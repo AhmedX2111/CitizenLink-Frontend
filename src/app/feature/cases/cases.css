@@ -284,10 +284,6 @@
 }
 
 /* ---------- SVG & Icons ---------- */
-[dir="rtl"] svg {
-  transform: scaleX(1);
-}
-
 /* Only mirror directional icons */
 [dir="rtl"] svg.arrow-icon,
 [dir="rtl"] svg[data-direction="rtl"],

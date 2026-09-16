@@ -35,6 +35,9 @@ export interface CaseSummary {
     priority: string;
     createdAt: string;
     assignedToName: string;
+    departmentNameEn: string;
+    departmentNameAr: string;
+    updatedAt: string;
 }
 
 export interface CreateCitizenRequest {

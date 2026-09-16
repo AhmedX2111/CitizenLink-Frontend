@@ -32,6 +32,23 @@ export interface CreateCaseRequest {
   departmentId: string;
   assignedToUserId?: string;
   dueAt?: string;
+  duplicateReason?: string;
+}
+
+// US-57: same as CreateCaseRequest but WITHOUT the citizen national id —
+// the citizen is bound to the URL path (POST /citizens/{citizenId}/cases),
+// so a masked national ID (US-56) is never needed.
+export interface CreateCitizenCaseRequest {
+  subject: string;
+  description: string;
+  type: CaseType;
+  priority: Priority;
+  channel: Channel;
+  categoryId: string;
+  departmentId: string;
+  assignedToUserId?: string;
+  dueAt?: string;
+  duplicateReason?: string;
 }
 
 export interface CaseSearchRequest {
@@ -79,6 +96,7 @@ export interface CaseResponse {
   updatedAt:             string;
   resolvedAt:            string | null;
   closedAt:              string | null;
+  duplicateReason:       string | null;
 }
 
 export interface PagedResponse<T> {
@@ -148,4 +166,18 @@ export interface HandlerResponse {
   id:           string;
   displayName:  string;
   email:        string;
+}
+
+/**
+ * US-58: a candidate from the duplicate-open-case preflight check.
+ * The backend only returns cases visible to the current user that are in a
+ * non-final status (not RESOLVED/CLOSED/CANCELLED) and match the new case on
+ * citizen + (category OR department).
+ */
+export interface DuplicateCaseCandidateResponse {
+  id:          string;
+  caseNumber:  string;
+  subject:     string;
+  status:      CaseStatus;
+  createdAt:   string;
 }
